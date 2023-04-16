@@ -1,0 +1,32 @@
+<h1 class="mat-headline-3">Home</h1>
+
+<div *ngIf="sysInfo.data.computerInfo">
+  <mat-card>
+    <mat-card-content>
+      <p class="mat-body-1">{{ sysInfo.data.computerInfo.currentUser }}@{{ sysInfo.data.computerInfo.hostname }}</p>
+      <p class="mat-body-1">{{ sysInfo.data.computerInfo.osName }} (Version: {{ sysInfo.data.computerInfo.osVersion }}{{ osBuild }})</p>
+    </mat-card-content>
+  </mat-card>
+
+  <span class="mat-headline-4">CPU</span>
+  <mat-card>
+    <mat-card-content>
+      <p class="mat-body-1">Name: {{ sysInfo.data.computerInfo.cpu.name }}</p>
+      <p class="mat-body-1">Core count: {{ sysInfo.data.computerInfo.cpu.numCores }}</p>
+      <p class="mat-body-1">Thread count: {{ sysInfo.data.computerInfo.cpu.numThreads }}</p>
+      <p class="mat-body-1">Frequency: {{ arrayHelpers.average(sysInfo.data.computerInfo.cpu.baseFrequencies) }} MHz</p>
+    </mat-card-content>
+  </mat-card>
+
+  <span class="mat-headline-4">Disks</span>
+  <mat-card *ngFor="let disk of sysInfo.data.computerInfo.disks" class="disk-card">
+    <mat-card-header>
+      <mat-card-title>{{ disk.name }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="mat-body-1">Size: {{ disk.totalSize }} B</p>
+      <p class="mat-body-1">Type: {{ disk.diskType }}</p>
+    </mat-card-content>
+  </mat-card>
+
+</div>
