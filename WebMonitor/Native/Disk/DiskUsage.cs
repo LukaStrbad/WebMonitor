@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Versioning;
 using System.Text.Json.Serialization;
-using WebMonitor.Native.Disk.Win32;
+using WebMonitor.Native.Disk.Win;
 
 namespace WebMonitor.Native.Disk;
 

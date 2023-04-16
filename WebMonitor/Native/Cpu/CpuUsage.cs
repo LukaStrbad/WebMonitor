@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using Windows.Win32;
 using Windows.Win32.System.WindowsProgramming;
-using WebMonitor.Native.Cpu.Win32;
+using WebMonitor.Native.Cpu.Win;
 
 namespace WebMonitor.Native.Cpu;
 
