@@ -1,6 +1,16 @@
 <body>
-  <app-nav-menu></app-nav-menu>
-  <main class="container">
-    <router-outlet></router-outlet>
-  </main>
+<mat-drawer-container>
+  <!-- Drawer content -->
+  <mat-drawer mode="side" [opened]="drawerOpen">
+    <app-nav-menu></app-nav-menu>
+  </mat-drawer>
+
+  <!-- Page content -->
+  <mat-drawer-content>
+    <app-nav-bar (menuToggleEvent)="toggleDrawer()"></app-nav-bar>
+    <main class="container">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-drawer-content>
+</mat-drawer-container>
 </body>

@@ -1,0 +1,11 @@
+div {
+  width: 256pt;
+}
+
+div>button {
+  width: 100%;
+}
+
+.no-border-radius {
+  border-radius: 0;
+}
