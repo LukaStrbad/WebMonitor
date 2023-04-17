@@ -14,20 +14,25 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { NavMenuComponent } from './nav/nav-menu/nav-menu.component';
+import { UsageGraphComponent } from './usage/usage-graph/usage-graph.component';
+import { UsagesComponent } from './usage/usages/usages.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavBarComponent,
     HomeComponent,
-    NavMenuComponent
+    NavMenuComponent,
+    UsageGraphComponent,
+    UsagesComponent
   ],
   imports: [
-    BrowserModule.withServerTransition({appId: 'ng-cli-universal'}),
+    BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
     RouterModule.forRoot([
-      {path: '', component: HomeComponent, pathMatch: 'full'}
+      { path: '', component: HomeComponent, pathMatch: 'full' },
+      { path: 'usages', component: UsagesComponent }
     ]),
     BrowserAnimationsModule,
     MatButtonModule,
