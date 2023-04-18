@@ -20,7 +20,7 @@
     <app-usage-graph
       #cpuGraph
       color="teal"
-      [usages]="averageCpuUsageHistory()" />
+      [usages]="averageCpuUsageHistory()"/>
   </mat-expansion-panel>
 
   <!-- Memory panel -->
@@ -44,6 +44,76 @@
     <app-usage-graph
       #memoryGraph
       color="purple"
-      [usages]="memoryUsagePercentageHistory()" />
+      [usages]="memoryUsagePercentageHistory()"/>
+  </mat-expansion-panel>
+
+  <!-- Disk panels -->
+  <mat-expansion-panel *ngFor="let diskUsage of diskUsages">
+    <!-- Panel header -->
+    <mat-expansion-panel-header
+      collapsedHeight="auto"
+      style="padding-top: 8pt; padding-bottom: 8pt">
+      <mat-panel-description class="row">
+        <div class="panel-title">
+          <mat-panel-title>{{ diskUsage.name }}</mat-panel-title>
+          {{ diskUsageUtilization(diskUsage.name) | number : "1.0-0" }}%
+        </div>
+        <mat-progress-bar mode="determinate" [value]="diskUsageUtilization(diskUsage.name)">
+        </mat-progress-bar>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <!-- Panel content -->
+    <app-usage-graph
+      #diskGraph
+      color="green"
+      [usages]=" diskUsageUtilizationHistory(diskUsage.name)"/>
+  </mat-expansion-panel>
+
+  <!-- Network panels -->
+  <mat-expansion-panel *ngFor="let networkUsage of networkUsages">
+    <!-- Panel header -->
+    <mat-expansion-panel-header
+      collapsedHeight="auto"
+      style="padding-top: 8pt; padding-bottom: 8pt">
+      <mat-panel-description class="row">
+        <div class="panel-title">
+          <mat-panel-title>{{ networkUsage.name }}</mat-panel-title>
+          {{ networkUsageUtilization(networkUsage.name) | number : "1.0-0" }}%
+        </div>
+        <mat-progress-bar mode="determinate" [value]="networkUsageUtilization(networkUsage.name)">
+        </mat-progress-bar>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <!-- Panel content -->
+    <app-usage-graph
+      #networkGraph
+      color="blue"
+      [relativeMax]="true"
+      [usages]="networkDownloadSpeedHistory(networkUsage.name)"/>
+  </mat-expansion-panel>
+
+  <!-- GPU panels -->
+  <mat-expansion-panel *ngFor="let gpuUsage of gpuUsages">
+    <!-- Panel header -->
+    <mat-expansion-panel-header
+      collapsedHeight="auto"
+      style="padding-top: 8pt; padding-bottom: 8pt">
+      <mat-panel-description class="row">
+        <div class="panel-title">
+          <mat-panel-title>{{ gpuUsage.name }}</mat-panel-title>
+          {{ gpuUsageUtilization(gpuUsage.name) | number : "1.0-0" }}%
+        </div>
+        <mat-progress-bar mode="determinate" [value]="gpuUsageUtilization(gpuUsage.name)">
+        </mat-progress-bar>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <!-- Panel content -->
+    <app-usage-graph
+      #gpuGraph
+      color="orange"
+      [usages]="gpuUsageUtilizationHistory(gpuUsage.name)"/>
   </mat-expansion-panel>
 </mat-accordion>
