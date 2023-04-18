@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { SysInfoService } from "../../services/sys-info.service";
 import * as arrayHelpers from "../../helpers/array-helpers";
+import * as numberHelpers from "../../helpers/number-helpers";
 
 @Component({
   selector: 'app-home',
@@ -18,8 +19,11 @@ export class HomeComponent {
       return "";
     }
 
-    return `, Build: ${ this.sysInfo.data.computerInfo.osBuild }`;
+    return `, Build: ${this.sysInfo.data.computerInfo.osBuild}`;
   }
 
-  protected readonly Math = Math;
+  sizeDisplay(value: bigint): string {
+    const options = new numberHelpers.MemoryByteOptions(true, false, 0);
+    return numberHelpers.toByteString(value, options);
+  }
 }
