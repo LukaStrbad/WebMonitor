@@ -59,6 +59,13 @@ export class SysInfoUsages {
   }
 
   /**
+   * Cpu usage history getter
+   */
+  get cpuUsageHistory(): CpuUsage[] {
+    return this._cpuUsages;
+  }
+
+  /**
    * Function to update memory usage
    * @param memoryUsage
    */
@@ -75,6 +82,13 @@ export class SysInfoUsages {
    */
   get memoryUsage(): MemoryUsage | undefined {
     return this._memoryUsages[this._memoryUsages.length - 1];
+  }
+
+  /**
+   * Memory usage history getter
+   */
+  get memoryUsageHistory(): MemoryUsage[] {
+    return this._memoryUsages;
   }
 
   /**
@@ -97,6 +111,13 @@ export class SysInfoUsages {
   }
 
   /**
+   * Disk usage history getter
+   */
+  get diskUsagesHistory(): DiskUsages[] {
+    return this._diskUsages;
+  }
+
+  /**
    * Function to update GPU usage
    * @param gpuUsages
    */
@@ -116,6 +137,13 @@ export class SysInfoUsages {
   }
 
   /**
+   * GPU usage history getter
+   */
+  get gpuUsagesHistory(): GpuUsages[] {
+    return this._gpuUsages;
+  }
+
+  /**
    * Function to update network usage
    * @param networkUsages
    */
@@ -132,6 +160,13 @@ export class SysInfoUsages {
    */
   get networkUsages(): NetworkUsages | undefined {
     return this._networkUsages[this._networkUsages.length - 1];
+  }
+
+  /**
+   * Network usage history getter
+   */
+  get networkUsagesHistory(): NetworkUsages[] {
+    return this._networkUsages;
   }
 
   /**

@@ -16,6 +16,8 @@ import { MatSidenavModule } from "@angular/material/sidenav";
 import { NavMenuComponent } from './nav/nav-menu/nav-menu.component';
 import { UsageGraphComponent } from './usage/usage-graph/usage-graph.component';
 import { UsagesComponent } from './usage/usages/usages.component';
+import { MatExpansionModule } from "@angular/material/expansion";
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { UsagesComponent } from './usage/usages/usages.component';
     MatCardModule,
     MatToolbarModule,
     MatIconModule,
-    MatSidenavModule
+    MatSidenavModule,
+    MatExpansionModule,
+    MatProgressBarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

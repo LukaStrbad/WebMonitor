@@ -2,6 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import { UsageGraphComponent } from "../usage-graph/usage-graph.component";
 import { interval } from "rxjs";
 import { SysInfoService } from "../../../services/sys-info.service";
+import { NetworkUsages } from 'src/model/network-usage';
+import * as arrayHelpers from "../../../helpers/array-helpers";
 
 @Component({
   selector: 'app-usages',
@@ -9,16 +11,36 @@ import { SysInfoService } from "../../../services/sys-info.service";
   styleUrls: ['./usages.component.css']
 })
 export class UsagesComponent implements AfterViewInit {
-  @ViewChild("usageGraph")
-  usageGraph!: UsageGraphComponent;
+  @ViewChild("cpuGraph") cpuGraph!: UsageGraphComponent;
+  @ViewChild("memoryGraph") memoryGraph!: UsageGraphComponent;
 
-  constructor(public sysInfo: SysInfoService) {
-  }
+  networkUsages: NetworkUsages = [];
+
+  constructor(public sysInfo: SysInfoService) { }
 
   ngAfterViewInit(): void {
-    interval(1000).subscribe(() => {
-      this.usageGraph.addValue(Math.random() * 100);
-    });
+    this.sysInfo.onRefresh.subscribe(() => {
+      this.cpuGraph.addValue(this.averageCpuUsage());
+      this.memoryGraph.addValue(this.memoryUsagePercentage());
+    })
+  }
+
+  averageCpuUsage(): number {
+    return arrayHelpers.average(this.sysInfo.data.cpuUsage?.threadUsages ?? []);
+  }
+
+  averageCpuUsageHistory(): number[] {
+    return this.sysInfo.data.cpuUsageHistory.map(usage =>
+      arrayHelpers.average(usage.threadUsages));
+  }
+
+  memoryUsagePercentage(): number {
+    return Number(this.sysInfo.data.memoryUsage?.used ?? 0n) / Number(this.sysInfo.data.memoryUsage?.total ?? 0n) * 100;
+  }
+
+  memoryUsagePercentageHistory(): number[] {
+    return this.sysInfo.data.memoryUsageHistory.map(usage =>
+      Number(usage.used) / Number(usage.total) * 100);
   }
 
 }

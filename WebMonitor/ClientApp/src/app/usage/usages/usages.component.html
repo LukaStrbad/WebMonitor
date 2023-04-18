@@ -1,3 +1,49 @@
-<app-usage-graph #usageGraph color="red" [fill]="true" [usages]="[1,100,50,30]">
+<mat-accordion>
+  <!-- CPU panel -->
+  <mat-expansion-panel>
+    <!-- Panel header -->
+    <mat-expansion-panel-header
+      collapsedHeight="auto"
+      style="padding-top: 8pt; padding-bottom: 8pt"
+    >
+      <mat-panel-description class="row">
+        <div class="panel-title">
+          <mat-panel-title>CPU</mat-panel-title>
+          {{ averageCpuUsage() | number : "1.0-0" }}%
+        </div>
+        <mat-progress-bar mode="determinate" [value]="averageCpuUsage()">
+        </mat-progress-bar>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
 
-</app-usage-graph>
+    <!-- Panel content -->
+    <app-usage-graph
+      #cpuGraph
+      color="teal"
+      [usages]="averageCpuUsageHistory()" />
+  </mat-expansion-panel>
+
+  <!-- Memory panel -->
+  <mat-expansion-panel>
+    <!-- Panel header -->
+    <mat-expansion-panel-header
+      collapsedHeight="auto"
+      style="padding-top: 8pt; padding-bottom: 8pt"
+    >
+      <mat-panel-description class="row">
+        <div class="panel-title">
+          <mat-panel-title>Memory</mat-panel-title>
+          {{ memoryUsagePercentage() | number : "1.0-0" }}%
+        </div>
+        <mat-progress-bar mode="determinate" [value]="memoryUsagePercentage()">
+        </mat-progress-bar>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <!-- Panel content -->
+    <app-usage-graph
+      #memoryGraph
+      color="purple"
+      [usages]="memoryUsagePercentageHistory()" />
+  </mat-expansion-panel>
+</mat-accordion>
