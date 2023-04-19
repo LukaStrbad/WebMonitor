@@ -6,18 +6,39 @@ import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '
   styleUrls: ['./usage-graph.component.css']
 })
 export class UsageGraphComponent implements AfterViewInit {
+  /**
+   * Starting values for the graph
+   */
   @Input() usages: number[] = [];
+  /**
+   * Maximum amount of points to tract, discarding the oldest ones
+   */
   @Input() maxPoints = 60;
+  /**
+   * Color of the graph
+   */
   @Input() color = "black";
+  /**
+   * Whether the area under the graph should be filled
+   */
   @Input() fill = true;
+  /**
+   * Whether the graph should be drawn with a grid
+   */
   @Input() drawGrid = true;
+  /**
+   * Whether the maximum value should be relative to the maximum value of the usages
+   */
   @Input() relativeMax = false;
 
   @ViewChild("canvasElement")
-  canvasRef!: ElementRef<HTMLCanvasElement>;
+  private canvasRef!: ElementRef<HTMLCanvasElement>;
 
   private gridOffset = 0;
 
+  /**
+   * Returns the current usage as a percentage relative to the maximum value
+   */
   get currentUsage() {
     return (this.usages[this.usages.length - 1] ?? 0) / this.maxValue;
   }
@@ -31,8 +52,12 @@ export class UsageGraphComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Remove extra points if they were passed
+    while (this.usages.length > this.maxPoints) {
+      this.usages.shift();
+    }
     // Draw starting points
-   this.redrawGraph();
+    this.redrawGraph();
   }
 
   private redrawGraph() {

@@ -12,11 +12,11 @@ import { GpuUsages } from 'src/model/gpu-usage';
   styleUrls: ['./usages.component.css']
 })
 export class UsagesComponent implements AfterViewInit {
-  @ViewChild("cpuGraph") cpuGraph!: UsageGraphComponent;
-  @ViewChild("memoryGraph") memoryGraph!: UsageGraphComponent;
-  @ViewChildren("diskGraph") diskGraphs!: QueryList<UsageGraphComponent>;
-  @ViewChildren("networkGraph") networkGraphs!: QueryList<UsageGraphComponent>;
-  @ViewChildren("gpuGraph") gpuGraphs!: QueryList<UsageGraphComponent>;
+  @ViewChild("cpuGraph") private cpuGraph!: UsageGraphComponent;
+  @ViewChild("memoryGraph") private memoryGraph!: UsageGraphComponent;
+  @ViewChildren("diskGraph") private diskGraphs!: QueryList<UsageGraphComponent>;
+  @ViewChildren("networkGraph") private networkGraphs!: QueryList<UsageGraphComponent>;
+  @ViewChildren("gpuGraph") private gpuGraphs!: QueryList<UsageGraphComponent>;
 
   // These are used to detect changes only
   // Actual data should be obtained from sysInfo.data
@@ -49,8 +49,11 @@ export class UsagesComponent implements AfterViewInit {
         this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
       }
 
+      // Update graphs
       this.cpuGraph.addValue(this.averageCpuUsage());
       this.memoryGraph.addValue(this.memoryUsagePercentage());
+      // For disks, networks and GPUs we need to update all graphs from the list
+      // Their names are used to match the correct graph with the correct usage
       this.diskGraphs.forEach((graph, i) => {
         const name = this.diskUsages[i]?.name ?? "";
         const utilization = this.diskUsageUtilization(name);
@@ -97,8 +100,20 @@ export class UsagesComponent implements AfterViewInit {
   }
 
   networkUsageUtilization(name: string): number {
-    // TODO: Implement relative utilization
-    return this.sysInfo.data.networkUsages?.find(usage => usage.name === name)?.downloadSpeed ?? 0;
+    let usageGraph: UsageGraphComponent | undefined;
+
+    // Network utilization needs to be relative because the maximum value is not known
+    // Graphs already handle relative values, so it's easier to just get the current value from the graph than to calculate it here
+    let i = 0;
+    for (const usage of this.networkUsages) {
+      if (usage.name === name) {
+        usageGraph = this.networkGraphs.get(i);
+        break;
+      }
+      i++;
+    }
+
+    return (usageGraph?.currentUsage ?? 0) * 100;
   }
 
   networkDownloadSpeed(name: string): number {
