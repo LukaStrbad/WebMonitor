@@ -1,6 +1,15 @@
 using System.Reflection;
 using WebMonitor.Native;
 
+// Setting the working directory to the location of the executable ensures that
+// ASP.NET will correctly serve frontend files from the wwwroot folder.
+var executableLocation = Assembly.GetExecutingAssembly().Location;
+var executableFile = new FileInfo(executableLocation);
+if (executableFile.DirectoryName != null)
+{
+    Directory.SetCurrentDirectory(executableFile.DirectoryName);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
