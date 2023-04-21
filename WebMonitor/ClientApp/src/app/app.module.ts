@@ -18,6 +18,9 @@ import { UsageGraphComponent } from './usage/usage-graph/usage-graph.component';
 import { UsagesComponent } from './usage/usages/usages.component';
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ProcessListComponent } from './process/process-list/process-list.component';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
 
 @NgModule({
   declarations: [
@@ -26,7 +29,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     HomeComponent,
     NavMenuComponent,
     UsageGraphComponent,
-    UsagesComponent
+    UsagesComponent,
+    ProcessListComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -34,7 +38,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     FormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'usages', component: UsagesComponent }
+      { path: 'usages', component: UsagesComponent },
+      { path: 'processes', component: ProcessListComponent }
     ]),
     BrowserAnimationsModule,
     MatButtonModule,
@@ -43,7 +48,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     MatIconModule,
     MatSidenavModule,
     MatExpansionModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatTableModule,
+    MatSortModule
   ],
   providers: [],
   bootstrap: [AppComponent]

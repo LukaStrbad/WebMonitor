@@ -1,0 +1,13 @@
+table {
+    width: 100%;
+    text-align: center;
+}
+
+.mat-sort-header-content {
+    margin: 0 auto;
+}
+
+.mat-cell {
+    text-align: center;
+    justify-content: center;
+}

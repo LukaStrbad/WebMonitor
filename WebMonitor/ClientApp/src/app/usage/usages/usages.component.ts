@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { UsageGraphComponent } from "../usage-graph/usage-graph.component";
 import { SysInfoService } from "../../../services/sys-info.service";
 import { NetworkUsage, NetworkUsages } from 'src/model/network-usage';
@@ -7,13 +7,14 @@ import { DiskUsage, DiskUsages } from 'src/model/disk-usage';
 import { GpuUsages } from 'src/model/gpu-usage';
 import * as numberHelpers from "../../../helpers/number-helpers";
 import { replaceValues } from "../../../helpers/object-helpers";
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-usages',
   templateUrl: './usages.component.html',
   styleUrls: ['./usages.component.css']
 })
-export class UsagesComponent implements AfterViewInit {
+export class UsagesComponent implements AfterViewInit, OnDestroy {
   @ViewChild("cpuGraph") private cpuGraph!: UsageGraphComponent;
   @ViewChild("memoryGraph") private memoryGraph!: UsageGraphComponent;
   @ViewChildren("diskGraph") private diskGraphs!: QueryList<UsageGraphComponent>;
@@ -26,14 +27,20 @@ export class UsagesComponent implements AfterViewInit {
   networkUsages: NetworkUsages = [];
   gpuUsages: GpuUsages = [];
 
+  refreshSubscription: Subscription | undefined;
+
   constructor(public sysInfo: SysInfoService) { }
+
+  ngOnDestroy(): void {
+    this.refreshSubscription?.unsubscribe();
+  }
 
   ngAfterViewInit(): void {
     this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
     this.networkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
     this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
 
-    this.sysInfo.onRefresh.subscribe(() => {
+    this.refreshSubscription = this.sysInfo.onRefresh.subscribe(() => {
       // Refresh disk list if it was changed
       if (this.diskUsages.length !== this.sysInfo.data.diskUsages?.length) {
         this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
