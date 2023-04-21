@@ -1,0 +1,22 @@
+.panel-title {
+    margin-bottom: 8pt;
+    display: flex;
+    justify-content: space-between;
+}
+
+.panel-header {
+    padding-top: 10pt;
+    padding-bottom: 10pt;
+}
+
+.disk .percentage,
+.network .percentage {
+    margin-right: 0.5em;
+}
+
+/* Max-width ensures that graph doesn't fill the whole screen when fullscreen. */
+app-usage-graph {
+    max-width: 400pt;
+    display: block;
+    margin: 0 auto;
+}
