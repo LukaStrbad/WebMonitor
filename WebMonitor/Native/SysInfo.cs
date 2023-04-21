@@ -6,6 +6,7 @@ using WebMonitor.Native.Gpu;
 using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
+using System.Runtime.InteropServices;
 using Timer = System.Timers.Timer;
 
 namespace WebMonitor.Native;
@@ -45,7 +46,7 @@ internal class SysInfo
         computer.IsCpuEnabled = false;
 
         MemoryUsage = new MemoryUsage();
-        
+
         var gpuUsages = computer.Hardware
             .Where(hardware =>
                 hardware.HardwareType is HardwareType.GpuIntel or HardwareType.GpuAmd)
@@ -55,9 +56,14 @@ internal class SysInfo
             })
             .Cast<IGpuUsage>()
             .ToList();
-        // GeForce experience overlay causes high CPU usage
-        // Using NVML may fix the issue with the added benefit of linux support
-        gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus());
+
+        // NVML is only supported on x64
+        if (RuntimeInformation.OSArchitecture == Architecture.X64)
+        {
+            // GeForce experience overlay causes high CPU usage
+            // Using NVML may fix the issue with the added benefit of linux support
+            gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus());
+        }
 
         GpuUsages = gpuUsages;
 

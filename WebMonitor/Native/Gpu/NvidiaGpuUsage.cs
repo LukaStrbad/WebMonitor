@@ -1,4 +1,5 @@
 ﻿using ManagedCuda.Nvml;
+using System.Runtime.InteropServices;
 
 namespace WebMonitor.Native.Gpu;
 
@@ -24,6 +25,8 @@ public class NvidiaGpuUsage : IGpuUsage
 
     private NvidiaGpuUsage(nvmlDevice gpu)
     {
+        ThrowIfNotX64();
+
         _gpu = gpu;
         // Get name
         NvmlNativeMethods.nvmlDeviceGetName(gpu, out var name);
@@ -32,6 +35,8 @@ public class NvidiaGpuUsage : IGpuUsage
 
     public void Refresh(int millisSinceRefresh)
     {
+        ThrowIfNotX64();
+
         // NOTE: Refreshing clocks and power sometimes causes high CPU usage when NVIDIA overlay is enabled
         // nvidia-smi exhibits the same behavior so there may be no way to fix this
         // Possible workarounds:
@@ -69,6 +74,8 @@ public class NvidiaGpuUsage : IGpuUsage
 
     public static IEnumerable<NvidiaGpuUsage> GetNvidiaGpus()
     {
+        ThrowIfNotX64();
+
         // Initialize NVML
         NvmlNativeMethods.nvmlInit();
 
@@ -82,6 +89,18 @@ public class NvidiaGpuUsage : IGpuUsage
             var device = new nvmlDevice();
             NvmlNativeMethods.nvmlDeviceGetHandleByIndex(i, ref device);
             yield return new NvidiaGpuUsage(device);
+        }
+    }
+
+    /// <summary>
+    /// Throws if OS architecture is not x64
+    /// </summary>
+    /// <exception cref="PlatformNotSupportedException">Thrown if OS architecture is not x64</exception>
+    private static void ThrowIfNotX64()
+    {
+        if (RuntimeInformation.OSArchitecture != Architecture.X64)
+        {
+            throw new PlatformNotSupportedException("Only x64 is supported");
         }
     }
 }
