@@ -92,13 +92,19 @@ export class UsageGraphComponent implements AfterViewInit {
     if (start < 0)
       start = 0;
 
+    // Top line is thicker
+    ctx.lineWidth = window.devicePixelRatio * 2;
     // Draw the points
     ctx.moveTo(start * w, canvas.height - this.usages[0] / this.maxValue * canvas.height);
     for (let i = start + 1; i < this.maxPoints; i++) {
       ctx.lineTo(i * w, canvas.height - this.usages[i - start] / this.maxValue * canvas.height);
     }
+    ctx.stroke();
+    ctx.lineWidth = window.devicePixelRatio;
 
     if (this.fill) {
+      // Fill is semi-transparent
+      ctx.globalAlpha = 0.8;
       // Move to bottom right
       ctx.lineTo(canvas.width, canvas.height);
       // Move to starting x
