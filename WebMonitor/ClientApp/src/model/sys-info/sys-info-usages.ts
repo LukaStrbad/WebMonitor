@@ -7,6 +7,8 @@ import { ProcessList } from "../process-info";
 import { ComputerInfo } from "../computer-info";
 
 export class SysInfoUsages {
+  // Data age in milliseconds
+  private _millisSinceRefresh: number = 0;
   // Keep history of usages for these values
   private _cpuUsages: CpuUsage[] = [];
   private _memoryUsages: MemoryUsage[] = [];
@@ -22,6 +24,17 @@ export class SysInfoUsages {
    * @param maxHistory Maximum number of items to keep in history
    */
   constructor(private maxHistory: number) {
+  }
+
+  /**
+   * How old is the data in milliseconds
+   */
+  get millisSinceRefresh(): number {
+    return this._millisSinceRefresh;
+  }
+
+  set millisSinceRefresh(value: number) {
+    this._millisSinceRefresh = value;
   }
 
   /**

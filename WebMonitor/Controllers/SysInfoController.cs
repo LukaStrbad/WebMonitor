@@ -14,53 +14,59 @@ namespace WebMonitor.Controllers;
 [Produces("application/json")]
 public class SysInfoController : ControllerBase
 {
-	private readonly SysInfo _sysInfo;
+    private readonly SysInfo _sysInfo;
 
-	public SysInfoController(IServiceProvider serviceProvider)
-	{
-		_sysInfo = serviceProvider.GetService<SysInfo>()!;
-	}
+    public SysInfoController(IServiceProvider serviceProvider)
+    {
+        _sysInfo = serviceProvider.GetService<SysInfo>()!;
+    }
 
-	/// <summary>
-	/// Fetches basic computer info
-	/// </summary>
-	[HttpGet("computerInfo")]
-	public ActionResult<ComputerInfo> ComputerInfo() => _sysInfo.ComputerInfo;
+    /// <summary>
+    /// Returns the number of milliseconds since the last refresh
+    /// </summary>
+	[HttpGet("millisSinceLastRefresh")]
+    public ActionResult<long> MillisSinceLastRefresh() => DateTimeOffset.Now.ToUnixTimeMilliseconds() - _sysInfo.LastRefresh;
 
-	/// <summary>
-	/// Fetches current memory usage
-	/// </summary>
-	[HttpGet("memoryUsage")]
-	public ActionResult<MemoryUsage> MemoryUsage() => _sysInfo.MemoryUsage;
+    /// <summary>
+    /// Fetches basic computer info
+    /// </summary>
+    [HttpGet("computerInfo")]
+    public ActionResult<ComputerInfo> ComputerInfo() => _sysInfo.ComputerInfo;
 
-	/// <summary>
-	/// Fetches data about currently running processes
-	/// </summary>
-	[HttpGet("processList")]
-	public ActionResult<IEnumerable<ProcessInfo>> ProcessList() => _sysInfo.Processes.ToList();
+    /// <summary>
+    /// Fetches current memory usage
+    /// </summary>
+    [HttpGet("memoryUsage")]
+    public ActionResult<MemoryUsage> MemoryUsage() => _sysInfo.MemoryUsage;
 
-	/// <summary>
-	/// Fetches per thread usage
-	/// </summary>
-	[HttpGet("cpuUsage")]
-	public ActionResult<CpuUsage> CpuUsage() => _sysInfo.CpuUsage;
-	
-	/// <summary>
-	/// Fetches GPU usages
-	/// </summary>
-	/// <returns></returns>
-	[HttpGet("gpuUsages")]
-	public ActionResult<IEnumerable<IGpuUsage>> GpuUsages() => _sysInfo.GpuUsages.ToList();
+    /// <summary>
+    /// Fetches data about currently running processes
+    /// </summary>
+    [HttpGet("processList")]
+    public ActionResult<IEnumerable<ProcessInfo>> ProcessList() => _sysInfo.Processes.ToList();
 
-	/// <summary>
-	/// Fetches disk usages
-	/// </summary>
-	[HttpGet("diskUsages")]
-	public ActionResult<IEnumerable<DiskUsage>> DiskUsages() => _sysInfo.DiskUsages;
+    /// <summary>
+    /// Fetches per thread usage
+    /// </summary>
+    [HttpGet("cpuUsage")]
+    public ActionResult<CpuUsage> CpuUsage() => _sysInfo.CpuUsage;
 
-	/// <summary>
-	/// Fetches usage statistics per NIC
-	/// </summary>
-	[HttpGet("networkUsages")]
-	public ActionResult<IEnumerable<NetworkUsage>> NetworkUsages() => _sysInfo.NetworkUsages.ToList();
+    /// <summary>
+    /// Fetches GPU usages
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("gpuUsages")]
+    public ActionResult<IEnumerable<IGpuUsage>> GpuUsages() => _sysInfo.GpuUsages.ToList();
+
+    /// <summary>
+    /// Fetches disk usages
+    /// </summary>
+    [HttpGet("diskUsages")]
+    public ActionResult<IEnumerable<DiskUsage>> DiskUsages() => _sysInfo.DiskUsages;
+
+    /// <summary>
+    /// Fetches usage statistics per NIC
+    /// </summary>
+    [HttpGet("networkUsages")]
+    public ActionResult<IEnumerable<NetworkUsage>> NetworkUsages() => _sysInfo.NetworkUsages.ToList();
 }

@@ -40,6 +40,7 @@ export class SysInfoService implements OnDestroy {
   private async refresh() {
     // Refresh all data in parallel
     await Promise.all([
+      this.refreshDataAge(),
       this.refreshCpuUsage(),
       this.refreshMemoryUsage(),
       this.refreshDiskUsages(),
@@ -49,6 +50,12 @@ export class SysInfoService implements OnDestroy {
     ]);
     // Notify subscribers that data has been refreshed
     this.onRefresh.next();
+  }
+
+  private async refreshDataAge() {
+    this.data.millisSinceRefresh = await firstValueFrom(
+      this.http.get<number>(this.apiUrl + "millisSinceLastRefresh")
+    );
   }
 
   private async refreshComputerInfo() {

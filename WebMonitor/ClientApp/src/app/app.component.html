@@ -13,4 +13,8 @@
       </main>
     </mat-drawer-content>
   </mat-drawer-container>
+
+  <div id="debugWindow" *ngIf="showDebugWindow">
+    Time since refresh: {{ sysInfo.data.millisSinceRefresh }} ms
+  </div>
 </body>

@@ -20,6 +20,7 @@ internal class SysInfo
     private readonly DiskUsageTracker _diskUsageTracker;
 
     private const int RefreshInterval = 1000;
+    public long LastRefresh { get; private set; }
 
     public CpuUsage CpuUsage { get; } = new();
     public ComputerInfo ComputerInfo { get; }
@@ -91,5 +92,6 @@ internal class SysInfo
     private void Refresh(object? sender, ElapsedEventArgs e)
     {
         _refreshables.ForEach(r => r.Refresh(RefreshInterval));
+        LastRefresh = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 }
