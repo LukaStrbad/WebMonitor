@@ -9,16 +9,16 @@ import { GpuUsages } from "../model/gpu-usage";
 import { NetworkUsages } from "../model/network-usage";
 import { ProcessList } from "../model/process-info";
 import { ComputerInfo } from "../model/computer-info";
+import { RefreshInformation } from 'src/model/refresh-information';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SysInfoService implements OnDestroy {
+export class SysInfoService {
   onRefresh = new Subject<void>();
   data = new SysInfoUsages(60);
 
   private readonly apiUrl: string;
-  private readonly loopSubscription: any;
 
   constructor(
     private http: HttpClient,
@@ -30,17 +30,24 @@ export class SysInfoService implements OnDestroy {
     this.refreshComputerInfo().then(_ => {
     });
 
-    this.loopSubscription = interval(1000).subscribe(async () => await this.refresh());
+    this.refreshLoop();
   }
 
-  ngOnDestroy(): void {
-    this.loopSubscription.unsubscribe();
+  private async refreshLoop() {
+    while (true) {
+      await this.refresh();
+
+      const timeToNextRefresh = Number(this.data.refreshInfo.refreshInterval - this.data.refreshInfo.millisSinceLastRefresh);
+
+      await new Promise(r => setTimeout(r, timeToNextRefresh));
+    }
   }
 
   private async refresh() {
+    // Refresh info is refreshed first to get the most accurate data
+    this.refreshRefreshInfo();
     // Refresh all data in parallel
     await Promise.all([
-      this.refreshDataAge(),
       this.refreshCpuUsage(),
       this.refreshMemoryUsage(),
       this.refreshDiskUsages(),
@@ -52,9 +59,9 @@ export class SysInfoService implements OnDestroy {
     this.onRefresh.next();
   }
 
-  private async refreshDataAge() {
-    this.data.millisSinceRefresh = await firstValueFrom(
-      this.http.get<number>(this.apiUrl + "millisSinceLastRefresh")
+  private async refreshRefreshInfo() {
+    this.data.refreshInfo = await firstValueFrom(
+      this.http.get<RefreshInformation>(this.apiUrl + "refreshInfo")
     );
   }
 

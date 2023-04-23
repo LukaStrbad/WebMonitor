@@ -5,10 +5,11 @@ import { GpuUsages } from "../gpu-usage";
 import { NetworkUsages } from "../network-usage";
 import { ProcessList } from "../process-info";
 import { ComputerInfo } from "../computer-info";
+import { RefreshInformation } from "../refresh-information";
 
 export class SysInfoUsages {
   // Data age in milliseconds
-  private _millisSinceRefresh: number = 0;
+  private _millisSinceRefresh: RefreshInformation = { millisSinceLastRefresh: 0n, refreshInterval: 0n };
   // Keep history of usages for these values
   private _cpuUsages: CpuUsage[] = [];
   private _memoryUsages: MemoryUsage[] = [];
@@ -27,13 +28,13 @@ export class SysInfoUsages {
   }
 
   /**
-   * How old is the data in milliseconds
+   * Information about refreshes
    */
-  get millisSinceRefresh(): number {
+  get refreshInfo(): RefreshInformation {
     return this._millisSinceRefresh;
   }
 
-  set millisSinceRefresh(value: number) {
+  set refreshInfo(value: RefreshInformation) {
     this._millisSinceRefresh = value;
   }
 

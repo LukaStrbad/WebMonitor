@@ -24,8 +24,8 @@ public class SysInfoController : ControllerBase
     /// <summary>
     /// Returns the number of milliseconds since the last refresh
     /// </summary>
-	[HttpGet("millisSinceLastRefresh")]
-    public ActionResult<long> MillisSinceLastRefresh() => DateTimeOffset.Now.ToUnixTimeMilliseconds() - _sysInfo.LastRefresh;
+	[HttpGet("refreshInfo")]
+    public ActionResult<RefreshInformation> RefreshInfo() => _sysInfo.RefreshInfo;
 
     /// <summary>
     /// Fetches basic computer info

@@ -22,6 +22,12 @@ internal class SysInfo
     private const int RefreshInterval = 1000;
     public long LastRefresh { get; private set; }
 
+    public RefreshInformation RefreshInfo => new()
+    {
+        MillisSinceLastRefresh = DateTimeOffset.Now.ToUnixTimeMilliseconds() - LastRefresh,
+        RefreshInterval = RefreshInterval
+    };
+
     public CpuUsage CpuUsage { get; } = new();
     public ComputerInfo ComputerInfo { get; }
     public MemoryUsage MemoryUsage { get; }
