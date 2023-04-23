@@ -11,6 +11,10 @@ export class UsageGraphComponent implements AfterViewInit {
    */
   @Input() usages: number[] = [];
   /**
+   * Secondary values for the graph
+   */
+  @Input() secondaryUsages: number[] = [];
+  /**
    * Maximum amount of points to tract, discarding the oldest ones
    */
   @Input() maxPoints = 60;
@@ -18,6 +22,10 @@ export class UsageGraphComponent implements AfterViewInit {
    * Color of the graph
    */
   @Input() color = "black";
+  /**
+   * Color of the secondary line
+   */
+  @Input() secondaryColor = "red";
   /**
    * Whether the area under the graph should be filled
    */
@@ -30,6 +38,10 @@ export class UsageGraphComponent implements AfterViewInit {
    * Whether the maximum value should be relative to the maximum value of the usages
    */
   @Input() relativeMax = false;
+  /**
+   * Whether the secondary graph should be shown
+   */
+  @Input() showSecondary = false;
 
   @ViewChild("canvasElement")
   private canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -45,7 +57,7 @@ export class UsageGraphComponent implements AfterViewInit {
 
   private get maxValue() {
     if (this.relativeMax) {
-      return Math.max(...this.usages);
+      return Math.max(...this.usages, ...this.secondaryUsages);
     }
 
     return 100;
@@ -99,12 +111,11 @@ export class UsageGraphComponent implements AfterViewInit {
     for (let i = start + 1; i < this.maxPoints; i++) {
       ctx.lineTo(i * w, canvas.height - this.usages[i - start] / this.maxValue * canvas.height);
     }
-    ctx.stroke();
-    ctx.lineWidth = window.devicePixelRatio;
+    ctx.stroke()
 
     if (this.fill) {
       // Fill is semi-transparent
-      ctx.globalAlpha = 0.8;
+      ctx.globalAlpha = 0.5;
       // Move to bottom right
       ctx.lineTo(canvas.width, canvas.height);
       // Move to starting x
@@ -113,10 +124,23 @@ export class UsageGraphComponent implements AfterViewInit {
       // Fill the graph
       ctx.fillStyle = this.color;
       ctx.fill();
-    } else {
-      ctx.stroke();
     }
 
+    ctx.globalAlpha = 1;
+
+    // Draw the secondary graph
+    if (this.showSecondary) {
+      ctx.strokeStyle = this.secondaryColor;
+      ctx.lineWidth = window.devicePixelRatio * 2;
+      ctx.beginPath();
+      ctx.moveTo(start * w, canvas.height - this.secondaryUsages[0] / this.maxValue * canvas.height);
+      for (let i = start + 1; i < this.maxPoints; i++) {
+        ctx.lineTo(i * w, canvas.height - this.secondaryUsages[i - start] / this.maxValue * canvas.height);
+      }
+      ctx.stroke()
+    }
+    // Reset line width
+    ctx.lineWidth = window.devicePixelRatio;
 
     ctx.strokeStyle = "gray";
     // Border and grid are semi-transparent
@@ -157,6 +181,22 @@ export class UsageGraphComponent implements AfterViewInit {
     this.usages.push(value);
     if (this.usages.length > this.maxPoints) {
       this.usages.shift();
+    }
+
+    this.gridOffset = (this.gridOffset + 1) % this.maxPoints;
+
+    this.redrawGraph();
+  }
+
+  public addValues(primary: number, secondary: number) {
+    this.usages.push(primary);
+    if (this.usages.length > this.maxPoints) {
+      this.usages.shift();
+    }
+
+    this.secondaryUsages.push(secondary);
+    if (this.secondaryUsages.length > this.maxPoints) {
+      this.secondaryUsages.shift();
     }
 
     this.gridOffset = (this.gridOffset + 1) % this.maxPoints;
