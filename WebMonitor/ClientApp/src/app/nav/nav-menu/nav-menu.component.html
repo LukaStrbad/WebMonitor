@@ -1,9 +1,10 @@
 <div>
-  <button mat-flat-button class="no-border-radius" routerLink="">Home</button>
-  <button mat-flat-button class="no-border-radius" routerLink="usages">
-    Component Usages
-  </button>
-  <button mat-flat-button class="no-border-radius" routerLink="processes">
-    Processes
+  <button
+    *ngFor="let route of appRoutes"
+    mat-flat-button
+    class="no-border-radius"
+    [routerLink]="route.path"
+  >
+    {{ route.title }}
   </button>
 </div>

@@ -21,6 +21,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProcessListComponent } from './process/process-list/process-list.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
+import { appRoutes } from './app-routes';
 
 @NgModule({
   declarations: [
@@ -36,11 +37,7 @@ import { MatSortModule } from '@angular/material/sort';
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
     HttpClientModule,
     FormsModule,
-    RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'usages', component: UsagesComponent },
-      { path: 'processes', component: ProcessListComponent }
-    ]),
+    RouterModule.forRoot(appRoutes),
     BrowserAnimationsModule,
     MatButtonModule,
     MatCardModule,

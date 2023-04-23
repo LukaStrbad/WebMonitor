@@ -1,5 +1,7 @@
 div>button {
   width: 100%;
+  display: block;
+  text-align: center;
 }
 
 .no-border-radius {

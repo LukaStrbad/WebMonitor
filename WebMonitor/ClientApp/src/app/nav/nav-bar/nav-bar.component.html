@@ -1,6 +1,22 @@
 <mat-toolbar color="primary">
-  <button mat-icon-button aria-label="Menu button" (click)="onMenuToggle()">
+  <button
+    mat-icon-button
+    aria-label="Menu button"
+    (click)="onMenuToggle()"
+    class="d-md-none"
+  >
     <mat-icon>menu</mat-icon>
   </button>
   <span>Web Monitor</span>
+  <span class="spacer"></span>
+
+  <span class="d-none d-md-inline">
+    <button
+      *ngFor="let route of appRoutes"
+      mat-button
+      [routerLink]="route.path"
+    >
+      {{ route.title }}
+    </button>
+  </span>
 </mat-toolbar>
