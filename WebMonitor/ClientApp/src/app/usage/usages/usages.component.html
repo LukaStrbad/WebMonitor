@@ -2,10 +2,7 @@
   <!-- CPU panel -->
   <mat-expansion-panel>
     <!-- Panel header -->
-    <mat-expansion-panel-header
-      collapsedHeight="auto"
-      class="panel-header"
-    >
+    <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
         <div class="panel-title">
           <mat-panel-title>CPU</mat-panel-title>
@@ -20,16 +17,14 @@
     <app-usage-graph
       #cpuGraph
       color="teal"
-      [usages]="averageCpuUsageHistory()"/>
+      [usages]="averageCpuUsageHistory()"
+    />
   </mat-expansion-panel>
 
   <!-- Memory panel -->
   <mat-expansion-panel>
     <!-- Panel header -->
-    <mat-expansion-panel-header
-      collapsedHeight="auto"
-      class="panel-header"
-    >
+    <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
         <div class="panel-title">
           <mat-panel-title>Memory</mat-panel-title>
@@ -44,21 +39,30 @@
     <app-usage-graph
       #memoryGraph
       color="purple"
-      [usages]="memoryUsagePercentageHistory()"/>
+      [usages]="memoryUsagePercentageHistory()"
+    />
 
-    <div class="mat-body-1">Memory usage: {{ byteRatio(sysInfo.data.memoryUsage?.used, sysInfo.data.memoryUsage?.total) }}</div>
+    <div class="mat-body-1">
+      Memory usage:
+      {{
+        byteRatio(
+          sysInfo.data.memoryUsage?.used,
+          sysInfo.data.memoryUsage?.total
+        )
+      }}
+    </div>
   </mat-expansion-panel>
 
   <!-- Disk panels -->
   <mat-expansion-panel *ngFor="let diskUsage of diskUsages">
     <!-- Panel header -->
-    <mat-expansion-panel-header
-      collapsedHeight="auto"
-      class="panel-header">
+    <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
         <div class="panel-title disk">
           <mat-panel-title>{{ diskUsage.name }}</mat-panel-title>
-          <span class="percentage">{{ diskUsage.utilization | number : "1.0-0" }}%, </span>
+          <span class="percentage"
+            >{{ diskUsage.utilization | number : "1.0-0" }}%,
+          </span>
           <span>{{ diskSpeeds(diskUsage) }}</span>
         </div>
         <mat-progress-bar mode="determinate" [value]="diskUsage.utilization">
@@ -70,25 +74,28 @@
     <app-usage-graph
       #diskGraph
       color="green"
-      [usages]=" diskUsageUtilizationHistory(diskUsage)"/>
+      [usages]="diskUsageUtilizationHistory(diskUsage)"
+    />
 
-      <div class="mat-body-1">Read speed: {{ bytes(diskUsage.readSpeed) }}/s</div>
-      <div class="mat-body-1">Write speed: {{ bytes(diskUsage.writeSpeed) }}/s</div>
+    <div class="mat-body-1">Read speed: {{ bytes(diskUsage.readSpeed) }}/s</div>
+    <div class="mat-body-1">
+      Write speed: {{ bytes(diskUsage.writeSpeed) }}/s
+    </div>
   </mat-expansion-panel>
 
   <!-- Network panels -->
   <mat-expansion-panel *ngFor="let networkUsage of networkUsages">
     <!-- Panel header -->
-    <mat-expansion-panel-header
-      collapsedHeight="auto"
-      class="panel-header">
+    <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
         <div class="panel-title network">
           <mat-panel-title>{{ networkUsage.name }}</mat-panel-title>
-          <span class="percentage">{{ networkUsageUtilization(networkUsage) || 0 | number : "1.0-0" }}%,</span>
           <span>{{ networkSpeeds(networkUsage) }}</span>
         </div>
-        <mat-progress-bar mode="determinate" [value]="networkUsageUtilization(networkUsage)">
+        <mat-progress-bar
+          mode="determinate"
+          [value]="networkUsageUtilization(networkUsage)"
+        >
         </mat-progress-bar>
       </mat-panel-description>
     </mat-expansion-panel-header>
@@ -96,22 +103,32 @@
     <!-- Panel content -->
     <app-usage-graph
       #networkGraph
-      color="blue"
+      color="fuchsia"
+      secondaryColor="red"
       [relativeMax]="true"
-      [usages]="networkDownloadSpeedHistory(networkUsage.name)"/>
+      [usages]="networkDownloadSpeedHistory(networkUsage)"
+      [secondaryUsages]="networkUploadSpeedHistory(networkUsage)"
+      [showSecondary]="true"
+    />
 
-      <div class="mat-body-1">Download speed: {{ bits(networkUsage.downloadSpeed) }}/s</div>
-      <div class="mat-body-1">Upload speed: {{ bits(networkUsage.uploadSpeed) }}/s</div>
-      <div class="mat-body-2">Data downloaded: {{ bytes(networkUsage.dataDownloaded) }}</div>
-      <div class="mat-body-2">Data uploaded: {{ bytes(networkUsage.dataUploaded) }}</div>
+    <div class="mat-body-1">
+      Download speed: {{ bits(networkUsage.downloadSpeed) }}/s
+    </div>
+    <div class="mat-body-1">
+      Upload speed: {{ bits(networkUsage.uploadSpeed) }}/s
+    </div>
+    <div class="mat-body-2">
+      Data downloaded: {{ bytes(networkUsage.dataDownloaded) }}
+    </div>
+    <div class="mat-body-2">
+      Data uploaded: {{ bytes(networkUsage.dataUploaded) }}
+    </div>
   </mat-expansion-panel>
 
   <!-- GPU panels -->
   <mat-expansion-panel *ngFor="let gpuUsage of gpuUsages">
     <!-- Panel header -->
-    <mat-expansion-panel-header
-      collapsedHeight="auto"
-      class="panel-header">
+    <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
         <div class="panel-title">
           <mat-panel-title>{{ gpuUsage.name }}</mat-panel-title>
@@ -126,14 +143,29 @@
     <app-usage-graph
       #gpuGraph
       color="orange"
-      [usages]="gpuUsageUtilizationHistory(gpuUsage.name)"/>
+      [usages]="gpuUsageUtilizationHistory(gpuUsage.name)"
+    />
 
-    <div class="mat-body-1" *ngIf="gpuUsage.memoryTotal; else memoryElse">Memory usage: {{ byteRatio(gpuUsage.memoryUsed, gpuUsage.memoryTotal) }}</div>
-    <ng-template #memoryElse><div class="mat-body-1">Memory usage: {{ bytes(gpuUsage.memoryUsed) }}</div></ng-template>
+    <div class="mat-body-1" *ngIf="gpuUsage.memoryTotal; else memoryElse">
+      Memory usage: {{ byteRatio(gpuUsage.memoryUsed, gpuUsage.memoryTotal) }}
+    </div>
+    <ng-template #memoryElse
+      ><div class="mat-body-1">
+        Memory usage: {{ bytes(gpuUsage.memoryUsed) }}
+      </div></ng-template
+    >
 
-    <div class="mat-body-1" *ngIf="gpuUsage.temperature">Temperature: {{ gpuUsage.temperature }}°C</div>
-    <div class="mat-body-1" *ngIf="gpuUsage.coreClock">Core clock: {{ gpuUsage.coreClock }} MHz</div>
-    <div class="mat-body-1" *ngIf="gpuUsage.memoryClock">Memory clock: {{ gpuUsage.memoryClock }} MHz</div>
-    <div class="mat-body-1" *ngIf="gpuUsage.power">Power: {{ gpuUsage.power }} W</div>
+    <div class="mat-body-1" *ngIf="gpuUsage.temperature">
+      Temperature: {{ gpuUsage.temperature }}°C
+    </div>
+    <div class="mat-body-1" *ngIf="gpuUsage.coreClock">
+      Core clock: {{ gpuUsage.coreClock }} MHz
+    </div>
+    <div class="mat-body-1" *ngIf="gpuUsage.memoryClock">
+      Memory clock: {{ gpuUsage.memoryClock }} MHz
+    </div>
+    <div class="mat-body-1" *ngIf="gpuUsage.power">
+      Power: {{ gpuUsage.power }} W
+    </div>
   </mat-expansion-panel>
 </mat-accordion>

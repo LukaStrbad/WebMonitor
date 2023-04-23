@@ -85,9 +85,9 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
         graph.addValue(utilization);
       });
       this.networkGraphs.forEach((graph, i) => {
-        const name = this.networkUsages[i]?.name ?? "";
-        const downloadSpeed = this.networkDownloadSpeed(name);
-        graph.addValue(downloadSpeed);
+        const downloadSpeed = this.networkUsages[i].downloadSpeed;
+        const uploadSpeed = this.networkUsages[i].uploadSpeed;
+        graph.addValues(downloadSpeed, uploadSpeed);
       });
       this.gpuGraphs.forEach((graph, i) => {
         const utilization = this.gpuUsages[i].utilization;
@@ -159,13 +159,14 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
     return (usageGraph?.currentUsage ?? 0) * 100;
   }
 
-  networkDownloadSpeed(name: string): number {
-    return this.sysInfo.data.networkUsages?.find(usage => usage.name === name)?.downloadSpeed ?? 0;
+  networkDownloadSpeedHistory(networkUsage: NetworkUsage): number[] {
+    return this.sysInfo.data.networkUsagesHistory.map(usages =>
+      usages.find(usage => usage.name === networkUsage.name)?.downloadSpeed ?? 0);
   }
 
-  networkDownloadSpeedHistory(name: string): number[] {
+  networkUploadSpeedHistory(networkUsage: NetworkUsage): number[] {
     return this.sysInfo.data.networkUsagesHistory.map(usages =>
-      usages.find(usage => usage.name === name)?.downloadSpeed ?? 0);
+      usages.find(usage => usage.name === networkUsage.name)?.uploadSpeed ?? 0);
   }
 
   networkUsageFilter(usage: NetworkUsage): boolean {
