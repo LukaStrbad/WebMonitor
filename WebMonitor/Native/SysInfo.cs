@@ -97,7 +97,8 @@ internal class SysInfo
 
     private void Refresh(object? sender, ElapsedEventArgs e)
     {
-        _refreshables.ForEach(r => r.Refresh(RefreshInterval));
+        // Refresh all refreshables in parallel
+        Parallel.ForEach(_refreshables, r => r.Refresh(RefreshInterval));
         LastRefresh = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 }
