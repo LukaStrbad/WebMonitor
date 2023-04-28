@@ -22,6 +22,7 @@ import { ProcessListComponent } from './process/process-list/process-list.compon
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { appRoutes } from './app-routes';
+import { FileBrowserComponent } from './file-browser/file-browser.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { appRoutes } from './app-routes';
     NavMenuComponent,
     UsageGraphComponent,
     UsagesComponent,
-    ProcessListComponent
+    ProcessListComponent,
+    FileBrowserComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

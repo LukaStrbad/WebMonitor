@@ -7,124 +7,142 @@ namespace WebMonitor.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Produces("application/json")]
 public class FileBrowserController : ControllerBase
 {
-	private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-	{
-		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-	};
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        // For ignoring null values
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        // For camelCase property names
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
 
-	[HttpGet("dir")]
-	public IActionResult Dir(string? requestedDirectory = null)
-	{
-		if (requestedDirectory == null)
-		{
-			return new JsonResult(DriveInfo.GetDrives()
-				.Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory.FullName)))
-			{
-				SerializerSettings = _jsonSerializerOptions
-			};
-		}
+    [HttpGet("dir")]
+    public ActionResult<List<FileOrDir>> Dir(string? requestedDirectory = null)
+    {
+        if (requestedDirectory == null)
+        {
+            return new JsonResult(DriveInfo.GetDrives()
+                .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory)))
+            {
+                SerializerSettings = _jsonSerializerOptions
+            };
+        }
 
-		var dirInfo = new DirectoryInfo(requestedDirectory);
+        var dirInfo = new DirectoryInfo(requestedDirectory);
 
-		if (!dirInfo.Exists)
-			return new BadRequestResult();
+        if (!dirInfo.Exists)
+            return new BadRequestResult();
 
-		var dirs = dirInfo
-			.GetDirectories()
-			.Select(dir => FileOrDir.Dir(dir.FullName))
-			.ToList();
-		dirs.AddRange(dirInfo.GetFiles().Select(FileOrDir.File));
+        var dirs = dirInfo
+            .GetDirectories()
+            .Select(dir => FileOrDir.Dir(dir))
+            .ToList();
+        dirs.AddRange(dirInfo.GetFiles().Select(FileOrDir.File));
 
-		return new JsonResult(dirs)
-		{
-			SerializerSettings = _jsonSerializerOptions
-		};
-	}
+        return new JsonResult(dirs)
+        {
+            SerializerSettings = _jsonSerializerOptions
+        };
+    }
 
-	[HttpGet("download-file")]
-	public FileResult DownloadFile(string path)
-	{
-		new FileExtensionContentTypeProvider().TryGetContentType(path, out var contentType);
-		var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
-		// return new FileStreamResult(stream, contentType ?? "application/octet-stream");
-		return File(stream, contentType ?? "application/octet-stream", Path.GetFileName(path));
-	}
+    [HttpGet("download-file")]
+    public FileResult DownloadFile(string path)
+    {
+        new FileExtensionContentTypeProvider().TryGetContentType(path, out var contentType);
+        var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
+        // return new FileStreamResult(stream, contentType ?? "application/octet-stream");
+        return File(stream, contentType ?? "application/octet-stream", Path.GetFileName(path));
+    }
 
-	[HttpPost("upload-file")]
-	public async Task<IActionResult> UploadFile(string path)
-	{
-		var outputDir = new DirectoryInfo(path);
+    [HttpPost("upload-file")]
+    public async Task<IActionResult> UploadFile(string path)
+    {
+        var outputDir = new DirectoryInfo(path);
 
-		if (!outputDir.Exists)
-			return new BadRequestObjectResult($"Directory '${path}' doesn't exist");
+        if (!outputDir.Exists)
+            return new BadRequestObjectResult($"Directory '${path}' doesn't exist");
 
-		var fileStatues = new List<FileUploadInfo>();
+        var fileStatues = new List<FileUploadInfo>();
 
-		foreach (var file in Request.Form.Files)
-		{
-			var outputFile = new FileInfo(Path.Combine(outputDir.FullName, file.FileName));
-			if (outputFile.Exists)
-			{
-				fileStatues.Add(new(file.FileName, false));
-				continue;
-			}
+        foreach (var file in Request.Form.Files)
+        {
+            var outputFile = new FileInfo(Path.Combine(outputDir.FullName, file.FileName));
+            if (outputFile.Exists)
+            {
+                fileStatues.Add(new(file.FileName, false));
+                continue;
+            }
 
-			var buffer = new byte[10 * 1024];
-			using var br = new BinaryReader(file.OpenReadStream());
-			await using var bw = new BinaryWriter(outputFile.OpenWrite());
+            var buffer = new byte[10 * 1024];
+            using var br = new BinaryReader(file.OpenReadStream());
+            await using var bw = new BinaryWriter(outputFile.OpenWrite());
 
-			int read;
-			do
-			{
-				read = br.Read(buffer);
-				bw.Write(buffer, 0, read);
-			} while (read > 0);
+            int read;
+            do
+            {
+                read = br.Read(buffer);
+                bw.Write(buffer, 0, read);
+            } while (read > 0);
 
-			fileStatues.Add(new(file.FileName, true));
-		}
+            fileStatues.Add(new(file.FileName, true));
+        }
 
-		return new JsonResult(fileStatues)
-		{
-			SerializerSettings = _jsonSerializerOptions
-		};
-	}
+        return new JsonResult(fileStatues)
+        {
+            SerializerSettings = _jsonSerializerOptions
+        };
+    }
 }
 
 public sealed class FileOrDir
 {
-	[JsonPropertyName("type")]
-	public string Type { get; }
+    public string Type { get; }
 
-	[JsonPropertyName("path")]
-	public string Path { get; }
+    public string Path { get; }
 
-	[JsonPropertyName("size")]
-	public long? Size { get; }
+    public long? Size { get; }
 
-	private FileOrDir(string type, string path, long? size = null)
-	{
-		Type = type;
-		Path = path;
-		Size = size;
-	}
+    public int? ChildrenCount { get; }
 
-	public static FileOrDir Dir(string path) => new("dir", path);
-	public static FileOrDir File(FileInfo file) => new("file", file.FullName, file.Length);
+    private FileOrDir(string type, string path, long? size = null, int? childrenCount = null)
+    {
+        Type = type;
+        Path = path;
+        Size = size;
+        ChildrenCount = childrenCount;
+    }
+
+    public static FileOrDir Dir(DirectoryInfo dir)
+    {
+        int childrenCount;
+
+        try
+        {
+            childrenCount = dir.GetFileSystemInfos().Length;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            childrenCount = -1;
+        }
+
+        return new("dir", dir.FullName, childrenCount: childrenCount);
+    }
+    public static FileOrDir File(FileInfo file) => new("file", file.FullName, file.Length);
 }
 
 public class FileUploadInfo
 {
-	[JsonPropertyName("filename")]
-	public string FileName { get; }
+    [JsonPropertyName("filename")]
+    public string FileName { get; }
 
-	[JsonPropertyName("success")]
-	public bool Success { get; }
+    [JsonPropertyName("success")]
+    public bool Success { get; }
 
-	public FileUploadInfo(string fileName, bool success)
-	{
-		FileName = fileName;
-		Success = success;
-	}
+    public FileUploadInfo(string fileName, bool success)
+    {
+        FileName = fileName;
+        Success = success;
+    }
 }
