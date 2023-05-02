@@ -1,3 +1,8 @@
+<app-breadcrumbs
+  [items]="breadcrumbs"
+  [separator]="breadcrumbSeparator"
+></app-breadcrumbs>
+
 <table matSort mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <!-- Name -->
   <ng-container [matColumnDef]="headers[0]">

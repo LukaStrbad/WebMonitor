@@ -1,0 +1,8 @@
+<ng-container *ngFor="let item of items; let i = index">
+  <span class="breadcrumb mat-headline-5" (click)="item?.onClick()">{{
+    item.title
+  }}</span>
+  <span *ngIf="i != items.length - 1" class="separator mat-headline-5">{{
+    separator
+  }}</span>
+</ng-container>

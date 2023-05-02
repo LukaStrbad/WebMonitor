@@ -14,7 +14,7 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatIconModule } from "@angular/material/icon";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { NavMenuComponent } from './nav/nav-menu/nav-menu.component';
-import { UsageGraphComponent } from './usage/usage-graph/usage-graph.component';
+import { UsageGraphComponent } from './components/usage-graph/usage-graph.component';
 import { UsagesComponent } from './usage/usages/usages.component';
 import { MatExpansionModule } from "@angular/material/expansion";
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -23,6 +23,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { appRoutes } from './app-routes';
 import { FileBrowserComponent } from './file-browser/file-browser.component';
+import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { FileBrowserComponent } from './file-browser/file-browser.component';
     UsageGraphComponent,
     UsagesComponent,
     ProcessListComponent,
-    FileBrowserComponent
+    FileBrowserComponent,
+    BreadcrumbsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

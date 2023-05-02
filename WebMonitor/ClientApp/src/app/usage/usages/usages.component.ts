@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { UsageGraphComponent } from "../usage-graph/usage-graph.component";
+import { UsageGraphComponent } from "../../components/usage-graph/usage-graph.component";
 import { SysInfoService } from "../../../services/sys-info.service";
 import { NetworkUsage, NetworkUsages } from 'src/model/network-usage';
 import * as arrayHelpers from "../../../helpers/array-helpers";
