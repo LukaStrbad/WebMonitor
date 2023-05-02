@@ -87,8 +87,8 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     this.currentDir = dir.path;
 
     let breadcrumbTitle;
-    // If OS is windows, remove the backslash from drive letter
-    if (this.breadcrumbSeparator == "\\") {
+    // If OS is windows and we're navigating to drive root, remove the backslash from drive letter
+    if (this.breadcrumbSeparator == "\\" && !this.currentDir) {
       breadcrumbTitle = dir.basename.slice(0, -1);
     } else {
       breadcrumbTitle = dir.basename;
