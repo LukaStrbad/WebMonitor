@@ -84,15 +84,16 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
    * @param dir Directory to navigate to
    */
   navigateToDir(dir: FileOrDir) {
-    this.currentDir = dir.path;
-
     let breadcrumbTitle;
     // If OS is windows and we're navigating to drive root, remove the backslash from drive letter
-    if (this.breadcrumbSeparator == "\\" && !this.currentDir) {
+    if (this.breadcrumbSeparator == "\\" && this.currentDir == undefined) {
+      console.log("removing backslash");
       breadcrumbTitle = dir.basename.slice(0, -1);
     } else {
       breadcrumbTitle = dir.basename;
     }
+
+    this.currentDir = dir.path;
     // Increase depth
     this.depth++;
     // Save current depth to use in onClick
