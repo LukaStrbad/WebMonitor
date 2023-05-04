@@ -63,6 +63,8 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
+    // Change data sort function
+    this.dataSource.sortData = this.tableSortFunction;
   }
 
   /**
@@ -126,6 +128,36 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     }
 
     this.navigateToDir(row);
+  }
+
+  tableSortFunction(items: FileOrDir[], sort: MatSort): FileOrDir[] {
+    return items.sort((a, b) => {
+      const isAsc = sort.direction === 'asc';
+      let compareValue = 0;
+
+      switch (sort.active) {
+        case "basename":
+          compareValue = a.basename.localeCompare(b.basename);
+          break;
+        case "type":
+          compareValue = a.type.localeCompare(b.type);
+          break;
+        case "size": {
+          // Directories have lower precedence
+          if (a.type === "dir" && b.type === "file") {
+            compareValue = -1;
+          } else if (a.type === "file" && b.type === "dir") {
+            compareValue = 1;
+          } else if (a.type === "dir" && b.type === "dir") {
+            compareValue = (b.childrenCount ?? -1) - (a.childrenCount ?? -1);
+          } else {
+            compareValue = Number((a.size ?? 0n) - (b.size ?? 0n));
+          }
+        }
+      }
+
+      return compareValue * (isAsc ? 1 : -1);
+    });
   }
 }
 
