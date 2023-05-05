@@ -10,7 +10,7 @@ import { AppSettingsService, AppTheme } from 'src/services/app-settings.service'
 })
 export class AppComponent {
   drawerOpen = false;
-  showDebugWindow = !environment.production;
+  showDebugWindow: Signal<boolean>;
   isDarkTheme: Signal<boolean>;
 
   toggleDrawer() {
@@ -22,5 +22,6 @@ export class AppComponent {
     private appSettings: AppSettingsService
   ) {
     this.isDarkTheme = computed(() => this.appSettings.theme() === AppTheme.Dark);
+    this.showDebugWindow = computed(() => this.appSettings.showDebugWindow());
   }
 }

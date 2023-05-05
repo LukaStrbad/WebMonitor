@@ -1,4 +1,4 @@
-import { Component, Signal, computed } from '@angular/core';
+import { Component, Signal, computed, signal } from '@angular/core';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 
 @Component({
@@ -9,12 +9,19 @@ import { AppSettingsService, AppTheme } from 'src/services/app-settings.service'
 export class SettingsComponent {
   isDarkTheme: Signal<boolean>;
 
-  constructor(private appSettings: AppSettingsService) {
+  constructor(public appSettings: AppSettingsService) {
     this.isDarkTheme = computed(() => this.appSettings.theme() === AppTheme.Dark);
   }
 
   setDarkMode(value: boolean) {
     this.appSettings.setTheme(value ? AppTheme.Dark : AppTheme.Light);
+  }
+
+  /**
+   * Toggles the values of the showDebugWindow setting.
+   */
+  toggleDebugWindow() {
+    this.appSettings.showDebugWindow.set(!this.appSettings.showDebugWindow());
   }
 
 }

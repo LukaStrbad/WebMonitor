@@ -4,12 +4,24 @@
   </mat-card-header>
 
   <mat-card-content>
-    <div>
-      <mat-slide-toggle
-        [checked]="isDarkTheme()"
-        (change)="setDarkMode($event.checked)"
-        >Dark mode</mat-slide-toggle
-      >
-    </div>
+    <mat-slide-toggle
+      [checked]="isDarkTheme()"
+      (change)="setDarkMode($event.checked)"
+      >Dark mode</mat-slide-toggle
+    >
+  </mat-card-content>
+</mat-card>
+
+<mat-card>
+  <mat-card-header>
+    <mat-card-title><h4>Miscellaneous</h4></mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-checkbox
+      [checked]="appSettings.showDebugWindow()"
+      (click)="toggleDebugWindow()"
+      >Show debug window</mat-checkbox
+    >
   </mat-card-content>
 </mat-card>

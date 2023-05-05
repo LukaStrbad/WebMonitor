@@ -1,3 +1,8 @@
-mat-card-content div {
+mat-card {
+    margin-bottom: 16pt;
+}
+
+mat-card-content>* {
     margin-top: 4pt;
+    display: block;
 }
