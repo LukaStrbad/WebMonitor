@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Signal, computed } from '@angular/core';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 
 @Component({
@@ -7,15 +7,14 @@ import { AppSettingsService, AppTheme } from 'src/services/app-settings.service'
   styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent {
+  isDarkTheme: Signal<boolean>;
 
-  constructor(private appSettings: AppSettingsService) { }
-
-  setDarkMode(value: boolean) {
-    this.appSettings.theme = value ? AppTheme.Dark : AppTheme.Light;
+  constructor(private appSettings: AppSettingsService) {
+    this.isDarkTheme = computed(() => this.appSettings.theme() === AppTheme.Dark);
   }
 
-  isDarkTheme(): boolean {
-    return this.appSettings.theme === AppTheme.Dark;
+  setDarkMode(value: boolean) {
+    this.appSettings.setTheme(value ? AppTheme.Dark : AppTheme.Light);
   }
 
 }

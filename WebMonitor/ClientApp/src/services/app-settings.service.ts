@@ -1,26 +1,23 @@
-import { Injectable } from '@angular/core';
+import { Injectable, effect, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AppSettingsService {
-  private _theme: AppTheme;
-  themeChanged = new Subject<AppTheme>();
+  theme = signal(AppTheme.Light);
 
   constructor() {
+    // Effect that reacts to theme changes and updates saved theme
+    effect(() => localStorage.setItem("theme", this.theme()));
+
     // Load theme from local storage defaulting to light
-    this._theme = (localStorage.getItem("theme") ?? AppTheme.Light) as AppTheme;
+    const savedTheme = (localStorage.getItem("theme") ?? AppTheme.Light) as AppTheme;
+    this.setTheme(savedTheme);
   }
 
-  get theme(): AppTheme {
-    return this._theme;
-  }
-
-  set theme(value: AppTheme) {
-    this._theme = value;
-    this.themeChanged.next(value);
-    localStorage.setItem("theme", value);
+  setTheme(newTheme: AppTheme) {
+    this.theme.set(newTheme);
   }
 }
 

@@ -1,4 +1,4 @@
-<body [ngClass]="isDarkTheme ? 'dark-theme' : 'light-theme'">
+<body [ngClass]="isDarkTheme() ? 'dark-theme' : 'light-theme'">
   <mat-drawer-container style="height: 100vh">
     <!-- Drawer content -->
     <mat-drawer mode="side" [opened]="drawerOpen" class="d-md-none">
