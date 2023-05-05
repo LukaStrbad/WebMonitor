@@ -24,6 +24,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { appRoutes } from './app-routes';
 import { FileBrowserComponent } from './file-browser/file-browser.component';
 import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.component';
+import { SettingsComponent } from './settings/settings.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
   declarations: [
@@ -35,7 +37,8 @@ import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.compo
     UsagesComponent,
     ProcessListComponent,
     FileBrowserComponent,
-    BreadcrumbsComponent
+    BreadcrumbsComponent,
+    SettingsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -51,7 +54,8 @@ import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.compo
     MatExpansionModule,
     MatProgressBarModule,
     MatTableModule,
-    MatSortModule
+    MatSortModule,
+    MatSlideToggleModule
   ],
   providers: [],
   bootstrap: [AppComponent]

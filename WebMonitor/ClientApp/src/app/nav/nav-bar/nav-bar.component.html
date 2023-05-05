@@ -8,15 +8,19 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>Web Monitor</span>
+
   <span class="spacer"></span>
 
   <span class="d-none d-md-inline">
     <button
-      *ngFor="let route of appRoutes"
+      *ngFor="let route of menuRoutes"
       mat-button
       [routerLink]="route.path"
     >
       {{ route.title }}
     </button>
   </span>
+  <button mat-icon-button routerLink="settings">
+    <mat-icon>settings</mat-icon>
+  </button>
 </mat-toolbar>

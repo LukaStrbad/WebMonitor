@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { appRoutes } from 'src/app/app-routes';
+import { menuRoutes } from 'src/app/app-routes';
 
 @Component({
   selector: 'app-nav-menu',
@@ -7,5 +7,5 @@ import { appRoutes } from 'src/app/app-routes';
   styleUrls: ['./nav-menu.component.css']
 })
 export class NavMenuComponent {
-  appRoutes = appRoutes;
+  menuRoutes = menuRoutes;
 }

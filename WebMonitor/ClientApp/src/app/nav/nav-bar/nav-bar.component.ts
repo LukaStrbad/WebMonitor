@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { appRoutes } from 'src/app/app-routes';
+import { menuRoutes } from 'src/app/app-routes';
 
 @Component({
   selector: 'app-nav-bar',
@@ -8,7 +8,7 @@ import { appRoutes } from 'src/app/app-routes';
 })
 export class NavBarComponent {
   @Output() menuToggleEvent = new EventEmitter<void>();
-  appRoutes = appRoutes;
+  menuRoutes = menuRoutes;
 
   onMenuToggle() {
     this.menuToggleEvent.emit();
