@@ -2,6 +2,6 @@ export interface FileOrDir {
     type: "file" | "dir";
     path: string;
     basename: string;
-    size?: bigint;
-    childrenCount?: number;
+    size: bigint | null;
+    childrenCount: number | null;
 }

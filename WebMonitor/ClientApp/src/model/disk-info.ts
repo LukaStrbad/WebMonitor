@@ -1,8 +1,8 @@
 ﻿export interface DiskInfo {
-  diskType?: string;
-  connectionType?: string;
+  diskType: string | null;
+  connectionType: string | null;
   name: string;
   totalSize: bigint;
   isRemovable: boolean;
-  rotationalSpeed?: number;
+  rotationalSpeed: number | null;
 }

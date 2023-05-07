@@ -10,7 +10,7 @@ export interface MemoryInfo {
 }
 
 export interface MemoryStickInfo {
-    manufacturer?: string;
-    partNumber?: string;
+    manufacturer: string | null;
+    partNumber: string | null;
     capacity: bigint;
 }

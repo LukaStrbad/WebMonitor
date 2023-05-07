@@ -4,7 +4,7 @@
   memoryTotal: bigint;
   memoryUsed: bigint;
   name: string;
-  power?: number;
+  power: number | null;
   temperature: number;
   utilization: number;
 }
