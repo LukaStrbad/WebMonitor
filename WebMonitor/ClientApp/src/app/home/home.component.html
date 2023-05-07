@@ -76,6 +76,11 @@
     <mat-card-content>
       <div class="mat-body-1">Size: {{ sizeDisplay(disk.totalSize) }}</div>
       <div class="mat-body-1">Type: {{ disk.diskType }}</div>
+      <div class="mat-body-1">Connection: {{ disk.connectionType }}</div>
+      <!-- Hard drive only -->
+      <div class="mat-body-1" *ngIf="disk.rotationalSpeed">
+        Speed: {{ disk.rotationalSpeed }} RPM
+      </div>
     </mat-card-content>
   </mat-card>
 </div>
