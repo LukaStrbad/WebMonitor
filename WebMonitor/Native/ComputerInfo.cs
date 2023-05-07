@@ -3,6 +3,7 @@ using LibreHardwareMonitor.Hardware;
 using Microsoft.Win32;
 using WebMonitor.Native.Cpu;
 using WebMonitor.Native.Disk;
+using WebMonitor.Native.Memory;
 
 namespace WebMonitor.Native;
 
@@ -37,13 +38,18 @@ public class ComputerInfo
     /// CPU info
     /// </summary>
     public CpuInfo Cpu { get; }
+    
+    /// <summary>
+    /// Memory info
+    /// </summary>
+    public MemoryInfo Memory { get; } = new();
 
     /// <summary>
     /// List disk infos
     /// </summary>
     public IEnumerable<DiskInfo> Disks { get; }
 
-    public ComputerInfo(Computer computer)
+    public ComputerInfo(IComputer computer)
     {
         Hostname = Environment.MachineName;
         CurrentUser = Environment.UserName;

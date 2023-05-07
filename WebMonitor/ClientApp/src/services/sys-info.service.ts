@@ -33,6 +33,20 @@ export class SysInfoService {
     this.refreshLoop();
   }
 
+  /**
+   * Method that waits for the first refresh to complete
+   * or returns immediately if the first refresh has already completed
+   * @returns Computer info
+   */
+  async getComputerInfo(): Promise<ComputerInfo> {
+    if (this.data.computerInfo == null) {
+      await this.refreshComputerInfo();
+    }
+
+    return this.data.computerInfo!;
+  }
+
+
   private async refreshLoop() {
     while (true) {
       await this.refresh();

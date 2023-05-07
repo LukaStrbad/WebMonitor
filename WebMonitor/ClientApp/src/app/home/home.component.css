@@ -1,3 +1,8 @@
-﻿.disk-card {
-  margin: 4pt;
+﻿/* Add more padding above the first card */
+mat-card:nth-child(1) {
+  margin-top: 16pt;
+}
+
+mat-card {
+  margin-bottom: 16pt;
 }
