@@ -66,7 +66,7 @@ const DefaultAppSettings: AppSettings = {
     cpu: "teal",
     memory: "purple",
     disk: "green",
-    network: "fushsia",
+    network: "fuchsia",
     networkUpload: "red",
     gpu: "orange"
   }
