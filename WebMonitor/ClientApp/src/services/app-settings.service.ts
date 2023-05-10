@@ -1,4 +1,4 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, effect, signal } from '@angular/core';
 import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -6,44 +6,35 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class AppSettingsService {
-  theme = signal(AppTheme.Light);
-  showDebugWindow = signal<boolean>(false);
-  appSettings: AppSettings;
+  /**
+   * App settings theme.
+   * Don't use set() method unless changing the whole object as it will not trigger updates.
+   * To change a single property use the mutate() method.
+   */
+  settings: WritableSignal<AppSettings>;
 
   constructor() {
     // Load settings from local storage
-    this.appSettings = this.loadSettings();
-    this.theme.set(this.appSettings.theme);
-    this.showDebugWindow.set(this.appSettings.showDebugWindow);
+    this.settings = signal(this.loadSettings());
 
     // Effect that reacts to changes in app settings
     effect(() => {
-      this.appSettings.theme = this.theme();
-      this.appSettings.showDebugWindow = this.showDebugWindow();
       // Save changed values to local storage
-      this.saveSettings(this.appSettings);
+      this.saveSettings(this.settings());
     });
   }
 
-  saveSettings(value: AppSettings) {
+  private saveSettings(value: AppSettings) {
     localStorage.setItem("appSettings", JSON.stringify(value));
   }
 
-  loadSettings(): AppSettings {
+  private loadSettings(): AppSettings {
     const savedSettings = localStorage.getItem("appSettings");
     if (savedSettings) {
       return JSON.parse(savedSettings);
     } else {
-      return {
-        theme: AppTheme.Light,
-        // By default, show the debug window in development mode
-        showDebugWindow: !environment.production
-      };
+      return DefaultAppSettings;
     }
-  }
-
-  setTheme(newTheme: AppTheme) {
-    this.theme.set(newTheme);
   }
 }
 
@@ -52,7 +43,31 @@ export enum AppTheme {
   Dark
 }
 
+export interface GraphColors {
+  cpu: string;
+  memory: string;
+  disk: string;
+  network: string;
+  networkUpload: string;
+  gpu: string;
+}
+
 interface AppSettings {
   theme: AppTheme;
   showDebugWindow: boolean;
+  graphColors: GraphColors;
 }
+
+const DefaultAppSettings: AppSettings = {
+  theme: AppTheme.Light,
+  // By default, show the debug window in development mode
+  showDebugWindow: !environment.production,
+  graphColors: {
+    cpu: "teal",
+    memory: "purple",
+    disk: "green",
+    network: "fushsia",
+    networkUpload: "red",
+    gpu: "orange"
+  }
+};

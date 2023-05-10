@@ -21,7 +21,7 @@ export class AppComponent {
     public sysInfo: SysInfoService,
     private appSettings: AppSettingsService
   ) {
-    this.isDarkTheme = computed(() => this.appSettings.theme() === AppTheme.Dark);
-    this.showDebugWindow = computed(() => this.appSettings.showDebugWindow());
+    this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
+    this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
   }
 }

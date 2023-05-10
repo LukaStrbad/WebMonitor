@@ -18,9 +18,7 @@
   </mat-card-header>
 
   <mat-card-content>
-    <mat-checkbox
-      [checked]="appSettings.showDebugWindow()"
-      (click)="toggleDebugWindow()"
+    <mat-checkbox [checked]="showDebugWindow()" (click)="toggleDebugWindow()"
       >Show debug window</mat-checkbox
     >
   </mat-card-content>
