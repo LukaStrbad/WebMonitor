@@ -28,6 +28,8 @@ import { SettingsComponent } from './settings/settings.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ColorInputComponent } from './components/color-input/color-input.component';
+import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
   declarations: [
@@ -40,7 +42,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     ProcessListComponent,
     FileBrowserComponent,
     BreadcrumbsComponent,
-    SettingsComponent
+    SettingsComponent,
+    ColorInputComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -59,7 +62,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSortModule,
     MatSlideToggleModule,
     MatCheckboxModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatInputModule
   ],
   providers: [],
   bootstrap: [AppComponent]

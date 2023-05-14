@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, QueryList, Signal, ViewChild, ViewChildren, computed } from '@angular/core';
 import { UsageGraphComponent } from "../../components/usage-graph/usage-graph.component";
 import { SysInfoService } from "../../../services/sys-info.service";
 import { NetworkUsage, NetworkUsages } from 'src/model/network-usage';
@@ -8,6 +8,7 @@ import { GpuUsages } from 'src/model/gpu-usage';
 import * as numberHelpers from "../../../helpers/number-helpers";
 import { replaceValues } from "../../../helpers/object-helpers";
 import { Subscription } from 'rxjs';
+import { AppSettingsService, GraphColors } from 'src/services/app-settings.service';
 
 @Component({
   selector: 'app-usages',
@@ -20,6 +21,7 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   @ViewChildren("diskGraph") private diskGraphs!: QueryList<UsageGraphComponent>;
   @ViewChildren("networkGraph") private networkGraphs!: QueryList<UsageGraphComponent>;
   @ViewChildren("gpuGraph") private gpuGraphs!: QueryList<UsageGraphComponent>;
+  graphColors: Signal<GraphColors>;
 
   // These are used to detect changes only
   // Actual data should be obtained from sysInfo.data
@@ -29,7 +31,12 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
 
   refreshSubscription: Subscription | undefined;
 
-  constructor(public sysInfo: SysInfoService) { }
+  constructor(
+    public sysInfo: SysInfoService,
+    appSettings: AppSettingsService
+  ) {
+    this.graphColors = computed(() => appSettings.settings().graphColors);
+  }
 
   ngOnDestroy(): void {
     this.refreshSubscription?.unsubscribe();

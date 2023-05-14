@@ -6,3 +6,7 @@ mat-card-content>* {
     margin-top: 4pt;
     display: block;
 }
+
+mat-card-content app-color-input:first-of-type {
+    margin-top: 16pt;
+}

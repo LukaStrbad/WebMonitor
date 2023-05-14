@@ -9,6 +9,13 @@
       (change)="setDarkMode($event.checked)"
       >Dark mode</mat-slide-toggle
     >
+
+    <app-color-input
+      *ngFor="let graphColorSetting of graphColorSettings"
+      [label]="graphColorSetting.label"
+      [color]="graphColorSetting.color"
+      (colorChange)="graphColorSetting.changeColor($event)"
+    ></app-color-input>
   </mat-card-content>
 </mat-card>
 

@@ -16,7 +16,7 @@
     <!-- Panel content -->
     <app-usage-graph
       #cpuGraph
-      color="teal"
+      [color]="graphColors().cpu"
       [usages]="averageCpuUsageHistory()"
     />
   </mat-expansion-panel>
@@ -38,7 +38,7 @@
     <!-- Panel content -->
     <app-usage-graph
       #memoryGraph
-      color="purple"
+      [color]="graphColors().memory"
       [usages]="memoryUsagePercentageHistory()"
     />
 
@@ -73,7 +73,7 @@
     <!-- Panel content -->
     <app-usage-graph
       #diskGraph
-      color="green"
+      [color]="graphColors().disk"
       [usages]="diskUsageUtilizationHistory(diskUsage)"
     />
 
@@ -103,8 +103,8 @@
     <!-- Panel content -->
     <app-usage-graph
       #networkGraph
-      color="fuchsia"
-      secondaryColor="red"
+      [color]="graphColors().network"
+      [secondaryColor]="graphColors().networkUpload"
       [relativeMax]="true"
       [usages]="networkDownloadSpeedHistory(networkUsage)"
       [secondaryUsages]="networkUploadSpeedHistory(networkUsage)"
@@ -142,7 +142,7 @@
     <!-- Panel content -->
     <app-usage-graph
       #gpuGraph
-      color="orange"
+      [color]="graphColors().gpu"
       [usages]="gpuUsageUtilizationHistory(gpuUsage.name)"
     />
 
