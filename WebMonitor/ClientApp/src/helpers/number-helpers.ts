@@ -102,7 +102,7 @@ export function toByteString(
   }
 
   if (valueNumber < multiplier) {
-    return valueNumber + suffix;
+    return `${valueNumber} ${suffix}`;
   }
 
   const [prefix, exp] = getPrefixAndExponent(valueNumber, multiplier);
