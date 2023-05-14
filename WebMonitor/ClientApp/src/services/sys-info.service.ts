@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { Inject, Injectable, OnDestroy, WritableSignal, signal } from '@angular/core';
 import { firstValueFrom, interval, Subject } from "rxjs";
 import { SysInfoUsages } from "../model/sys-info/sys-info-usages";
 import { HttpClient } from "@angular/common/http";
@@ -17,6 +17,10 @@ import { RefreshInformation } from 'src/model/refresh-information';
 export class SysInfoService {
   onRefresh = new Subject<void>();
   data = new SysInfoUsages(60);
+  /**
+   * IP address of the connected device
+   */
+  clientIp = signal<string | null>(null);
 
   private readonly apiUrl: string;
 
@@ -26,9 +30,9 @@ export class SysInfoService {
   ) {
     this.apiUrl = baseUrl + "SysInfo/";
 
-    // Computer info should not be refreshed every time
-    this.refreshComputerInfo().then(_ => {
-    });
+    // Get client IP
+    firstValueFrom(this.http.get<string>(this.apiUrl + "clientIP"))
+      .then(ip => this.clientIp.set(ip));
 
     this.refreshLoop();
   }

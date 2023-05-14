@@ -22,6 +22,12 @@ public class SysInfoController : ControllerBase
     }
 
     /// <summary>
+    /// Returns the client IP address
+    /// </summary>
+    [HttpGet("clientIP")]
+    public ActionResult<string?> ClientIp() => HttpContext.Connection.RemoteIpAddress?.ToString();
+
+    /// <summary>
     /// Returns the number of milliseconds since the last refresh
     /// </summary>
 	[HttpGet("refreshInfo")]
