@@ -3,6 +3,7 @@ import { LOCALE_ID, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import localeHr from '@angular/common/locales/hr';
 
 import { AppComponent } from './app.component';
 import { NavBarComponent } from "./nav/nav-bar/nav-bar.component";
@@ -32,6 +33,7 @@ import { ColorInputComponent } from './components/color-input/color-input.compon
 import { MatInputModule } from '@angular/material/input';
 import { FileDialogComponent } from './components/file-dialog/file-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { registerLocaleData } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -73,4 +75,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   bootstrap: [AppComponent]
 })
 export class AppModule {
+  constructor() {
+    registerLocaleData(localeHr);
+  }
 }
