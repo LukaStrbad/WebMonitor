@@ -1,10 +1,11 @@
-<h1 mat-dialog-title>{{ fileInfo.name }}</h1>
+<h1 mat-dialog-title>{{ data.fileInfo.name }}</h1>
 <div mat-dialog-content>
-  <p>Size: {{ numberHelpers.toByteString(fileInfo.size) }}</p>
-  <p>Created: {{ fileInfo.created.toLocaleString(locale) }}</p>
-  <p>Modified: {{ fileInfo.lastModified.toLocaleString(locale) }}</p>
-  <p>Accessed: {{ fileInfo.lastAccessed.toLocaleString(locale) }}</p>
+  <p>Size: {{ numberHelpers.toByteString(data.fileInfo.size) }}</p>
+  <p>Created: {{ data.fileInfo.created.toLocaleString(locale) }}</p>
+  <p>Modified: {{ data.fileInfo.lastModified.toLocaleString(locale) }}</p>
+  <p>Accessed: {{ data.fileInfo.lastAccessed.toLocaleString(locale) }}</p>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCloseClick()">Close</button>
+  <button mat-button (click)="data.download()" cdkFocusInitial>Download</button>
 </div>

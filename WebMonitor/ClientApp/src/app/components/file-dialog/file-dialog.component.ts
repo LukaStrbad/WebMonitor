@@ -13,11 +13,9 @@ export class FileDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<FileDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public fileInfo: FileInformation,
+    @Inject(MAT_DIALOG_DATA) public data: { fileInfo: FileInformation, download: () => void },
     @Inject(LOCALE_ID) public locale: string
-  ) {
-    console.log(`File name: ${JSON.stringify(fileInfo)}`);
-  }
+  ) { }
 
   onCloseClick() {
     this.dialogRef.close();

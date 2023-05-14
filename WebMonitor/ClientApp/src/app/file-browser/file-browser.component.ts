@@ -133,8 +133,11 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
 
   async onFileClick(file: FileOrDir) {
     const fileInfo = await this.fileBrowser.getFileInfo(file.path);
-    const dialogRef = this.dialog.open(FileDialogComponent,
-      { data: fileInfo });
+    const data = {
+      fileInfo: fileInfo,
+      download: () => this.fileBrowser.downloadFile(file.path)
+    }
+    const dialogRef = this.dialog.open(FileDialogComponent, { data });
   }
 
   tableSortFunction(items: FileOrDir[], sort: MatSort): FileOrDir[] {

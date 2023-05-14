@@ -71,4 +71,8 @@ export class FileBrowserService {
       lastAccessed: new Date(response.lastAccessed)
     }
   }
+
+  downloadFile(path: string) {
+    window.open(`${this.apiUrl}download-file?path=${path}`, "_blank");
+  }
 }
