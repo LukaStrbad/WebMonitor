@@ -51,14 +51,11 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.refreshDirsAndFiles();
 
-    if (!this.sysInfo.data.computerInfo) {
-      const subscription = this.sysInfo.onRefresh.subscribe(() => {
-        this.setBreadcrumbSeparator(this.sysInfo.data.computerInfo!);
-        subscription.unsubscribe();
-      });
-    } else {
-      this.setBreadcrumbSeparator(this.sysInfo.data.computerInfo);
-    }
+    this.initAsync();
+  }
+
+  async initAsync() {
+    this.setBreadcrumbSeparator(await this.sysInfo.getComputerInfo());
   }
 
   ngAfterViewInit(): void {
