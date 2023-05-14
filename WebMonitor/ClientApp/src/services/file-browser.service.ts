@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { FileInformation, FileInformationResponse } from 'src/model/file-information';
 import { FileOrDir } from 'src/model/file-or-dir';
 
 @Injectable({
@@ -51,5 +52,23 @@ export class FileBrowserService {
 
       return fileDir;
     });
+  }
+
+  async getFileInfo(path: string): Promise<FileInformation> {
+    const requestUrl = `${this.apiUrl}file-info?path=${path}`;
+
+    const response = await firstValueFrom(
+      this.http.get<FileInformationResponse>(encodeURI(requestUrl))
+    );
+
+    // API returns dates as strings, so we need to convert them to Date objects
+    return {
+      name: response.name,
+      path: response.path,
+      size: response.size,
+      created: new Date(response.created),
+      lastModified: new Date(response.lastModified),
+      lastAccessed: new Date(response.lastAccessed)
+    }
   }
 }

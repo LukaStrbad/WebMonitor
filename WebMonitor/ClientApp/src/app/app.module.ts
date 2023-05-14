@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -30,6 +30,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ColorInputComponent } from './components/color-input/color-input.component';
 import { MatInputModule } from '@angular/material/input';
+import { FileDialogComponent } from './components/file-dialog/file-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,8 @@ import { MatInputModule } from '@angular/material/input';
     FileBrowserComponent,
     BreadcrumbsComponent,
     SettingsComponent,
-    ColorInputComponent
+    ColorInputComponent,
+    FileDialogComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -63,9 +66,10 @@ import { MatInputModule } from '@angular/material/input';
     MatSlideToggleModule,
     MatCheckboxModule,
     MatTooltipModule,
-    MatInputModule
+    MatInputModule,
+    MatDialogModule
   ],
-  providers: [],
+  providers: [{ provide: LOCALE_ID, useValue: "hr-HR" }],
   bootstrap: [AppComponent]
 })
 export class AppModule {

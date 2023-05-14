@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using WebMonitor.Model;
 
 namespace WebMonitor.Controllers;
 
@@ -33,7 +34,7 @@ public class FileBrowserController : ControllerBase
         var dirInfo = new DirectoryInfo(requestedDirectory);
 
         if (!dirInfo.Exists)
-            return new BadRequestResult();
+            return new NotFoundResult();
 
         var dirs = dirInfo
             .GetDirectories()
@@ -42,6 +43,20 @@ public class FileBrowserController : ControllerBase
         dirs.AddRange(dirInfo.GetFiles().Select(FileOrDir.File));
 
         return new JsonResult(dirs)
+        {
+            SerializerSettings = _jsonSerializerOptions
+        };
+    }
+
+    [HttpGet("file-info")]
+    public ActionResult<FileInformation> FileInformation(string path)
+    {
+        var fileInfo = new FileInfo(path);
+
+        if (!fileInfo.Exists)
+            return new NotFoundResult();
+
+        return new JsonResult(new FileInformation(fileInfo))
         {
             SerializerSettings = _jsonSerializerOptions
         };
@@ -93,56 +108,5 @@ public class FileBrowserController : ControllerBase
         {
             SerializerSettings = _jsonSerializerOptions
         };
-    }
-}
-
-public sealed class FileOrDir
-{
-    public string Type { get; }
-
-    public string Path { get; }
-
-    public long? Size { get; }
-
-    public int? ChildrenCount { get; }
-
-    private FileOrDir(string type, string path, long? size = null, int? childrenCount = null)
-    {
-        Type = type;
-        Path = path;
-        Size = size;
-        ChildrenCount = childrenCount;
-    }
-
-    public static FileOrDir Dir(DirectoryInfo dir)
-    {
-        int childrenCount;
-
-        try
-        {
-            childrenCount = dir.GetFileSystemInfos().Length;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            childrenCount = -1;
-        }
-
-        return new("dir", dir.FullName, childrenCount: childrenCount);
-    }
-    public static FileOrDir File(FileInfo file) => new("file", file.FullName, file.Length);
-}
-
-public class FileUploadInfo
-{
-    [JsonPropertyName("filename")]
-    public string FileName { get; }
-
-    [JsonPropertyName("success")]
-    public bool Success { get; }
-
-    public FileUploadInfo(string fileName, bool success)
-    {
-        FileName = fileName;
-        Success = success;
     }
 }

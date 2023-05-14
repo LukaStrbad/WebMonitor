@@ -7,6 +7,8 @@ import * as numberHelpers from "src/helpers/number-helpers";
 import { BreadcrumbItem } from '../components/breadcrumbs/breadcrumbs.component';
 import { SysInfoService } from 'src/services/sys-info.service';
 import { ComputerInfo } from "../../model/computer-info";
+import { MatDialog } from '@angular/material/dialog';
+import { FileDialogComponent } from '../components/file-dialog/file-dialog.component';
 
 @Component({
   selector: 'app-file-browser',
@@ -30,7 +32,8 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
 
   constructor(
     private fileBrowser: FileBrowserService,
-    private sysInfo: SysInfoService
+    private sysInfo: SysInfoService,
+    private dialog: MatDialog
   ) {
     this.resetBreadcrumbs();
   }
@@ -115,7 +118,8 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
   }
 
   onRowClick(row: FileOrDir) {
-    if (row.type !== "dir") {
+    if (row.type === "file") {
+      this.onFileClick(row);
       return;
     }
 
@@ -125,6 +129,12 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     }
 
     this.navigateToDir(row);
+  }
+
+  async onFileClick(file: FileOrDir) {
+    const fileInfo = await this.fileBrowser.getFileInfo(file.path);
+    const dialogRef = this.dialog.open(FileDialogComponent,
+      { data: fileInfo });
   }
 
   tableSortFunction(items: FileOrDir[], sort: MatSort): FileOrDir[] {
