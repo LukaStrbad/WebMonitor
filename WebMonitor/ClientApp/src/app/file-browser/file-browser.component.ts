@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { FileOrDir } from 'src/model/file-or-dir';
@@ -9,6 +9,10 @@ import { SysInfoService } from 'src/services/sys-info.service';
 import { ComputerInfo } from "../../model/computer-info";
 import { MatDialog } from '@angular/material/dialog';
 import { FileDialogComponent } from '../components/file-dialog/file-dialog.component';
+import { Subscription, finalize } from 'rxjs';
+import { HttpEventType } from '@angular/common/http';
+import { FileUploadInfo } from 'src/model/file-upload-info';
+import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-file-browser',
@@ -26,14 +30,19 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
    */
   breadcrumbs: BreadcrumbItemDepth[] = [];
   breadcrumbSeparator = "/";
+  numberOfSelectedFiles = 0;
+  uploadSubscription: Subscription | undefined;
+  uploadFile: { progress: number; file: File; } | undefined;
 
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild("fileUpload") fileUpload!: ElementRef<HTMLInputElement>;
   numberHelpers = numberHelpers;
 
   constructor(
     private fileBrowser: FileBrowserService,
     private sysInfo: SysInfoService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {
     this.resetBreadcrumbs();
   }
@@ -138,6 +147,51 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
       download: () => this.fileBrowser.downloadFile(file.path)
     }
     const dialogRef = this.dialog.open(FileDialogComponent, { data });
+  }
+
+  uploadOnChange() {
+    this.numberOfSelectedFiles = this.fileUpload.nativeElement.files?.length ?? 0;
+  }
+
+  uploadFiles() {
+    if (!this.currentDir) {
+      return;
+    }
+
+    this.uploadFile = {
+      progress: 0,
+      file: this.fileUpload.nativeElement.files![0]
+    }
+
+    let uploadSub = this.fileBrowser
+      .uploadFile(this.uploadFile.file, this.currentDir)
+      .pipe(finalize(() => {
+        this.uploadSubscription?.unsubscribe();
+        this.uploadSubscription = undefined;
+        this.uploadFile = undefined;
+      }));
+
+    uploadSub.subscribe((event: any) => {
+      if (event.type == HttpEventType.UploadProgress) {
+        if (this.uploadFile) {
+          this.uploadFile.progress = event.loaded / event.total;
+        }
+      } else if (event.type == HttpEventType.Response && Array.isArray(event.body)) {
+        const responses = event.body as FileUploadInfo[];
+        const snackBarConfig = <MatSnackBarConfig>{
+          duration: 3000,
+          horizontalPosition: "end",
+          verticalPosition: "bottom"
+        };
+
+        if (responses[0].success) {
+          this.snackBar.open("Upload successful", undefined, snackBarConfig)
+          this.refreshDirsAndFiles();
+        } else {
+          this.snackBar.open("Upload failed", undefined, snackBarConfig)
+        }
+      }
+    });
   }
 
   tableSortFunction(items: FileOrDir[], sort: MatSort): FileOrDir[] {

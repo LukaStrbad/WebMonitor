@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { FileInformation, FileInformationResponse } from 'src/model/file-information';
 import { FileOrDir } from 'src/model/file-or-dir';
 
@@ -74,5 +74,15 @@ export class FileBrowserService {
 
   downloadFile(path: string) {
     window.open(`${this.apiUrl}download-file?path=${path}`, "_blank");
+  }
+
+  uploadFile(file: File, directory: string): Observable<Object> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return this.http.post(`${this.apiUrl}upload-file?path=${encodeURI(directory)}`, formData, {
+      reportProgress: true,
+      observe: "events"
+    });
   }
 }

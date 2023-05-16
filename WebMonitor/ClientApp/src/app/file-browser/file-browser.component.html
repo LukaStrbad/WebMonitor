@@ -55,3 +55,56 @@
     (click)="onRowClick(row)"
   ></tr>
 </table>
+
+<mat-card class="mt-4 mat-elevation-z8" *ngIf="uploadFile">
+  <mat-card-content>
+    <mat-card-title>
+      <h6>
+        Uploading "{{ uploadFile.file.name }} ({{
+          numberHelpers.toByteStringRatio(
+            uploadFile.progress * uploadFile.file.size,
+            uploadFile.file.size
+          )
+        }})"
+      </h6>
+    </mat-card-title>
+
+    <mat-progress-bar
+      class="mt-3 mb-2"
+      mode="determinate"
+      [value]="uploadFile.progress * 100"
+    ></mat-progress-bar>
+  </mat-card-content>
+</mat-card>
+
+<!-- If we are located somewhere on the filesystem show upload button -->
+<ng-container *ngIf="currentDir">
+  <button
+    class="mt-4 mb-4"
+    type="button"
+    mat-raised-button
+    color="accent"
+    (click)="fileUpload.click()"
+  >
+    Select file to upload
+  </button>
+
+  <input
+    hidden
+    type="file"
+    mat-button
+    #fileUpload
+    (change)="uploadOnChange()"
+  />
+
+  <button
+    class="ms-4"
+    type="button"
+    mat-raised-button
+    color="primary"
+    (click)="uploadFiles()"
+    [disabled]="!numberOfSelectedFiles"
+  >
+    Upload
+  </button>
+</ng-container>
