@@ -1,7 +1,15 @@
+using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using CommandLine;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using WebMonitor;
 using WebMonitor.Native;
+
+var cmdOptions = Parser.Default.ParseArguments<CommandLineOptions>(args).Value;
+if (cmdOptions is null)
+    return;
 
 // Setting the working directory to the location of the executable ensures that
 // ASP.NET will correctly serve frontend files from the wwwroot folder.
@@ -24,14 +32,44 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
 });
 
-builder.Services.Configure<KestrelServerOptions>(options =>
-{
-    options.Limits.MaxRequestBodySize = long.MaxValue;
-});
+builder.Services.Configure<KestrelServerOptions>(options => { options.Limits.MaxRequestBodySize = long.MaxValue; });
 builder.Services.Configure<FormOptions>(options =>
 {
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartBodyLengthLimit = long.MaxValue;
+});
+
+builder.WebHost.UseKestrel(options =>
+{
+    if (!cmdOptions.Ips.Any()) return;
+    
+    foreach (var ip in cmdOptions.Ips)
+    {
+        var regex = IpRegex();
+        var match = regex.Match(ip);
+        var protocolGroup = match.Groups["protocol"];
+        var ipGroup = match.Groups["ip"];
+        var portGroup = match.Groups["port"];
+
+        if (!ipGroup.Success)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"""Invalid ip address: "{ip}" """);
+            Console.ResetColor();
+            Environment.Exit(1);
+        }
+
+        var ipAddress = IPAddress.Parse(ipGroup.Value);
+        var useHttps = protocolGroup.Value == "https";
+        // Parse won't fail because regex ensures that the port is a number.
+        var port = portGroup.Success ? int.Parse(portGroup.Value) : 5000;
+
+        options.Listen(ipAddress, port, listenOptions =>
+        {
+            if (useHttps)
+                listenOptions.UseHttps();
+        });
+    }
 });
 
 var app = builder.Build();
@@ -55,8 +93,15 @@ app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+    pattern: "{controller}/{action=Index}/{id?}"
+);
 
 app.MapFallbackToFile("index.html");
 
 app.Run();
+
+internal partial class Program
+{
+    [GeneratedRegex("((?<protocol>https?)://)?(?<ip>(\\d{1,3}\\.){3}\\d{1,3})(:(?<port>\\d{1,5}))?")]
+    private static partial Regex IpRegex();
+}
