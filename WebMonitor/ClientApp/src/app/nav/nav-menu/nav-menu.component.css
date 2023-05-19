@@ -1,9 +1,13 @@
+.nav-container {
+  padding: 8pt
+}
+
 div>button {
   width: 100%;
   display: block;
-  text-align: center;
+  text-align: start;
 }
 
-.no-border-radius {
-  border-radius: 0;
+.button-container {
+  margin-bottom: 8pt;
 }

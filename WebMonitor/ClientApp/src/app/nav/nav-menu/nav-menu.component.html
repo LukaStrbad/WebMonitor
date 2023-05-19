@@ -1,10 +1,39 @@
-<div>
-  <button
+<div class="nav-container">
+  <div
     *ngFor="let route of menuRoutes"
-    mat-flat-button
-    class="no-border-radius"
-    [routerLink]="route.path"
+    matRipple
+    #rippleContainer
+    class="button-container"
   >
-    {{ route.title }}
-  </button>
+    <button
+      *ngIf="currentUrl !== route.path"
+      mat-button
+      [routerLink]="route.path"
+      matRipple
+      [matRippleTrigger]="rippleContainer"
+    >
+      <mat-icon
+        aria-hidden="false"
+        [fontIcon]="route.icon ?? ''"
+        style="vertical-align: middle"
+      ></mat-icon>
+      <span>{{ route.title }}</span>
+    </button>
+
+    <button
+      *ngIf="currentUrl === route.path"
+      mat-raised-button
+      color="primary"
+      [routerLink]="route.path"
+      matRipple
+      [matRippleTrigger]="rippleContainer"
+    >
+      <mat-icon
+        aria-hidden="false"
+        [fontIcon]="route.icon ?? ''"
+        style="vertical-align: middle"
+      ></mat-icon>
+      <span>{{ route.title }}</span>
+    </button>
+  </div>
 </div>

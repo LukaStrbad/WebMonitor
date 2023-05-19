@@ -35,6 +35,7 @@ import { FileDialogComponent } from './components/file-dialog/file-dialog.compon
 import { MatDialogModule } from '@angular/material/dialog';
 import { registerLocaleData } from '@angular/common';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatRippleModule } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -71,7 +72,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatTooltipModule,
     MatInputModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatRippleModule
   ],
   providers: [{ provide: LOCALE_ID, useValue: "hr-HR" }],
   bootstrap: [AppComponent]
