@@ -58,7 +58,7 @@ internal class ProcessTracker : IRefreshable
         {
             Pid = process.Id,
             Name = process.ProcessName,
-            MemoryUsage = process.WorkingSet64,
+            MemoryUsage = process.PrivateMemorySize64,
             DiskUsage = 0,
             CpuUsage = (float)(workingMillis / millisSinceRefresh * 100 / Environment.ProcessorCount)
         };
