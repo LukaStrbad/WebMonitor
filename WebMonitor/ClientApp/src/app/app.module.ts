@@ -36,6 +36,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { registerLocaleData } from '@angular/common';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatRippleModule } from '@angular/material/core';
+import { EllipsisPipe } from '../pipes/ellipsis.pipe';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { MatRippleModule } from '@angular/material/core';
     BreadcrumbsComponent,
     SettingsComponent,
     ColorInputComponent,
-    FileDialogComponent
+    FileDialogComponent,
+    EllipsisPipe
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

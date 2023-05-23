@@ -15,7 +15,7 @@
       matTooltipPosition="right"
     >
       <!-- Limit width to 20 characters -->
-      {{ element.name | slice : 0 : 20 }}
+      {{ element.name | ellipsis }}
     </td>
   </ng-container>
 
