@@ -1,18 +1,18 @@
 <body [ngClass]="isDarkTheme() ? 'dark-theme' : 'light-theme'">
-  <mat-drawer-container style="height: 100vh">
+  <mat-sidenav-container style="height: 100vh">
     <!-- Drawer content -->
-    <mat-drawer mode="side" [opened]="drawerOpen" class="d-md-none">
-      <app-nav-menu></app-nav-menu>
-    </mat-drawer>
+    <mat-sidenav mode="over" [opened]="sidenavOpen" class="d-md-none">
+      <app-nav-menu (onRouteSelected)="closeSidenav()"></app-nav-menu>
+    </mat-sidenav>
 
     <!-- Page content -->
-    <mat-drawer-content>
-      <app-nav-bar (menuToggleEvent)="toggleDrawer()"></app-nav-bar>
+    <mat-sidenav-content>
+      <app-nav-bar (menuToggleEvent)="toggleSidenav()"></app-nav-bar>
       <main class="container">
         <router-outlet></router-outlet>
       </main>
-    </mat-drawer-content>
-  </mat-drawer-container>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 
   <div id="debugWindow" *ngIf="showDebugWindow()">
     IP: {{ sysInfo.clientIp() }}

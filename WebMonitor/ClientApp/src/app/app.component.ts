@@ -1,4 +1,4 @@
-import { Component, Signal, computed, effect } from '@angular/core';
+import { Component, Signal, ViewEncapsulation, computed, effect } from '@angular/core';
 import { SysInfoService } from 'src/services/sys-info.service';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 import { OverlayContainer } from '@angular/cdk/overlay';
@@ -6,15 +6,20 @@ import { OverlayContainer } from '@angular/cdk/overlay';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class AppComponent {
-  drawerOpen = false;
+  sidenavOpen = false;
   showDebugWindow: Signal<boolean>;
   isDarkTheme: Signal<boolean>;
 
-  toggleDrawer() {
-    this.drawerOpen = !this.drawerOpen;
+  toggleSidenav() {
+    this.sidenavOpen = !this.sidenavOpen;
+  }
+
+  closeSidenav() {
+    this.sidenavOpen = false;
   }
 
   constructor(

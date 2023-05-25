@@ -1,5 +1,8 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { menuRoutes } from 'src/app/app-routes';
+import { RouteWatcherService } from 'src/services/route-watcher.service';
 
 @Component({
   selector: 'app-nav-bar',
@@ -9,6 +12,8 @@ import { menuRoutes } from 'src/app/app-routes';
 export class NavBarComponent {
   @Output() menuToggleEvent = new EventEmitter<void>();
   menuRoutes = menuRoutes;
+
+  constructor(public routeWatcher: RouteWatcherService) { }
 
   onMenuToggle() {
     this.menuToggleEvent.emit();

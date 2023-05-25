@@ -14,8 +14,9 @@
   <span class="d-none d-md-inline">
     <button
       *ngFor="let route of menuRoutes"
-      mat-button
+      mat-flat-button
       [routerLink]="route.path"
+      [color]="routeWatcher.currentRoute() === route ? 'accent' : 'primary'"
     >
       {{ route.title }}
     </button>
