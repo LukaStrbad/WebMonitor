@@ -1,3 +1,38 @@
+<mat-form-field class="me-4 mt-1">
+  <mat-label>Search by</mat-label>
+  <mat-select
+    [(value)]="selectedFilter"
+    (selectionChange)="onFilterSelectionChange()"
+  >
+    <mat-option *ngFor="let filter of filters" [value]="filter">{{
+      processFilterName(filter)
+    }}</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<mat-form-field class="me-4">
+  <mat-label>{{ processFilterName(selectedFilter) }} search</mat-label>
+  <input
+    matInput
+    [(ngModel)]="filterValue"
+    (ngModelChange)="onFilterChange($event)"
+    placeholder="Enter a search term"
+  />
+  <button
+    *ngIf="filterValue"
+    matSuffix
+    mat-icon-button
+    aria-label="Clear"
+    (click)="clearFilter()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-form-field>
+<span *ngIf="filterValue"
+  >Showing {{ dataSource.filteredData.length }} /
+  {{ sysInfo.data.processInfos.length }} processes</span
+>
+
 <table matSort mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <!-- PID -->
   <ng-container [matColumnDef]="headers[0]">

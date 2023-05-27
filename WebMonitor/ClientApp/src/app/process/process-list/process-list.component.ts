@@ -15,13 +15,16 @@ import * as numberHelpers from "../../../helpers/number-helpers";
 export class ProcessListComponent implements AfterViewInit, OnDestroy {
   headers = ["pid", "name", "cpuUsage", "memoryUsage"];
   dataSource = new MatTableDataSource<ProcessInfo>([]);
+  filters = [ProcessFilter.PID, ProcessFilter.Name];
+  selectedFilter = ProcessFilter.Name;
+  filterValue = "";
 
   @ViewChild(MatSort) sort!: MatSort;
   numberHelpers = numberHelpers;
 
   private readonly refreshSubscription: Subscription;
 
-  constructor(sysInfo: SysInfoService) {
+  constructor(public sysInfo: SysInfoService) {
     // Load initial value
     this.dataSource.data = sysInfo.data.processInfos;
 
@@ -38,4 +41,38 @@ export class ProcessListComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
   }
+
+  onFilterSelectionChange() {
+    this.dataSource.filterPredicate = (data: ProcessInfo, filter: string) => {
+      switch (this.selectedFilter) {
+        case ProcessFilter.PID:
+          return data.pid.toString().includes(filter);
+        case ProcessFilter.Name:
+          return data.name.toLowerCase().includes(filter);
+      }
+    }
+  }
+
+  onFilterChange(filter: string) {
+    this.dataSource.filter = filter.trim().toLowerCase();
+  }
+
+  clearFilter() {
+    this.filterValue = "";
+    this.onFilterChange(this.filterValue);
+  }
+
+  processFilterName(processFilter: ProcessFilter): string {
+    switch (processFilter) {
+      case ProcessFilter.PID:
+        return "PID";
+      case ProcessFilter.Name:
+        return "Name";
+    }
+  }
+}
+
+enum ProcessFilter {
+  PID,
+  Name
 }

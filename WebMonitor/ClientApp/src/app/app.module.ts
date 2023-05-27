@@ -37,6 +37,7 @@ import { registerLocaleData } from '@angular/common';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatRippleModule } from '@angular/material/core';
 import { EllipsisPipe } from '../pipes/ellipsis.pipe';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,8 @@ import { EllipsisPipe } from '../pipes/ellipsis.pipe';
     MatInputModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatRippleModule
+    MatRippleModule,
+    MatSelectModule
   ],
   providers: [{ provide: LOCALE_ID, useValue: "hr-HR" }],
   bootstrap: [AppComponent]
