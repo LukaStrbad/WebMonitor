@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using System.Runtime.Versioning;
 using LibreHardwareMonitor.Hardware;
 using Microsoft.Win32;
 using WebMonitor.Native.Cpu;
@@ -48,9 +48,29 @@ public class ComputerInfo
     /// List disk infos
     /// </summary>
     public IEnumerable<DiskInfo> Disks { get; }
+    
+    [SupportedOSPlatform("linux")]
+    private readonly Dictionary<string, string>? _osReleaseValues;
 
     public ComputerInfo(IComputer computer)
     {
+        if (OperatingSystem.IsLinux())
+        {
+            var file = "/etc/os-release";
+            if (!File.Exists(file))
+                file = "/etc/gentoo-release";
+            if (!File.Exists(file))
+                file = "/etc/SuSE-release";
+
+            if (File.Exists(file))
+            {
+                _osReleaseValues = File
+                    .ReadAllLines(file)
+                    .Select(line => line.Split('='))
+                    .ToDictionary(line => line[0], line => line[1]);
+            }
+        }
+        
         Hostname = Environment.MachineName;
         CurrentUser = Environment.UserName;
         OsName = GetOsName();
@@ -60,7 +80,7 @@ public class ComputerInfo
         Disks = DiskInfo.GetDiskInfos();
     }
     
-    private static string GetOsName()
+    private string GetOsName()
     {
         if (OperatingSystem.IsWindows())
         {
@@ -75,10 +95,15 @@ public class ComputerInfo
             return $"{baseVersion} {edition}";
         }
 
+        if (OperatingSystem.IsLinux() && _osReleaseValues?.TryGetValue("NAME", out var value) is true)
+        {
+            return value.Trim('"');
+        }
+
         return "";
     }
 
-    private static string GetOsVersion()
+    private string GetOsVersion()
     {
         if (OperatingSystem.IsWindows())
         {
@@ -86,6 +111,11 @@ public class ComputerInfo
             var version = versionKey?.GetValue("DisplayVersion")?.ToString();
 
             return version ?? "";
+        }
+
+        if (OperatingSystem.IsLinux() && _osReleaseValues?.TryGetValue("VERSION", out var value) is true)
+        {
+            return value.Trim('"');
         }
 
         return "";
@@ -98,6 +128,13 @@ public class ComputerInfo
             var buildNumber = Environment.OSVersion.Version.Build;
 
             return buildNumber == -1 ? null : buildNumber.ToString();
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            var version = Environment.OSVersion.Version;
+
+            return $"{version.Major}.{version.Minor}.{version.Build}-{version.Revision}";
         }
 
         return null;
