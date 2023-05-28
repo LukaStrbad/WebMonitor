@@ -1,4 +1,5 @@
-﻿using System.Management;
+﻿using System.Diagnostics;
+using System.Management;
 using System.Runtime.Versioning;
 using Windows.Win32;
 
@@ -10,37 +11,37 @@ public class MemoryInfo
     /// Usable memory in bytes
     /// </summary>
     public ulong UsableMemory { get; private set; }
-    
+
     /// <summary>
     /// Reserved memory in bytes
     /// </summary>
     public ulong ReservedMemory { get; private set; }
-    
+
     /// <summary>
     /// Total installed system memory
     /// </summary>
     public ulong TotalMemory { get; private set; }
-    
+
     /// <summary>
     /// Memory speed in MHz
     /// </summary>
     public uint Speed { get; private set; }
-    
+
     /// <summary>
     /// Memory voltage in mV
     /// </summary>
     public uint Voltage { get; private set; }
-    
+
     /// <summary>
     /// RAM form factor (e.g. DIMM)
     /// </summary>
     public string? FormFactor { get; private set; }
-    
+
     /// <summary>
     /// RAM type (e.g. DDR4)
     /// </summary>
     public string? Type { get; private set; }
-    
+
     /// <summary>
     /// Info about each memory stick
     /// </summary>
@@ -81,13 +82,13 @@ public class MemoryInfo
                 Type = GetMemoryType((uint)obj["SMBIOSMemoryType"]);
                 firstLoop = false;
             }
-            
+
             var manufacturer = obj["Manufacturer"].ToString()?.Trim();
             var partNumber = obj["PartNumber"].ToString()?.Trim();
             var capacity = (ulong)obj["Capacity"];
             memorySticks.Add(new MemoryStickInfo(manufacturer, partNumber, capacity));
         }
-        
+
         MemorySticks = memorySticks;
         PInvoke.GlobalMemoryStatus(out var memoryStatus);
         UsableMemory = memoryStatus.dwTotalPhys;
@@ -101,6 +102,35 @@ public class MemoryInfo
     [SupportedOSPlatform("linux")]
     private void InitLinux()
     {
+        var meminfo = File
+            .ReadAllLines("/proc/meminfo")
+            .Select(line => line.Split(':'))
+            .ToDictionary(split => split[0].Trim(), split => split[1].Trim());
+
+        // Values are shown in kB, so we need to remove the suffix and multiply by 1024
+        UsableMemory = ulong.Parse(meminfo["MemTotal"].Split(' ')[0]) * 1024;
+        ReservedMemory = ulong.Parse(meminfo["DirectMap1G"].Split(' ')[0]) * 1024;
+        TotalMemory = UsableMemory + ReservedMemory;
+
+        var dmidecodeOutput = GetDmidecodeOutput();
+        if (dmidecodeOutput is null)
+            return;
+
+        var memSticks = GetMemorySticks(dmidecodeOutput);
+        MemorySticks = memSticks.Select(MemoryStickInfo.FromDictionary);
+
+        // These values are the same for all memory sticks
+        var firstStick = memSticks.First();
+        Speed = Convert.ToUInt32(firstStick["Speed"].Split(' ')[0]);
+        Voltage = (uint)(Convert.ToDouble(firstStick["Configured Voltage"].Split(' ')[0]) * 1000);
+        FormFactor = firstStick["Form Factor"];
+        Type = firstStick["Type"];
+
+        // Refresh values in case /proc/meminfo is inaccurate
+        TotalMemory = MemorySticks
+            .Select(ms => ms.Capacity)
+            .Aggregate((a, b) => a + b);
+        ReservedMemory = TotalMemory - UsableMemory;
     }
 
     /// <summary>
@@ -176,4 +206,57 @@ public class MemoryInfo
             0x23 => "LPDDR5",
             _ => null
         };
+
+    [SupportedOSPlatform("linux")]
+    private static List<Dictionary<string, string>> GetMemorySticks(string dmidecodeOutput)
+    {
+        var lines = dmidecodeOutput.Split(Environment.NewLine);
+
+        var deviceIndices = lines
+            .Select((line, index) => (line, index))
+            .Where(line => line.line.StartsWith("Memory Device"))
+            .Select(line => line.index)
+            .ToList();
+
+        var devices = new List<Dictionary<string, string>>();
+
+        for (var i = 0; i < deviceIndices.Count; i++)
+        {
+            var end = i + 1 < deviceIndices.Count ? deviceIndices[i + 1] : lines.Length;
+            var properties = lines[deviceIndices[i]..end]
+                .Select(line => line.Split(':'))
+                .Where(line => line.Length == 2)
+                .ToDictionary(line => line[0].Trim(), line => line[1].Trim());
+            devices.Add(properties);
+        }
+
+        return devices;
+    }
+
+    [SupportedOSPlatform("linux")]
+    private static string? GetDmidecodeOutput()
+    {
+        try
+        {
+            var process = new System.Diagnostics.Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dmidecode",
+                    Arguments = "--type memory",
+                    RedirectStandardOutput = true
+                }
+            };
+
+            process.Start();
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            return output.Contains("Permission denied") ? null : output;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

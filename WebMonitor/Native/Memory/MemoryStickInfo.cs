@@ -1,4 +1,6 @@
-﻿namespace WebMonitor.Native.Memory;
+﻿using System.Runtime.Versioning;
+
+namespace WebMonitor.Native.Memory;
 
 /// <summary>
 /// Info about a memory stick
@@ -9,5 +11,15 @@
 public record MemoryStickInfo(
     string? Manufacturer,
     string? PartNumber,
-    ulong Capacity
-);
+    ulong Capacity)
+{
+    [SupportedOSPlatform("linux")]
+    public static MemoryStickInfo FromDictionary(Dictionary<string, string> memStick)
+    {
+        var manufacturer = memStick.GetValueOrDefault("Manufacturer");
+        var partNumber = memStick.GetValueOrDefault("Part Number");
+        var capacity = ulong.Parse(memStick.GetValueOrDefault("Size", "0").Split(' ')[0]) * 1024 * 1024;
+
+        return new MemoryStickInfo(manufacturer, partNumber, capacity);
+    }
+}

@@ -50,8 +50,13 @@
         {{ numberHelpers.toByteString(computerInfo.memory.reservedMemory) }}
         reserved)
       </div>
-      <div class="mat-body-1">Speed: {{ computerInfo.memory.speed }} MHz</div>
-      <div class="mat-body-1">
+      <div class="mat-body-1" *ngIf="computerInfo.memory.speed">
+        Speed: {{ computerInfo.memory.speed }} MHz
+      </div>
+      <div
+        class="mat-body-1"
+        *ngIf="computerInfo.memory.type && computerInfo.memory.formFactor"
+      >
         Type: {{ computerInfo.memory.type }}
         {{ computerInfo.memory.formFactor }}
       </div>
@@ -76,7 +81,9 @@
     <mat-card-content>
       <div class="mat-body-1">Size: {{ sizeDisplay(disk.totalSize) }}</div>
       <div class="mat-body-1">Type: {{ disk.diskType }}</div>
-      <div class="mat-body-1">Connection: {{ disk.connectionType }}</div>
+      <div class="mat-body-1" *ngIf="disk.connectionType">
+        Connection: {{ disk.connectionType }}
+      </div>
       <!-- Hard drive only -->
       <div class="mat-body-1" *ngIf="disk.rotationalSpeed">
         Speed: {{ disk.rotationalSpeed }} RPM
