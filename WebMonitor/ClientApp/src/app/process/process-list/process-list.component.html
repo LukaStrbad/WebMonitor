@@ -1,37 +1,42 @@
-<mat-form-field class="me-4 mt-1">
-  <mat-label>Search by</mat-label>
-  <mat-select
-    [(value)]="selectedFilter"
-    (selectionChange)="onFilterSelectionChange()"
-  >
-    <mat-option *ngFor="let filter of filters" [value]="filter">{{
-      processFilterName(filter)
-    }}</mat-option>
-  </mat-select>
-</mat-form-field>
+<div class="container mt-2 mb-2 mb-lg-0">
+  <div class="row">
+    <mat-form-field class="col-12 col-md-4">
+      <mat-label>Search by</mat-label>
+      <mat-select
+        [(value)]="selectedFilter"
+        (selectionChange)="onFilterSelectionChange()"
+      >
+        <mat-option *ngFor="let filter of filters" [value]="filter">{{
+          processFilterName(filter)
+        }}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-<mat-form-field class="me-4">
-  <mat-label>{{ processFilterName(selectedFilter) }} search</mat-label>
-  <input
-    matInput
-    [(ngModel)]="filterValue"
-    (ngModelChange)="onFilterChange($event)"
-    placeholder="Enter a search term"
-  />
-  <button
-    *ngIf="filterValue"
-    matSuffix
-    mat-icon-button
-    aria-label="Clear"
-    (click)="clearFilter()"
-  >
-    <mat-icon>close</mat-icon>
-  </button>
-</mat-form-field>
-<span *ngIf="filterValue"
-  >Showing {{ dataSource.filteredData.length }} /
-  {{ sysInfo.data.processInfos.length }} processes</span
->
+    <mat-form-field class="col-12 col-md-4">
+      <mat-label>{{ processFilterName(selectedFilter) }} search</mat-label>
+      <input
+        matInput
+        [(ngModel)]="filterValue"
+        (ngModelChange)="onFilterChange($event)"
+        placeholder="Enter a search term"
+      />
+      <button
+        *ngIf="filterValue"
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="clearFilter()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <span *ngIf="filterValue" class="col-12 col-md-4 align-self-center">
+      Showing {{ dataSource.filteredData.length }} /
+      {{ sysInfo.data.processInfos.length }} processes
+    </span>
+  </div>
+</div>
 
 <table matSort mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <!-- PID -->
