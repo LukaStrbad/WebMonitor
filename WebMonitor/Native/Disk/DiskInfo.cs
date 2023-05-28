@@ -136,19 +136,35 @@ public partial class DiskInfo
             var isRotational = File.ReadAllText(Path.Combine(drive.FullName, "queue/rotational")).Contains('1');
             var isRemovable = File.ReadAllText(Path.Combine(drive.FullName, "removable")).Contains('1');
             var name = File.ReadAllText(Path.Combine(drive.FullName, "device/model")).Trim();
-            var size = Convert.ToUInt64(
-                File.ReadAllText(Path.Combine(drive.FullName, "size"))
-            );
+            // Size returns a number of blocks, block size is always 512 bytes
+            var size = Convert.ToUInt64(File.ReadAllText(Path.Combine(drive.FullName, "size"))) * 512;
 
             yield return new DiskInfo
             {
                 DiskType = isRotational ? "HDD" : "SSD",
-                ConnectionType = null,
+                ConnectionType = GetConnectionType(drive.Name),
                 IsRemovable = isRemovable,
                 Name = name,
                 TotalSize = size
             };
         }
+    }
+
+    [SupportedOSPlatform("linux")]
+    private static string? GetConnectionType(string name)
+    {
+        if (name.StartsWith("fd"))
+            return "Floppy";
+        if (name.StartsWith("hd"))
+            return "IDE";
+        if (name.StartsWith("sd"))
+            return "SATA";
+        if (name.StartsWith("mmcblk"))
+            return "MMC";
+        if (name.StartsWith("nvme"))
+            return "NVMe";
+        
+        return null;
     }
 
     /// <summary>
