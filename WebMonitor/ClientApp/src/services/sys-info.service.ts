@@ -23,6 +23,7 @@ export class SysInfoService {
   clientIp = signal<string | null>(null);
 
   private readonly apiUrl: string;
+  refreshDelay: number = 0;
 
   constructor(
     private http: HttpClient,
@@ -55,7 +56,8 @@ export class SysInfoService {
     while (true) {
       await this.refresh();
 
-      const timeToNextRefresh = Number(this.data.refreshInfo.refreshInterval - this.data.refreshInfo.millisSinceLastRefresh);
+      // Try to predict time to next refresh
+      const timeToNextRefresh = Number(this.data.refreshInfo.refreshInterval) - (Number(this.data.refreshInfo.millisSinceLastRefresh) + this.refreshDelay) / 3;
 
       await new Promise(r => setTimeout(r, timeToNextRefresh));
     }
@@ -63,6 +65,7 @@ export class SysInfoService {
 
   private async refresh() {
     // Refresh info is refreshed first to get the most accurate data
+    const startTime = new Date().getTime();
     this.refreshRefreshInfo();
     // Refresh all data in parallel
     await Promise.all([
@@ -75,6 +78,7 @@ export class SysInfoService {
     ]);
     // Notify subscribers that data has been refreshed
     this.onRefresh.next();
+    this.refreshDelay = new Date().getTime() - startTime;
   }
 
   private async refreshRefreshInfo() {
