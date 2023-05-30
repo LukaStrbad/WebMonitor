@@ -3,6 +3,10 @@
 
 @include mat.core();
 
+// Needed to make material typography work
+$typography-config: mat.define-typography-config();
+@include mat.all-component-typographies($typography-config);
+
 $primary: mat.define-palette(mat.$indigo-palette);
 $accent: mat.define-palette(mat.$pink-palette);
 $warn: mat.define-palette(mat.$red-palette);
