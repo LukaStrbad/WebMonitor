@@ -1,4 +1,4 @@
-﻿export interface GpuUsage {
+export interface GpuUsage {
   coreClock: number;
   memoryClock: number;
   memoryTotal: bigint;
@@ -7,6 +7,7 @@
   power: number | null;
   temperature: number;
   utilization: number;
+  manufacturer: "NVIDIA" | "AMD" | "Intel";
 }
 
 export type GpuUsages = GpuUsage[];

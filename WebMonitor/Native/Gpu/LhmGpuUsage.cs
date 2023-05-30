@@ -1,4 +1,5 @@
 ﻿using LibreHardwareMonitor.Hardware;
+using Microsoft.OpenApi.Extensions;
 using WebMonitor.Utility;
 
 namespace WebMonitor.Native.Gpu;
@@ -16,6 +17,7 @@ public class LhmGpuUsage : IGpuUsage
 
     public UpdateVisitor? UpdateVisitor { get; init; }
 
+    public string Manufacturer { get; }
     public string Name { get; }
     public float Utilization => _loadSensor?.Value ?? 0;
     public long MemoryUsed => NumberUtility.MbToB(_memoryUsedSensor?.Value ?? 0f);
@@ -29,6 +31,14 @@ public class LhmGpuUsage : IGpuUsage
     {
         _gpu = gpu;
         Name = gpu.Name;
+
+        Manufacturer = gpu.HardwareType switch
+        {
+            HardwareType.GpuAmd => "AMD",
+            HardwareType.GpuIntel => "Intel",
+            HardwareType.GpuNvidia => "NVIDIA",
+            _ => throw new NotSupportedException($"Unsupported hardware type: {gpu.HardwareType.GetDisplayName()}")
+        };
 
         _loadSensor = Array.Find(gpu.Sensors, s => s.SensorType is SensorType.Load);
 

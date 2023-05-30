@@ -1,11 +1,16 @@
 ﻿using ManagedCuda.Nvml;
 using System.Runtime.InteropServices;
+using WebMonitor.Model;
 
 namespace WebMonitor.Native.Gpu;
 
 public class NvidiaGpuUsage : IGpuUsage
 {
     private readonly nvmlDevice _gpu;
+    private readonly NvidiaRefreshSettings _refreshSetting;
+    int _iteration = 0;
+
+    public string Manufacturer => "NVIDIA";
 
     public uint CoreClock { get; private set; }
 
@@ -23,11 +28,12 @@ public class NvidiaGpuUsage : IGpuUsage
 
     public float Utilization { get; private set; }
 
-    private NvidiaGpuUsage(nvmlDevice gpu)
+    private NvidiaGpuUsage(nvmlDevice gpu, NvidiaRefreshSettings refreshSetting)
     {
         ThrowIfNotX64();
 
         _gpu = gpu;
+        _refreshSetting = refreshSetting;
         // Get name
         NvmlNativeMethods.nvmlDeviceGetName(gpu, out var name);
         Name = name;
@@ -37,30 +43,33 @@ public class NvidiaGpuUsage : IGpuUsage
     {
         ThrowIfNotX64();
 
-        // NOTE: Refreshing clocks and power sometimes causes high CPU usage when NVIDIA overlay is enabled
+        // NOTE: Refreshing clocks and power sometimes causes high CPU usage for unknown reasons
         // nvidia-smi exhibits the same behavior so there may be no way to fix this
         // Possible workarounds:
-        // - Disable NVIDIA overlay
         // - Disable clock and power monitoring
         // - Refresh those values less often
 
-        uint val = 0;
+        // If disabled, do nothing
+        if (_refreshSetting.RefreshSetting == NvidiaRefreshSetting.Disabled)
+            return;
 
-        // Refresh clocks
-        NvmlNativeMethods.nvmlDeviceGetClockInfo(_gpu, nvmlClockType.Graphics, ref val);
-        CoreClock = val;
-        NvmlNativeMethods.nvmlDeviceGetClockInfo(_gpu, nvmlClockType.Mem, ref val);
-        MemoryClock = val;
+        // If longer interval, check if it is time to refresh
+        if (_refreshSetting.RefreshSetting == NvidiaRefreshSetting.LongerInterval)
+        {
+            // Loop back to 0 when we reach the end
+            _iteration = (_iteration + 1) % _refreshSetting.NRefreshIntervals;
+            if (_iteration != 0)
+                return;
+        }
+
+        // If enabled refresh everything
+        uint val = 0;
 
         // Refresh memory
         var memory = new nvmlMemory();
         NvmlNativeMethods.nvmlDeviceGetMemoryInfo(_gpu, ref memory);
         MemoryTotal = (long)memory.total;
         MemoryUsed = (long)memory.used;
-
-        // Refresh power
-        NvmlNativeMethods.nvmlDeviceGetPowerUsage(_gpu, ref val);
-        Power = val / 1000f;
 
         // Refresh temperature
         NvmlNativeMethods.nvmlDeviceGetTemperature(_gpu, nvmlTemperatureSensors.Gpu, ref val);
@@ -70,9 +79,22 @@ public class NvidiaGpuUsage : IGpuUsage
         var utilization = new nvmlUtilization();
         NvmlNativeMethods.nvmlDeviceGetUtilizationRates(_gpu, ref utilization);
         Utilization = utilization.gpu;
+
+        // If partially disabled, do not refresh clocks and power
+        if (_refreshSetting.RefreshSetting == NvidiaRefreshSetting.PartiallyDisabled)
+            return;
+        // Refresh clocks
+        NvmlNativeMethods.nvmlDeviceGetClockInfo(_gpu, nvmlClockType.Graphics, ref val);
+        CoreClock = val;
+        NvmlNativeMethods.nvmlDeviceGetClockInfo(_gpu, nvmlClockType.Mem, ref val);
+        MemoryClock = val;
+
+        // Refresh power
+        NvmlNativeMethods.nvmlDeviceGetPowerUsage(_gpu, ref val);
+        Power = val / 1000f;
     }
 
-    public static IEnumerable<NvidiaGpuUsage> GetNvidiaGpus()
+    public static IEnumerable<NvidiaGpuUsage> GetNvidiaGpus(NvidiaRefreshSettings refreshSetting)
     {
         ThrowIfNotX64();
 
@@ -88,7 +110,7 @@ public class NvidiaGpuUsage : IGpuUsage
         {
             var device = new nvmlDevice();
             NvmlNativeMethods.nvmlDeviceGetHandleByIndex(i, ref device);
-            yield return new NvidiaGpuUsage(device);
+            yield return new NvidiaGpuUsage(device, refreshSetting);
         }
     }
 

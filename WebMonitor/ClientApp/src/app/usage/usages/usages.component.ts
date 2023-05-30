@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, OnDestroy, QueryList, Signal, ViewChild, ViewChildren, computed } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  QueryList,
+  Signal,
+  ViewChild,
+  ViewChildren,
+  computed
+} from '@angular/core';
 import { UsageGraphComponent } from "../../components/usage-graph/usage-graph.component";
 import { SysInfoService } from "../../../services/sys-info.service";
 import { NetworkUsage, NetworkUsages } from 'src/model/network-usage';
@@ -71,8 +80,7 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
         });
       }
 
-      // Although it's not expected for GPUs to be hot-swappable, we still need to refresh the list
-      // in cases such as when drivers are updated
+      // Refresh GPU list if there was a driver change or NVIDIA monitoring was enabled/disabled
       if (this.gpuUsages.length !== this.sysInfo.data.gpuUsages?.length) {
         this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
       } else {

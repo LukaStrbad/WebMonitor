@@ -1,5 +1,5 @@
-import { Inject, Injectable, OnDestroy, WritableSignal, signal } from '@angular/core';
-import { firstValueFrom, interval, Subject } from "rxjs";
+import { Inject, Injectable, effect, signal } from '@angular/core';
+import { firstValueFrom, Subject } from "rxjs";
 import { SysInfoUsages } from "../model/sys-info/sys-info-usages";
 import { HttpClient } from "@angular/common/http";
 import { CpuUsage } from "../model/cpu-usage";
@@ -10,6 +10,7 @@ import { NetworkUsages } from "../model/network-usage";
 import { ProcessList } from "../model/process-info";
 import { ComputerInfo } from "../model/computer-info";
 import { RefreshInformation } from 'src/model/refresh-information';
+import { NvidiaRefreshSetting, NvidiaRefreshSettings } from 'src/model/nvidia-refresh-setting';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,10 @@ export class SysInfoService {
    * IP address of the connected device
    */
   clientIp = signal<string | null>(null);
+  nvidiaRefreshSettings = signal<NvidiaRefreshSettings>({
+    refreshSetting: NvidiaRefreshSetting.Enabled,
+    nRefreshIntervals: 10
+  });
 
   private readonly apiUrl: string;
   refreshDelay: number = 0;
@@ -34,6 +39,13 @@ export class SysInfoService {
     // Get client IP
     firstValueFrom(this.http.get<string>(this.apiUrl + "clientIP"))
       .then(ip => this.clientIp.set(ip));
+
+    this.getNvidiaRefreshSettings().then(settings => this.nvidiaRefreshSettings.set(settings));
+
+    // Update nvidia refresh settings when they change
+    effect(() => {
+      this.updateNvidiaRefreshSettings(this.nvidiaRefreshSettings());
+    })
 
     this.refreshLoop();
   }
@@ -50,7 +62,6 @@ export class SysInfoService {
 
     return this.data.computerInfo!;
   }
-
 
   private async refreshLoop() {
     while (true) {
@@ -118,7 +129,11 @@ export class SysInfoService {
     const response = await firstValueFrom(
       this.http.get<GpuUsages>(this.apiUrl + "gpuUsages")
     );
-    this.data.updateGpuUsages(response);
+    if (this.nvidiaRefreshSettings().refreshSetting === NvidiaRefreshSetting.Disabled) {
+      this.data.updateGpuUsages(response.filter(g => g.manufacturer !== "NVIDIA"));
+    } else {
+      this.data.updateGpuUsages(response);
+    }
   }
 
   private async refreshNetworkUsages() {
@@ -132,5 +147,15 @@ export class SysInfoService {
     this.data.processInfos = await firstValueFrom(
       this.http.get<ProcessList>(this.apiUrl + "processList")
     );
+  }
+
+  private async getNvidiaRefreshSettings(): Promise<NvidiaRefreshSettings> {
+    return await firstValueFrom(
+      this.http.get<NvidiaRefreshSettings>(this.apiUrl + "nvidiaRefreshSettings")
+    );
+  }
+
+  private async updateNvidiaRefreshSettings(settings: NvidiaRefreshSettings) {
+    await firstValueFrom(this.http.post(this.apiUrl + "nvidiaRefreshSettings", settings));
   }
 }

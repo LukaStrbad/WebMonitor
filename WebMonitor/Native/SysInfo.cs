@@ -8,6 +8,7 @@ using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
 using System.Runtime.InteropServices;
 using Timer = System.Timers.Timer;
+using WebMonitor.Model;
 
 namespace WebMonitor.Native;
 
@@ -35,6 +36,12 @@ internal class SysInfo
     public IEnumerable<NetworkUsage> NetworkUsages => _networkUsageTracker.Interfaces;
     public List<DiskUsage> DiskUsages => _diskUsageTracker.DiskUsages;
     public IEnumerable<IGpuUsage> GpuUsages { get; }
+
+    public NvidiaRefreshSettings NvidiaRefreshSettings { get; } = new()
+    {
+        RefreshSetting = NvidiaRefreshSetting.Enabled,
+        NRefreshIntervals = 10
+    };
 
     public SysInfo()
     {
@@ -69,7 +76,7 @@ internal class SysInfo
         {
             // GeForce experience overlay causes high CPU usage
             // Using NVML may fix the issue with the added benefit of linux support
-            gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus());
+            gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus(NvidiaRefreshSettings));
         }
 
         GpuUsages = gpuUsages;

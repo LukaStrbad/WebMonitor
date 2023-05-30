@@ -1,4 +1,7 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Mvc;
+using WebMonitor.Model;
 using WebMonitor.Native;
 using WebMonitor.Native.Cpu;
 using WebMonitor.Native.Disk;
@@ -75,4 +78,31 @@ public class SysInfoController : ControllerBase
     /// </summary>
     [HttpGet("networkUsages")]
     public ActionResult<IEnumerable<NetworkUsage>> NetworkUsages() => _sysInfo.NetworkUsages.ToList();
+
+    /// <summary>
+    /// Fetches the current Nvidia refresh settings
+    /// </summary>
+    [HttpGet("nvidiaRefreshSettings")]
+    public ActionResult<NvidiaRefreshSettings> NvidiaRefreshSetting() => _sysInfo.NvidiaRefreshSettings;
+
+    /// <summary>
+    /// Sets the Nvidia refresh settings
+    /// </summary>
+    [HttpPost("nvidiaRefreshSettings")]
+    public async Task<ActionResult> ChangeNvidiaRefreshSetting()
+    {
+        var settings = await JsonSerializer.DeserializeAsync<JsonObject>(Request.Body);
+        if (settings == null)
+            return BadRequest();
+
+        var refreshSetting = settings["refreshSetting"]?.AsValue().GetValue<int>();
+        var nRefreshIntervals = settings["nRefreshIntervals"]?.AsValue().GetValue<int>();
+
+        if (refreshSetting == null || nRefreshIntervals == null)
+            return BadRequest();
+
+        _sysInfo.NvidiaRefreshSettings.RefreshSetting = (NvidiaRefreshSetting)refreshSetting;
+        _sysInfo.NvidiaRefreshSettings.NRefreshIntervals = (int)nRefreshIntervals;
+        return Ok();
+    }
 }

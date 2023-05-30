@@ -1,5 +1,7 @@
-import { Component, Signal, computed, signal } from '@angular/core';
+import { Component, Signal, computed, effect, signal } from '@angular/core';
+import { NvidiaRefreshSetting } from 'src/model/nvidia-refresh-setting';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
+import { SysInfoService } from 'src/services/sys-info.service';
 
 @Component({
   selector: 'app-settings',
@@ -13,8 +15,17 @@ export class SettingsComponent {
    * Rather than creating a separate component for each graph color setting, we can just create a list of them and use *ngFor.
    */
   graphColorSettings: GraphColorSetting[];
+  nvidiaRefreshSettingEnum = NvidiaRefreshSetting;
+  nvidiaRefreshSettingValues = Object
+    .values(NvidiaRefreshSetting)
+    .filter(n => typeof n === "number") as NvidiaRefreshSetting[];
+  selectedNvidiaRefreshSetting = NvidiaRefreshSetting.Enabled;
 
-  constructor(public appSettings: AppSettingsService) {
+  constructor(
+    public appSettings: AppSettingsService,
+    public sysInfo: SysInfoService
+  ) {
+    effect(() => this.selectedNvidiaRefreshSetting = sysInfo.nvidiaRefreshSettings().refreshSetting);
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
     this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
 
@@ -61,6 +72,32 @@ export class SettingsComponent {
    */
   toggleDebugWindow() {
     this.appSettings.settings.mutate(s => s.showDebugWindow = !s.showDebugWindow);
+  }
+
+  nvidiaRefreshSettingName(refreshSetting: NvidiaRefreshSetting): string {
+    switch (refreshSetting) {
+      case NvidiaRefreshSetting.Enabled:
+        return "Enabled";
+      case NvidiaRefreshSetting.PartiallyDisabled:
+        return "Partially disabled";
+      case NvidiaRefreshSetting.Disabled:
+        return "Disabled";
+      case NvidiaRefreshSetting.LongerInterval:
+        return "Longer interval";
+    }
+  }
+
+  onNvidiaRefreshSettingChange() {
+    this.sysInfo.nvidiaRefreshSettings.mutate(s => s.refreshSetting = this.selectedNvidiaRefreshSetting);
+  }
+
+  onNvidiaRefreshIntervalChange(target: EventTarget | null) {
+    if (target == null) {
+      return;
+    }
+
+    const value = parseInt((target as HTMLInputElement).value);
+    this.sysInfo.nvidiaRefreshSettings.mutate(s => s.nRefreshIntervals = value);
   }
 
 }

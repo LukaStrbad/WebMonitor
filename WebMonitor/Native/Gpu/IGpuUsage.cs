@@ -44,4 +44,9 @@ public interface IGpuUsage : IRefreshable
     /// </summary>
     float Utilization { get; }
 
+    /// <summary>
+    /// GPU manufacturer
+    /// </summary>
+    string Manufacturer { get; }
+
 }

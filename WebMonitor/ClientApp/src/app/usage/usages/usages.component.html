@@ -43,13 +43,7 @@
     />
 
     <div class="mat-body-1">
-      Memory usage:
-      {{
-        byteRatio(
-          sysInfo.data.memoryUsage?.used,
-          sysInfo.data.memoryUsage?.total
-        )
-      }}
+      Memory usage: {{ byteRatio(sysInfo.data.memoryUsage?.used, sysInfo.data.memoryUsage?.total) }}
     </div>
   </mat-expansion-panel>
 
@@ -61,7 +55,7 @@
         <div class="panel-title disk">
           <mat-panel-title>{{ diskUsage.name }}</mat-panel-title>
           <span class="percentage"
-            >{{ diskUsage.utilization | number : "1.0-0" }}%,
+          >{{ diskUsage.utilization | number : "1.0-0" }}%,
           </span>
           <span>{{ diskSpeeds(diskUsage) }}</span>
         </div>
@@ -150,9 +144,11 @@
       Memory usage: {{ byteRatio(gpuUsage.memoryUsed, gpuUsage.memoryTotal) }}
     </div>
     <ng-template #memoryElse
-      ><div class="mat-body-1">
+    >
+      <div class="mat-body-1">
         Memory usage: {{ bytes(gpuUsage.memoryUsed) }}
-      </div></ng-template
+      </div>
+    </ng-template
     >
 
     <div class="mat-body-1" *ngIf="gpuUsage.temperature">
