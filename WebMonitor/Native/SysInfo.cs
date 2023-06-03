@@ -8,12 +8,12 @@ using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
 using System.Runtime.InteropServices;
 using Timer = System.Timers.Timer;
-using WebMonitor.Model;
 
 namespace WebMonitor.Native;
 
 internal class SysInfo
 {
+    private readonly Settings _settings;
     private readonly Timer _timer;
     private readonly List<IRefreshable> _refreshables;
     private readonly ProcessTracker _processTracker;
@@ -37,14 +37,10 @@ internal class SysInfo
     public List<DiskUsage> DiskUsages => _diskUsageTracker.DiskUsages;
     public IEnumerable<IGpuUsage> GpuUsages { get; }
 
-    public NvidiaRefreshSettings NvidiaRefreshSettings { get; } = new()
+    public SysInfo(Settings settings)
     {
-        RefreshSetting = NvidiaRefreshSetting.Enabled,
-        NRefreshIntervals = 10
-    };
-
-    public SysInfo()
-    {
+        _settings = settings;
+        
         var updateVisitor = new UpdateVisitor();
         var computer = new Computer
         {
@@ -76,7 +72,7 @@ internal class SysInfo
         {
             // GeForce experience overlay causes high CPU usage
             // Using NVML may fix the issue with the added benefit of linux support
-            gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus(NvidiaRefreshSettings));
+            gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus(_settings.NvidiaRefreshSettings));
         }
 
         GpuUsages = gpuUsages;
@@ -97,15 +93,26 @@ internal class SysInfo
         _refreshables.AddRange(GpuUsages);
 
         // Timer that refreshes every second
-        _timer = new Timer(RefreshInterval);
+        _timer = new Timer(_settings.RefreshInterval);
         _timer.Elapsed += Refresh;
         _timer.Start();
+
+        _settings.SettingsChanged += changedSettings =>
+        {
+            if (changedSettings == Settings.ChangedSettings.RefreshInterval) 
+                return;
+            
+            // Change refresh interval if it was changed
+            _timer.Enabled = false;
+            _timer.Interval = _settings.RefreshInterval;
+            _timer.Enabled = true;
+        };
     }
 
     private void Refresh(object? sender, ElapsedEventArgs e)
     {
         // Refresh all refreshables in parallel
-        Parallel.ForEach(_refreshables, r => r.Refresh(RefreshInterval));
+        Parallel.ForEach(_refreshables, r => r.Refresh(_settings.RefreshInterval));
         LastRefresh = DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 }

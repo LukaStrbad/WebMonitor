@@ -7,8 +7,8 @@ namespace WebMonitor.Native.Gpu;
 public class NvidiaGpuUsage : IGpuUsage
 {
     private readonly nvmlDevice _gpu;
-    private readonly NvidiaRefreshSettings _refreshSetting;
-    int _iteration = 0;
+    private readonly NvidiaRefreshSettings _refreshSettings;
+    private int _iteration = 0;
 
     public string Manufacturer => "NVIDIA";
 
@@ -28,12 +28,12 @@ public class NvidiaGpuUsage : IGpuUsage
 
     public float Utilization { get; private set; }
 
-    private NvidiaGpuUsage(nvmlDevice gpu, NvidiaRefreshSettings refreshSetting)
+    private NvidiaGpuUsage(nvmlDevice gpu, NvidiaRefreshSettings refreshSettings)
     {
         ThrowIfNotX64();
 
         _gpu = gpu;
-        _refreshSetting = refreshSetting;
+        _refreshSettings = refreshSettings;
         // Get name
         NvmlNativeMethods.nvmlDeviceGetName(gpu, out var name);
         Name = name;
@@ -50,14 +50,14 @@ public class NvidiaGpuUsage : IGpuUsage
         // - Refresh those values less often
 
         // If disabled, do nothing
-        if (_refreshSetting.RefreshSetting == NvidiaRefreshSetting.Disabled)
+        if (_refreshSettings.RefreshSetting == NvidiaRefreshSetting.Disabled)
             return;
 
         // If longer interval, check if it is time to refresh
-        if (_refreshSetting.RefreshSetting == NvidiaRefreshSetting.LongerInterval)
+        if (_refreshSettings.RefreshSetting == NvidiaRefreshSetting.LongerInterval)
         {
             // Loop back to 0 when we reach the end
-            _iteration = (_iteration + 1) % _refreshSetting.NRefreshIntervals;
+            _iteration = (_iteration + 1) % _refreshSettings.NRefreshIntervals;
             if (_iteration != 0)
                 return;
         }
@@ -81,7 +81,7 @@ public class NvidiaGpuUsage : IGpuUsage
         Utilization = utilization.gpu;
 
         // If partially disabled, do not refresh clocks and power
-        if (_refreshSetting.RefreshSetting == NvidiaRefreshSetting.PartiallyDisabled)
+        if (_refreshSettings.RefreshSetting == NvidiaRefreshSetting.PartiallyDisabled)
             return;
         // Refresh clocks
         NvmlNativeMethods.nvmlDeviceGetClockInfo(_gpu, nvmlClockType.Graphics, ref val);

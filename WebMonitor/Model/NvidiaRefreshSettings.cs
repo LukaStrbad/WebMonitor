@@ -18,15 +18,26 @@ public enum NvidiaRefreshSetting
 /// <summary>
 /// Interface for settings for how Nvidia GPU monitoring should be handled
 /// </summary>
-public class NvidiaRefreshSettings
+public class NvidiaRefreshSettings : SettingsBase
 {
+    private NvidiaRefreshSetting _refreshSetting;
+    private int _nRefreshIntervals;
+
     /// <summary>
     /// Refresh setting
     /// </summary>
-    public NvidiaRefreshSetting RefreshSetting { get; internal set; }
+    public NvidiaRefreshSetting RefreshSetting
+    {
+        get => _refreshSetting;
+        internal set => UpdateValue(ref _refreshSetting, value, ChangedSettings.NvidiaRefreshSetting);
+    }
 
     /// <summary>
     /// Number of refresh intervals to wait between refreshes
     /// </summary>
-    public int NRefreshIntervals { get; internal set; }
+    public int NRefreshIntervals
+    {
+        get => _nRefreshIntervals;
+        internal set => UpdateValue(ref _nRefreshIntervals, value, ChangedSettings.NvidiaRefreshIntervals);
+    }
 }

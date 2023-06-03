@@ -1,5 +1,5 @@
-import { Inject, Injectable, effect, signal } from '@angular/core';
-import { firstValueFrom, Subject } from "rxjs";
+import { Inject, Injectable, effect, signal, OnDestroy } from '@angular/core';
+import { firstValueFrom, Subject, Subscription } from "rxjs";
 import { SysInfoUsages } from "../model/sys-info/sys-info-usages";
 import { HttpClient } from "@angular/common/http";
 import { CpuUsage } from "../model/cpu-usage";
@@ -11,6 +11,7 @@ import { ProcessList } from "../model/process-info";
 import { ComputerInfo } from "../model/computer-info";
 import { RefreshInformation } from 'src/model/refresh-information';
 import { NvidiaRefreshSetting, NvidiaRefreshSettings } from 'src/model/nvidia-refresh-setting';
+import { toObservable } from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +27,7 @@ export class SysInfoService {
     refreshSetting: NvidiaRefreshSetting.Enabled,
     nRefreshIntervals: 10
   });
+  private nvidiaInitialized = false;
 
   private readonly apiUrl: string;
   refreshDelay: number = 0;
@@ -40,14 +42,23 @@ export class SysInfoService {
     firstValueFrom(this.http.get<string>(this.apiUrl + "clientIP"))
       .then(ip => this.clientIp.set(ip));
 
-    this.getNvidiaRefreshSettings().then(settings => this.nvidiaRefreshSettings.set(settings));
+    this.getNvidiaRefreshSettings()
+      .then(settings => {
+        this.nvidiaRefreshSettings.set(settings);
+        this.nvidiaInitialized = true;
+      });
 
     // Update nvidia refresh settings when they change
-    effect(() => {
-      this.updateNvidiaRefreshSettings(this.nvidiaRefreshSettings());
+    effect(async () => {
+      const settings = this.nvidiaRefreshSettings();
+      // Update refresh settings only after initialization to prevent double save
+      if (!this.nvidiaInitialized)
+        return;
+      await this.updateNvidiaRefreshSettings(settings);
     })
 
-    this.refreshLoop();
+    this.refreshLoop().then(_ => { // ignored
+    });
   }
 
   /**

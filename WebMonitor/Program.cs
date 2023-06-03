@@ -22,10 +22,14 @@ if (executableFile.DirectoryName != null)
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Initialize Settings and SysInfo early so they can start immediately
+var settings = Settings.Load();
+var sysInfo = new SysInfo(settings);
 
+// Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton(new SysInfo());
+builder.Services.AddSingleton(settings);
+builder.Services.AddSingleton(sysInfo);
 builder.Services.AddSwaggerGen(options =>
 {
     var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -97,6 +101,11 @@ app.MapControllerRoute(
 );
 
 app.MapFallbackToFile("index.html");
+
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    settings.Save();
+});
 
 app.Run();
 

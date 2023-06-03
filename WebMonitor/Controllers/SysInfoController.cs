@@ -18,10 +18,12 @@ namespace WebMonitor.Controllers;
 public class SysInfoController : ControllerBase
 {
     private readonly SysInfo _sysInfo;
+    private readonly Settings _settings;
 
     public SysInfoController(IServiceProvider serviceProvider)
     {
-        _sysInfo = serviceProvider.GetService<SysInfo>()!;
+        _sysInfo = serviceProvider.GetRequiredService<SysInfo>();
+        _settings = serviceProvider.GetRequiredService<Settings>();
     }
 
     /// <summary>
@@ -83,7 +85,7 @@ public class SysInfoController : ControllerBase
     /// Fetches the current Nvidia refresh settings
     /// </summary>
     [HttpGet("nvidiaRefreshSettings")]
-    public ActionResult<NvidiaRefreshSettings> NvidiaRefreshSetting() => _sysInfo.NvidiaRefreshSettings;
+    public ActionResult<NvidiaRefreshSettings> NvidiaRefreshSetting() => _settings.NvidiaRefreshSettings;
 
     /// <summary>
     /// Sets the Nvidia refresh settings
@@ -101,8 +103,8 @@ public class SysInfoController : ControllerBase
         if (refreshSetting == null || nRefreshIntervals == null)
             return BadRequest();
 
-        _sysInfo.NvidiaRefreshSettings.RefreshSetting = (NvidiaRefreshSetting)refreshSetting;
-        _sysInfo.NvidiaRefreshSettings.NRefreshIntervals = (int)nRefreshIntervals;
+        _settings.NvidiaRefreshSettings.RefreshSetting = (NvidiaRefreshSetting)refreshSetting;
+        _settings.NvidiaRefreshSettings.NRefreshIntervals = (int)nRefreshIntervals;
         return Ok();
     }
 }
