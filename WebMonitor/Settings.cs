@@ -17,7 +17,10 @@ public sealed class Settings : SettingsBase
     public int RefreshInterval
     {
         get => _refreshInterval;
-        set => UpdateValue(ref _refreshInterval, value, ChangedSettings.RefreshInterval);
+        set => UpdateValue(
+            ref _refreshInterval,
+            Math.Clamp(value, 1000, int.MaxValue),
+            ChangedSettings.RefreshInterval);
     }
 
     // No need for on change event because the value should be checked every refresh anyway
@@ -102,7 +105,7 @@ public sealed class Settings : SettingsBase
             return RefreshInterval == settings.RefreshInterval &&
                    NvidiaRefreshSettings.RefreshSetting == settings.NvidiaRefreshSettings.RefreshSetting &&
                    NvidiaRefreshSettings.NRefreshIntervals == settings.NvidiaRefreshSettings.NRefreshIntervals;
-    
+
         return false;
     }
 }

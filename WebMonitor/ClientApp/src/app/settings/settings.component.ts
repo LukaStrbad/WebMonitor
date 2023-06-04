@@ -100,6 +100,19 @@ export class SettingsComponent {
     this.sysInfo.nvidiaRefreshSettings.mutate(s => s.nRefreshIntervals = value);
   }
 
+  onRefreshIntervalChange(target: EventTarget | null) {
+    if (target == null) {
+      return;
+    }
+
+    const value = parseInt((target as HTMLInputElement).value);
+    this.sysInfo.updateRefreshInterval(value).then(ok => {
+      if (ok) {
+        this.sysInfo.data.refreshInfo.refreshInterval = value;
+      }
+    });
+  }
+
 }
 
 /**

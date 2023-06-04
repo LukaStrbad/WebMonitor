@@ -9,7 +9,7 @@ import { RefreshInformation } from "../refresh-information";
 
 export class SysInfoUsages {
   // Data age in milliseconds
-  private _millisSinceRefresh: RefreshInformation = { millisSinceLastRefresh: 0n, refreshInterval: 0n };
+  private _millisSinceRefresh: RefreshInformation = { millisSinceLastRefresh: 0, refreshInterval: 0 };
   // Keep history of usages for these values
   private _cpuUsages: CpuUsage[] = [];
   private _memoryUsages: MemoryUsage[] = [];

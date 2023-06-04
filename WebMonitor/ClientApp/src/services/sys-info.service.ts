@@ -109,6 +109,18 @@ export class SysInfoService {
     );
   }
 
+  async updateRefreshInterval(interval: number) {
+    const result = await firstValueFrom(
+      this.http.post(this.apiUrl + "refreshInterval", interval, {observe: "response"})
+    );
+
+    if (result.ok) {
+      this.data.refreshInfo.refreshInterval = interval;
+    }
+
+    return result.ok;
+  }
+
   private async refreshComputerInfo() {
     this.data.computerInfo = await firstValueFrom(
       this.http.get<ComputerInfo>(this.apiUrl + "computerInfo")

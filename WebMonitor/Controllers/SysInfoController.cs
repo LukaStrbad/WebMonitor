@@ -35,8 +35,22 @@ public class SysInfoController : ControllerBase
     /// <summary>
     /// Returns the number of milliseconds since the last refresh
     /// </summary>
-	[HttpGet("refreshInfo")]
+    [HttpGet("refreshInfo")]
     public ActionResult<RefreshInformation> RefreshInfo() => _sysInfo.RefreshInfo;
+
+    /// <summary>
+    /// Sets SysInfo refresh interval
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("refreshInterval")]
+    public ActionResult ChangeRefreshInterval([FromBody] int interval)
+    {
+        if (interval < 1000)
+            return BadRequest();
+
+        _settings.RefreshInterval = interval;
+        return Ok();
+    }
 
     /// <summary>
     /// Fetches basic computer info
