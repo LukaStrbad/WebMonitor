@@ -32,7 +32,7 @@ public class ComputerInfo
     /// <summary>
     /// OS build number
     /// </summary>
-    public string? OsBuild { get; }
+    public string OsBuild { get; }
 
     /// <summary>
     /// CPU info
@@ -121,13 +121,13 @@ public class ComputerInfo
         return "";
     }
 
-    private static string? GetOsBuild()
+    private static string GetOsBuild()
     {
         if (OperatingSystem.IsWindows())
         {
             var buildNumber = Environment.OSVersion.Version.Build;
 
-            return buildNumber == -1 ? null : buildNumber.ToString();
+            return buildNumber == -1 ? "" : buildNumber.ToString();
         }
 
         if (OperatingSystem.IsLinux())
@@ -137,6 +137,6 @@ public class ComputerInfo
             return $"{version.Major}.{version.Minor}.{version.Build}-{version.Revision}";
         }
 
-        return null;
+        return "";
     }
 }

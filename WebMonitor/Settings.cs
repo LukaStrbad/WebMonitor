@@ -9,7 +9,7 @@ public sealed class Settings : SettingsBase
 {
     private int _refreshInterval = 1000;
 
-    private const string SettingsPath = "settings.json";
+    public const string SettingsPath = "settings.json";
 
     /// <summary>
     /// Time between refreshes (ms)
@@ -21,11 +21,15 @@ public sealed class Settings : SettingsBase
     }
 
     // No need for on change event because the value should be checked every refresh anyway
-    public NvidiaRefreshSettings NvidiaRefreshSettings { get; private init; } = new()
+    public NvidiaRefreshSettings NvidiaRefreshSettings { get; internal init; } = new()
     {
         RefreshSetting = NvidiaRefreshSetting.Enabled,
         NRefreshIntervals = 10
     };
+
+    internal Settings()
+    {
+    }
 
     private static Settings LoadImpl(bool loadFromFile)
     {
@@ -63,9 +67,9 @@ public sealed class Settings : SettingsBase
     public static Settings Load(bool loadFromFile = true)
     {
         var settings = LoadImpl(loadFromFile);
-        settings.SettingsChanged += _ => settings.Save();
+        settings.SettingsChanged += (_, _) => settings.Save();
         settings.NvidiaRefreshSettings.SettingsChanged +=
-            changedSettings => settings.OnSettingsChanged(changedSettings);
+            (_, changedSettings) => settings.OnSettingsChanged(changedSettings);
         return settings;
     }
 
@@ -91,6 +95,16 @@ public sealed class Settings : SettingsBase
             File.WriteAllText(SettingsPath, json);
         }
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is Settings settings)
+            return RefreshInterval == settings.RefreshInterval &&
+                   NvidiaRefreshSettings.RefreshSetting == settings.NvidiaRefreshSettings.RefreshSetting &&
+                   NvidiaRefreshSettings.NRefreshIntervals == settings.NvidiaRefreshSettings.NRefreshIntervals;
+    
+        return false;
+    }
 }
 
 /// <summary>
@@ -101,17 +115,17 @@ public abstract class SettingsBase
     /// <summary>
     /// Event that is triggered when some settings change
     /// </summary>
-    internal event Action<ChangedSettings>? SettingsChanged;
-    
+    internal event EventHandler<ChangedSettings>? SettingsChanged;
+
     /// <summary>
     /// Method to invoke <see cref="SettingsChanged"/> event
     /// </summary>
     /// <param name="changedSetting">Flags of changed settings</param>
     protected void OnSettingsChanged(ChangedSettings changedSetting)
     {
-        SettingsChanged?.Invoke(changedSetting);
+        SettingsChanged?.Invoke(this, changedSetting);
     }
-    
+
     /// <summary>
     /// Method that invokes <see cref="OnSettingsChanged"/> if new value is different from the current value
     /// </summary>
@@ -128,7 +142,7 @@ public abstract class SettingsBase
         field = value;
         OnSettingsChanged(changedSetting);
     }
-    
+
     /// <summary>
     /// Enum representing changed settings
     /// </summary>

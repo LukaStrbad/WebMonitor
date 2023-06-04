@@ -17,6 +17,7 @@ public class MemoryUsage : IRefreshable
     /// <summary>
     /// Amount of cached memory in bytes
     /// </summary>
+    /// <remarks>Currently not implemented</remarks>
     public long Cached { get; private set; }
 
     /// <summary>
@@ -32,7 +33,6 @@ public class MemoryUsage : IRefreshable
             Total = (long)memoryStatus.dwTotalPhys;
             Used = Total - (long)memoryStatus.dwAvailPhys;
             Commited = (long)memoryStatus.dwTotalPageFile - (long)memoryStatus.dwAvailPageFile;
-            
         }
     }
 }

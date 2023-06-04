@@ -19,14 +19,12 @@ internal class SysInfo
     private readonly ProcessTracker _processTracker;
     private readonly NetworkUsageTracker _networkUsageTracker;
     private readonly DiskUsageTracker _diskUsageTracker;
-
-    private const int RefreshInterval = 1000;
     public long LastRefresh { get; private set; }
 
     public RefreshInformation RefreshInfo => new()
     {
         MillisSinceLastRefresh = DateTimeOffset.Now.ToUnixTimeMilliseconds() - LastRefresh,
-        RefreshInterval = RefreshInterval
+        RefreshInterval = _settings.RefreshInterval
     };
 
     public CpuUsage CpuUsage { get; } = new();
@@ -91,15 +89,17 @@ internal class SysInfo
             _diskUsageTracker
         };
         _refreshables.AddRange(GpuUsages);
-
+            
+        // Initial refresh
+        Refresh(this, null);
         // Timer that refreshes every second
         _timer = new Timer(_settings.RefreshInterval);
         _timer.Elapsed += Refresh;
         _timer.Start();
 
-        _settings.SettingsChanged += changedSettings =>
+        _settings.SettingsChanged += (_, changedSettings) =>
         {
-            if (changedSettings == Settings.ChangedSettings.RefreshInterval) 
+            if (changedSettings == SettingsBase.ChangedSettings.RefreshInterval) 
                 return;
             
             // Change refresh interval if it was changed
@@ -109,7 +109,7 @@ internal class SysInfo
         };
     }
 
-    private void Refresh(object? sender, ElapsedEventArgs e)
+    private void Refresh(object? sender, ElapsedEventArgs? e)
     {
         // Refresh all refreshables in parallel
         Parallel.ForEach(_refreshables, r => r.Refresh(_settings.RefreshInterval));

@@ -38,7 +38,7 @@ public class FileBrowserController : ControllerBase
 
         var dirs = dirInfo
             .GetDirectories()
-            .Select(dir => FileOrDir.Dir(dir))
+            .Select(FileOrDir.Dir)
             .ToList();
         dirs.AddRange(dirInfo.GetFiles().Select(FileOrDir.File));
 
@@ -86,7 +86,7 @@ public class FileBrowserController : ControllerBase
             var outputFile = new FileInfo(Path.Combine(outputDir.FullName, file.FileName));
             if (outputFile.Exists)
             {
-                fileStatues.Add(new(file.FileName, false));
+                fileStatues.Add(new FileUploadInfo(file.FileName, false));
                 continue;
             }
 
@@ -101,7 +101,7 @@ public class FileBrowserController : ControllerBase
                 bw.Write(buffer, 0, read);
             } while (read > 0);
 
-            fileStatues.Add(new(file.FileName, true));
+            fileStatues.Add(new FileUploadInfo(file.FileName, true));
         }
 
         return new JsonResult(fileStatues)
