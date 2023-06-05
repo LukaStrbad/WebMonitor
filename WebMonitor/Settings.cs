@@ -78,7 +78,6 @@ public sealed class Settings : SettingsBase
 
     public void Save()
     {
-        Console.WriteLine("Saving settings");
         try
         {
             var json = JsonSerializer.Serialize(this, new JsonSerializerOptions
@@ -121,12 +120,19 @@ public abstract class SettingsBase
     internal event EventHandler<ChangedSettings>? SettingsChanged;
 
     /// <summary>
+    /// Milliseconds since Unix epoch when settings were last updated
+    /// </summary>
+    /// <remarks>Time is in UTC</remarks>
+    public long LastUpdateTime { get; set; }
+
+    /// <summary>
     /// Method to invoke <see cref="SettingsChanged"/> event
     /// </summary>
     /// <param name="changedSetting">Flags of changed settings</param>
     protected void OnSettingsChanged(ChangedSettings changedSetting)
     {
         SettingsChanged?.Invoke(this, changedSetting);
+        LastUpdateTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
 
     /// <summary>

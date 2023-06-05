@@ -31,6 +31,7 @@ export class SysInfoService {
 
   private readonly apiUrl: string;
   refreshDelay: number = 0;
+  lastSettingsUpdate = 0n;
 
   constructor(
     private http: HttpClient,
@@ -91,12 +92,13 @@ export class SysInfoService {
     this.refreshRefreshInfo();
     // Refresh all data in parallel
     await Promise.all([
+      this.checkSettingsUpdates(),
       this.refreshCpuUsage(),
       this.refreshMemoryUsage(),
       this.refreshDiskUsages(),
       this.refreshGpuUsages(),
       this.refreshNetworkUsages(),
-      this.refreshProcessInfos()
+      this.refreshProcessInfos(),
     ]);
     // Notify subscribers that data has been refreshed
     this.onRefresh.next();
@@ -109,9 +111,34 @@ export class SysInfoService {
     );
   }
 
+  private async checkSettingsUpdates() {
+    const time = await firstValueFrom(
+      this.http.get<bigint>(this.apiUrl + "settingsUpdateTime")
+    );
+
+    if (time > this.lastSettingsUpdate) {
+      this.lastSettingsUpdate = time;
+      // Refresh interval is being updated constantly, so it is not checked here
+
+      // Disable NVIDIA refresh settings update to prevent infinite loop
+      this.nvidiaInitialized = false;
+
+      const nvidiaRefreshSettings = await this.getNvidiaRefreshSettings();
+      const currentNvidiaRefreshSettings = this.nvidiaRefreshSettings();
+
+      // Update NVIDIA refresh settings only if they have changed
+      if (nvidiaRefreshSettings.refreshSetting !== currentNvidiaRefreshSettings.refreshSetting ||
+        nvidiaRefreshSettings.nRefreshIntervals !== currentNvidiaRefreshSettings.nRefreshIntervals) {
+        this.nvidiaRefreshSettings.set(nvidiaRefreshSettings);
+      }
+      // Re-enable NVIDIA refresh settings update
+      this.nvidiaInitialized = true;
+    }
+  }
+
   async updateRefreshInterval(interval: number) {
     const result = await firstValueFrom(
-      this.http.post(this.apiUrl + "refreshInterval", interval, {observe: "response"})
+      this.http.post(this.apiUrl + "refreshInterval", interval, { observe: "response" })
     );
 
     if (result.ok) {

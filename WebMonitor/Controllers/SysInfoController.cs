@@ -37,6 +37,13 @@ public class SysInfoController : ControllerBase
     /// </summary>
     [HttpGet("refreshInfo")]
     public ActionResult<RefreshInformation> RefreshInfo() => _sysInfo.RefreshInfo;
+    
+    /// <summary>
+    /// Returns milliseconds since Unix epoch when the settings were last updated
+    /// </summary>
+    /// <remarks>Time is in UTC</remarks>
+    [HttpGet("settingsUpdateTime")]
+    public ActionResult<long> SettingsUpdateTime() => _settings.LastUpdateTime;
 
     /// <summary>
     /// Sets SysInfo refresh interval
