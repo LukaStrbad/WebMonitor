@@ -7,6 +7,7 @@ using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
 using System.Runtime.InteropServices;
+using WebMonitor.Options;
 using Timer = System.Timers.Timer;
 
 namespace WebMonitor.Native;

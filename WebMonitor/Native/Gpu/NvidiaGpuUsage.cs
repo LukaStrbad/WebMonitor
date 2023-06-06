@@ -1,6 +1,6 @@
 ﻿using ManagedCuda.Nvml;
 using System.Runtime.InteropServices;
-using WebMonitor.Model;
+using WebMonitor.Options;
 
 namespace WebMonitor.Native.Gpu;
 

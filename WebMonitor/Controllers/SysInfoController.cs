@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Mvc;
-using WebMonitor.Model;
 using WebMonitor.Native;
 using WebMonitor.Native.Cpu;
 using WebMonitor.Native.Disk;
@@ -9,6 +8,7 @@ using WebMonitor.Native.Gpu;
 using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
+using WebMonitor.Options;
 
 namespace WebMonitor.Controllers;
 

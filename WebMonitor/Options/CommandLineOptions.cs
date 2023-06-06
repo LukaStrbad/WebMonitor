@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace WebMonitor;
+namespace WebMonitor.Options;
 
 public class CommandLineOptions
 {

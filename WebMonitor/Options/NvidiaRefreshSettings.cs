@@ -1,4 +1,4 @@
-namespace WebMonitor.Model;
+namespace WebMonitor.Options;
 
 /// <summary>
 /// Settings for how Nvidia GPU monitoring should be handled

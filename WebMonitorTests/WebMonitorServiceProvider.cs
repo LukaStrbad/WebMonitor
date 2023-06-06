@@ -1,6 +1,5 @@
-﻿using System.CodeDom;
-using WebMonitor;
-using WebMonitor.Native;
+﻿using WebMonitor.Native;
+using WebMonitor.Options;
 
 namespace WebMonitorTests;
 

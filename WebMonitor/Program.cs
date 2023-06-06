@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using WebMonitor;
 using WebMonitor.Native;
+using WebMonitor.Options;
 
 [assembly: InternalsVisibleTo("WebMonitorTests")]
 

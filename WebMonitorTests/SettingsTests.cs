@@ -1,5 +1,4 @@
-using WebMonitor;
-using WebMonitor.Model;
+using WebMonitor.Options;
 
 namespace WebMonitorTests;
 

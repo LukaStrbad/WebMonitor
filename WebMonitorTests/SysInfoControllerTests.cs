@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using WebMonitor;
+﻿using Microsoft.Extensions.DependencyInjection;
 using WebMonitor.Controllers;
-using WebMonitor.Native;
+using WebMonitor.Options;
 
 namespace WebMonitorTests;
 
