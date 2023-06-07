@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Security;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using WebMonitor.Model;
@@ -36,10 +37,7 @@ public sealed class Settings : SettingsBase
 
     private static Settings LoadImpl(bool loadFromFile)
     {
-        if (!loadFromFile)
-            return new Settings();
-
-        if (!File.Exists(SettingsPath))
+        if (!loadFromFile || !File.Exists(SettingsPath))
             return new Settings();
 
         try
@@ -61,10 +59,27 @@ public sealed class Settings : SettingsBase
                 }
             };
         }
+        catch (Exception e)
+            when (e is UnauthorizedAccessException or IOException or SecurityException)
+        {
+            Console.WriteLine("Error opening settings file.");
+        }
+        catch (JsonException e)
+        {
+            Console.WriteLine($"Error parsing settings file: {e.Message}");
+        }
+        catch (FormatException e)
+        {
+            Console.WriteLine($"Invalid value format: {e.Message}");
+        }
         catch
         {
-            return new Settings();
+            Console.WriteLine("Unknown error loading settings.");
         }
+        
+        Console.WriteLine("Using default settings.");
+
+        return new Settings();
     }
 
     public static Settings Load(bool loadFromFile = true)

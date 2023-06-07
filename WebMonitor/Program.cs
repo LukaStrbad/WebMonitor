@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using CommandLine;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using WebMonitor;
 using WebMonitor.Native;
 using WebMonitor.Options;
 
@@ -24,11 +23,18 @@ if (executableFile.DirectoryName != null)
     Directory.SetCurrentDirectory(executableFile.DirectoryName);
 }
 
-var builder = WebApplication.CreateBuilder(args);
+// Load config
+var config = Config.Load();
+
+// Add addresses from command line
+var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
+config.Addresses.AddRange(addressInfos);
 
 // Initialize Settings and SysInfo early so they can start immediately
 var settings = Settings.Load();
 var sysInfo = new SysInfo(settings);
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -49,32 +55,24 @@ builder.Services.Configure<FormOptions>(options =>
 
 builder.WebHost.UseKestrel(options =>
 {
-    if (!cmdOptions.Ips.Any()) return;
-    
-    foreach (var ip in cmdOptions.Ips)
+    foreach (var addressInfo in config.Addresses)
     {
-        var regex = IpRegex();
-        var match = regex.Match(ip);
-        var protocolGroup = match.Groups["protocol"];
-        var ipGroup = match.Groups["ip"];
-        var portGroup = match.Groups["port"];
-
-        if (!ipGroup.Success)
+        IPAddress ipAddress = default!;
+        try
+        {
+            ipAddress = IPAddress.Parse(addressInfo.Ip);
+        }
+        catch (FormatException)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"""Invalid ip address: "{ip}" """);
+            Console.WriteLine($"Invalid ip address: \"{addressInfo.Ip}\"");
             Console.ResetColor();
             Environment.Exit(1);
         }
 
-        var ipAddress = IPAddress.Parse(ipGroup.Value);
-        var useHttps = protocolGroup.Value == "https";
-        // Parse won't fail because regex ensures that the port is a number.
-        var port = portGroup.Success ? int.Parse(portGroup.Value) : 5000;
-
-        options.Listen(ipAddress, port, listenOptions =>
+        options.Listen(ipAddress, addressInfo.Port, listenOptions =>
         {
-            if (useHttps)
+            if (addressInfo.UseHttps)
                 listenOptions.UseHttps();
         });
     }
@@ -113,8 +111,3 @@ app.Lifetime.ApplicationStopping.Register(() =>
 
 app.Run();
 
-internal partial class Program
-{
-    [GeneratedRegex("((?<protocol>https?)://)?(?<ip>(\\d{1,3}\\.){3}\\d{1,3})(:(?<port>\\d{1,5}))?")]
-    private static partial Regex IpRegex();
-}
