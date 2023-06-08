@@ -22,10 +22,25 @@ public class FileBrowserController : ControllerBase
     [HttpGet("dir")]
     public ActionResult<List<FileOrDir>> Dir(string? requestedDirectory = null)
     {
-        if (requestedDirectory == null)
+        if (requestedDirectory is null)
         {
-            return new JsonResult(DriveInfo.GetDrives()
-                .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory)))
+            IEnumerable<FileOrDir> rootDirs;
+            if (OperatingSystem.IsLinux())
+            {
+                // On Linux hardcode folder to / and ~
+                rootDirs = new List<FileOrDir>
+                {
+                    FileOrDir.Dir(new DirectoryInfo("/")),
+                    FileOrDir.Dir(new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
+                };
+            }
+            else
+            {
+                rootDirs = DriveInfo.GetDrives()
+                    .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory));
+            }
+
+            return new JsonResult(rootDirs)
             {
                 SerializerSettings = _jsonSerializerOptions
             };

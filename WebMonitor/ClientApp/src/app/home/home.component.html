@@ -44,11 +44,11 @@
     <mat-card-content>
       <div class="mat-body-1">
         Capacity:
-        {{ sizeDisplay(computerInfo.memory.totalMemory) }}
+        {{ computerInfo.memory.totalMemory > 0 ? sizeDisplay(computerInfo.memory.totalMemory) : "Unknown"}}
         ({{ numberHelpers.toByteString(computerInfo.memory.usableMemory) }}
-        usable,
-        {{ numberHelpers.toByteString(computerInfo.memory.reservedMemory) }}
-        reserved)
+        usable<span
+        *ngIf="computerInfo.memory.reservedMemory">, {{ numberHelpers.toByteString(computerInfo.memory.reservedMemory) }}
+        reserved</span>)
       </div>
       <div class="mat-body-1" *ngIf="computerInfo.memory.speed">
         Speed: {{ computerInfo.memory.speed }} MHz
@@ -74,7 +74,7 @@
   <mat-card *ngFor="let disk of computerInfo.disks">
     <mat-card-header>
       <mat-card-title
-        ><h3>Disk {{ disk.name }}</h3></mat-card-title
+      ><h3>Disk {{ disk.name }}</h3></mat-card-title
       >
     </mat-card-header>
 

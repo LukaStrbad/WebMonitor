@@ -109,8 +109,6 @@ public class MemoryInfo
 
         // Values are shown in kB, so we need to remove the suffix and multiply by 1024
         UsableMemory = ulong.Parse(meminfo["MemTotal"].Split(' ')[0]) * 1024;
-        ReservedMemory = ulong.Parse(meminfo["DirectMap1G"].Split(' ')[0]) * 1024;
-        TotalMemory = UsableMemory + ReservedMemory;
 
         var dmidecodeOutput = GetDmidecodeOutput();
         if (dmidecodeOutput is null)
@@ -120,7 +118,10 @@ public class MemoryInfo
         MemorySticks = memSticks.Select(MemoryStickInfo.FromDictionary);
 
         // These values are the same for all memory sticks
-        var firstStick = memSticks.First();
+        var firstStick = memSticks.FirstOrDefault();
+        if (firstStick is null)
+            return;
+        
         Speed = Convert.ToUInt32(firstStick["Speed"].Split(' ')[0]);
         Voltage = (uint)(Convert.ToDouble(firstStick["Configured Voltage"].Split(' ')[0]) * 1000);
         FormFactor = firstStick["Form Factor"];
@@ -244,15 +245,17 @@ public class MemoryInfo
                 {
                     FileName = "dmidecode",
                     Arguments = "--type memory",
-                    RedirectStandardOutput = true
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 }
             };
 
             process.Start();
-            var output = process.StandardOutput.ReadToEnd();
+            var stdErr = process.StandardError.ReadToEnd();
+            var stdOut = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
 
-            return output.Contains("Permission denied") ? null : output;
+            return stdErr.Contains("Permission denied") ? null : stdOut;
         }
         catch
         {
