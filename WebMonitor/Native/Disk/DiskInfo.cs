@@ -50,6 +50,11 @@ public partial class DiskInfo
     [SupportedOSPlatform("windows")]
     internal int DriveIndex { get; init; }
 
+    /// <summary>
+    /// Linux name of the disk
+    /// </summary>
+    internal string LinuxName { get; init; } = "";
+
     [SupportedOSPlatform("windows8.0")]
     private static IEnumerable<DiskInfo> GetDiskInfosWin()
     {
@@ -145,7 +150,8 @@ public partial class DiskInfo
                 ConnectionType = GetConnectionType(drive.Name),
                 IsRemovable = isRemovable,
                 Name = name,
-                TotalSize = size
+                TotalSize = size,
+                LinuxName = drive.Name
             };
         }
     }
