@@ -102,13 +102,13 @@ public class MemoryInfo
     [SupportedOSPlatform("linux")]
     private void InitLinux()
     {
-        var meminfo = File
+        var memInfo = File
             .ReadAllLines("/proc/meminfo")
             .Select(line => line.Split(':'))
             .ToDictionary(split => split[0].Trim(), split => split[1].Trim());
 
         // Values are shown in kB, so we need to remove the suffix and multiply by 1024
-        UsableMemory = ulong.Parse(meminfo["MemTotal"].Split(' ')[0]) * 1024;
+        UsableMemory = ulong.Parse(memInfo["MemTotal"].Split(' ')[0]) * 1024;
 
         var dmidecodeOutput = GetDmidecodeOutput();
         if (dmidecodeOutput is null)

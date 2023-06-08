@@ -45,6 +45,12 @@
     <div class="mat-body-1">
       Memory usage: {{ byteRatio(sysInfo.data.memoryUsage?.used, sysInfo.data.memoryUsage?.total) }}
     </div>
+    <div *ngIf="sysInfo.data.memoryUsage?.cached" class="mat-body-1">
+      Cached: {{ bytes(sysInfo.data.memoryUsage!.cached) }}
+    </div>
+    <div *ngIf="sysInfo.data.memoryUsage?.commited" class="mat-body-1">
+      Commited: {{ bytes(sysInfo.data.memoryUsage!.commited) }}
+    </div>
   </mat-expansion-panel>
 
   <!-- Disk panels -->

@@ -8,16 +8,16 @@ import {
   ViewChildren,
   computed
 } from '@angular/core';
-import { UsageGraphComponent } from "../../components/usage-graph/usage-graph.component";
-import { SysInfoService } from "../../../services/sys-info.service";
-import { NetworkUsage, NetworkUsages } from 'src/model/network-usage';
+import {UsageGraphComponent} from "../../components/usage-graph/usage-graph.component";
+import {SysInfoService} from "../../../services/sys-info.service";
+import {NetworkUsage, NetworkUsages} from 'src/model/network-usage';
 import * as arrayHelpers from "../../../helpers/array-helpers";
-import { DiskUsage, DiskUsages } from 'src/model/disk-usage';
-import { GpuUsages } from 'src/model/gpu-usage';
+import {DiskUsage, DiskUsages} from 'src/model/disk-usage';
+import {GpuUsages} from 'src/model/gpu-usage';
 import * as numberHelpers from "../../../helpers/number-helpers";
-import { replaceValues } from "../../../helpers/object-helpers";
-import { Subscription } from 'rxjs';
-import { AppSettingsService, GraphColors } from 'src/services/app-settings.service';
+import {replaceValues} from "../../../helpers/object-helpers";
+import {Subscription} from 'rxjs';
+import {AppSettingsService, GraphColors} from 'src/services/app-settings.service';
 
 @Component({
   selector: 'app-usages',
