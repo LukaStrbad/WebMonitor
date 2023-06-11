@@ -1,3 +1,5 @@
+<h1 class="mat-headline-4 mb-4 mt-2">Settings</h1>
+
 <mat-card>
   <mat-card-header>
     <mat-card-title class="mat-h1">Appearance</mat-card-title>
@@ -7,9 +9,8 @@
     <mat-slide-toggle
       [checked]="isDarkTheme()"
       (change)="setDarkMode($event.checked)"
-    >Dark mode
-    </mat-slide-toggle
-    >
+      >Dark mode
+    </mat-slide-toggle>
 
     <app-color-input
       *ngFor="let graphColorSetting of graphColorSettings"
@@ -49,7 +50,7 @@
             <mat-option
               *ngFor="let setting of nvidiaRefreshSettingValues"
               [value]="setting"
-            >{{ nvidiaRefreshSettingName(setting) }}</mat-option
+              >{{ nvidiaRefreshSettingName(setting) }}</mat-option
             >
           </mat-select>
         </mat-form-field>
@@ -66,7 +67,9 @@
               nvidiaRefreshSettingEnum.LongerInterval
             "
             (change)="onNvidiaRefreshIntervalChange($event.target)"
-            [value]="sysInfo.nvidiaRefreshSettings().nRefreshIntervals.toString()"
+            [value]="
+              sysInfo.nvidiaRefreshSettings().nRefreshIntervals.toString()
+            "
           />
         </mat-form-field>
       </div>
@@ -86,8 +89,7 @@
 
   <mat-card-content>
     <mat-checkbox [checked]="showDebugWindow()" (click)="toggleDebugWindow()"
-    >Show debug window
-    </mat-checkbox
-    >
+      >Show debug window
+    </mat-checkbox>
   </mat-card-content>
 </mat-card>

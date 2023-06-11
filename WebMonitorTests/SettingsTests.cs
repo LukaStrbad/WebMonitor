@@ -54,13 +54,13 @@ public class SettingsTests
             a => settings.SettingsChanged -= a,
             () => settings.RefreshInterval = 100);
         Assert.Equal(SettingsBase.ChangedSettings.RefreshInterval, arg.Arguments);
-        
+
         arg = Assert.Raises<SettingsBase.ChangedSettings>(
             a => settings.SettingsChanged += a,
             a => settings.SettingsChanged -= a,
             () => settings.NvidiaRefreshSettings.RefreshSetting = NvidiaRefreshSetting.Disabled);
         Assert.Equal(SettingsBase.ChangedSettings.NvidiaRefreshSetting, arg.Arguments);
-        
+
         arg = Assert.Raises<SettingsBase.ChangedSettings>(
             a => settings.SettingsChanged += a,
             a => settings.SettingsChanged -= a,
@@ -77,7 +77,7 @@ public class SettingsTests
         var raised = false;
         settings.SettingsChanged += (_, _) => raised = true;
         settings.RefreshInterval = 400;
-        
+
         Assert.False(raised);
     }
 }

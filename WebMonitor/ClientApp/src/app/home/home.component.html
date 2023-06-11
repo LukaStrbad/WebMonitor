@@ -1,9 +1,9 @@
-<h1>Home</h1>
+<h1 class="mat-headline-4 mb-0 mt-2">Home</h1>
 
 <div *ngIf="computerInfo">
   <mat-card>
     <mat-card-header>
-      <mat-card-title><h3>OS</h3></mat-card-title>
+      <mat-card-title class="mat-h1">OS</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
@@ -19,7 +19,7 @@
 
   <mat-card>
     <mat-card-header>
-      <mat-card-title><h3>CPU</h3></mat-card-title>
+      <mat-card-title class="mat-h1">CPU</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
@@ -38,17 +38,25 @@
 
   <mat-card>
     <mat-card-header>
-      <mat-card-title><h3>Memory</h3></mat-card-title>
+      <mat-card-title class="mat-h1">Memory</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
       <div class="mat-body-1">
         Capacity:
-        {{ computerInfo.memory.totalMemory > 0 ? sizeDisplay(computerInfo.memory.totalMemory) : "Unknown"}}
-        ({{ numberHelpers.toByteString(computerInfo.memory.usableMemory) }}
-        usable<span
-        *ngIf="computerInfo.memory.reservedMemory">, {{ numberHelpers.toByteString(computerInfo.memory.reservedMemory) }}
-        reserved</span>)
+        {{
+          computerInfo.memory.totalMemory > 0
+            ? sizeDisplay(computerInfo.memory.totalMemory)
+            : "Unknown"
+        }}
+        ({{
+          numberHelpers.toByteString(computerInfo.memory.usableMemory)
+        }}
+        usable<span *ngIf="computerInfo.memory.reservedMemory"
+          >,
+          {{ numberHelpers.toByteString(computerInfo.memory.reservedMemory) }}
+          reserved</span
+        >)
       </div>
       <div class="mat-body-1" *ngIf="computerInfo.memory.speed">
         Speed: {{ computerInfo.memory.speed }} MHz
@@ -73,9 +81,7 @@
 
   <mat-card *ngFor="let disk of computerInfo.disks">
     <mat-card-header>
-      <mat-card-title
-      ><h3>Disk {{ disk.name }}</h3></mat-card-title
-      >
+      <mat-card-title class="mat-h1">Disk {{ disk.name }}</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>

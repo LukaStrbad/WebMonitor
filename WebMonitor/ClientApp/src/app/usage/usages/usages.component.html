@@ -1,3 +1,5 @@
+<h1 class="mat-headline-4 mb-4 mt-2">Component Usages</h1>
+
 <mat-accordion>
   <!-- CPU panel -->
   <mat-expansion-panel>
@@ -43,7 +45,13 @@
     />
 
     <div class="mat-body-1">
-      Memory usage: {{ byteRatio(sysInfo.data.memoryUsage?.used, sysInfo.data.memoryUsage?.total) }}
+      Memory usage:
+      {{
+        byteRatio(
+          sysInfo.data.memoryUsage?.used,
+          sysInfo.data.memoryUsage?.total
+        )
+      }}
     </div>
     <div *ngIf="sysInfo.data.memoryUsage?.cached" class="mat-body-1">
       Cached: {{ bytes(sysInfo.data.memoryUsage!.cached) }}
@@ -61,7 +69,7 @@
         <div class="panel-title disk">
           <mat-panel-title>{{ diskUsage.name }}</mat-panel-title>
           <span class="percentage"
-          >{{ diskUsage.utilization | number : "1.0-0" }}%,
+            >{{ diskUsage.utilization | number : "1.0-0" }}%,
           </span>
           <span>{{ diskSpeeds(diskUsage) }}</span>
         </div>
@@ -149,13 +157,11 @@
     <div class="mat-body-1" *ngIf="gpuUsage.memoryTotal; else memoryElse">
       Memory usage: {{ byteRatio(gpuUsage.memoryUsed, gpuUsage.memoryTotal) }}
     </div>
-    <ng-template #memoryElse
-    >
+    <ng-template #memoryElse>
       <div class="mat-body-1">
         Memory usage: {{ bytes(gpuUsage.memoryUsed) }}
       </div>
-    </ng-template
-    >
+    </ng-template>
 
     <div class="mat-body-1" *ngIf="gpuUsage.temperature">
       Temperature: {{ gpuUsage.temperature }}°C
