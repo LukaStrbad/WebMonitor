@@ -5,8 +5,14 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
+  - package-ecosystem: "nuget" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "Microsoft.Windows.CsWin32"
       
+  - package-ecosystem: "npm
+    directory: "/WebMonitor/ClientApp"
+    schedule:
+      interval: "weekly"
