@@ -27,6 +27,12 @@ public class SysInfoController : ControllerBase
     }
 
     /// <summary>
+    /// Returns the current version of WebMonitor
+    /// </summary>
+    [HttpGet("version")]
+    public ActionResult<string?> Version() => _sysInfo.Version; 
+    
+    /// <summary>
     /// Returns the client IP address
     /// </summary>
     [HttpGet("clientIP")]

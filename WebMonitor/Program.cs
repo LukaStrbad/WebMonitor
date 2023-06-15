@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -30,9 +31,13 @@ var config = Config.Load();
 var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
 
+
+var executingAssembly = Assembly.GetExecutingAssembly();
+var fvi = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
+var version = fvi.FileVersion;
 // Initialize Settings and SysInfo early so they can start immediately
 var settings = Settings.Load();
-var sysInfo = new SysInfo(settings);
+var sysInfo = new SysInfo(settings, version);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +47,7 @@ builder.Services.AddSingleton(settings);
 builder.Services.AddSingleton(sysInfo);
 builder.Services.AddSwaggerGen(options =>
 {
-    var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlFileName = $"{executingAssembly.GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
 });
 

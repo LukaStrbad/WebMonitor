@@ -11,7 +11,7 @@ public class WebMonitorServiceProvider : IServiceProvider
     public WebMonitorServiceProvider()
     {
         _settings = Settings.Load();
-        _sysInfo = new SysInfo(_settings);
+        _sysInfo = new SysInfo(_settings, null);
     }
 
     public object? GetService(Type serviceType)

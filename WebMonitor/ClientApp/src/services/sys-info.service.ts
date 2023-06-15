@@ -30,6 +30,7 @@ export class SysInfoService {
   private nvidiaInitialized = false;
 
   private readonly apiUrl: string;
+  serverVersion: string | null = null;
   refreshDelay: number = 0;
   lastSettingsUpdate = 0n;
 
@@ -42,6 +43,9 @@ export class SysInfoService {
     // Get client IP
     firstValueFrom(this.http.get<string>(this.apiUrl + "clientIP"))
       .then(ip => this.clientIp.set(ip));
+
+    firstValueFrom(this.http.get<string | null>(this.apiUrl + "version"))
+      .then(version => this.serverVersion = version);
 
     this.getNvidiaRefreshSettings()
       .then(settings => {

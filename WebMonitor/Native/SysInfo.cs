@@ -28,6 +28,7 @@ internal class SysInfo
         RefreshInterval = _settings.RefreshInterval
     };
 
+    public readonly string? Version;
     public CpuUsage CpuUsage { get; } = new();
     public ComputerInfo ComputerInfo { get; }
     public MemoryUsage MemoryUsage { get; }
@@ -36,9 +37,10 @@ internal class SysInfo
     public List<DiskUsage> DiskUsages => _diskUsageTracker.DiskUsages;
     public IEnumerable<IGpuUsage> GpuUsages { get; }
 
-    public SysInfo(Settings settings)
+    public SysInfo(Settings settings, string? version)
     {
         _settings = settings;
+        Version = version;
         
         var updateVisitor = new UpdateVisitor();
         var computer = new Computer
