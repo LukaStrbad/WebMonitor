@@ -17,12 +17,7 @@ if (cmdOptions is null)
 
 // Setting the working directory to the location of the executable ensures that
 // ASP.NET will correctly serve frontend files from the wwwroot folder.
-var executableLocation = Assembly.GetExecutingAssembly().Location;
-var executableFile = new FileInfo(executableLocation);
-if (executableFile.DirectoryName != null)
-{
-    Directory.SetCurrentDirectory(executableFile.DirectoryName);
-}
+Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
 // Load config
 var config = Config.Load();
@@ -31,10 +26,7 @@ var config = Config.Load();
 var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
 
-
-var executingAssembly = Assembly.GetExecutingAssembly();
-var fvi = FileVersionInfo.GetVersionInfo(executingAssembly.Location);
-var version = fvi.FileVersion;
+var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 // Initialize Settings and SysInfo early so they can start immediately
 var settings = Settings.Load();
 var sysInfo = new SysInfo(settings, version);
@@ -45,13 +37,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(settings);
 builder.Services.AddSingleton(sysInfo);
-builder.Services.AddSwaggerGen(options =>
-{
-    var xmlFileName = $"{executingAssembly.GetName().Name}.xml";
-    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
-});
 
-builder.Services.Configure<KestrelServerOptions>(options => { options.Limits.MaxRequestBodySize = long.MaxValue; });
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddSwaggerGen(options =>
+    {
+        var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
+    });
+}
+
+builder.Services.Configure<KestrelServerOptions>(options => options.Limits.MaxRequestBodySize = long.MaxValue);
 builder.Services.Configure<FormOptions>(options =>
 {
     options.ValueLengthLimit = int.MaxValue;
