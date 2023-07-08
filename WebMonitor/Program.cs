@@ -29,7 +29,6 @@ var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
 
 var supportedFeatures = new SupportedFeatures();
-Console.WriteLine(JsonSerializer.Serialize(supportedFeatures, new JsonSerializerOptions { WriteIndented = true }));
 
 var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 // Initialize Settings and SysInfo early so they can start immediately
