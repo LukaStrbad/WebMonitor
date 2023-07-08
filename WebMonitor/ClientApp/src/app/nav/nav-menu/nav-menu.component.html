@@ -2,6 +2,7 @@
   <div *ngFor="let route of menuRoutes" class="button-container">
     <button
       mat-flat-button
+      [hidden]="shouldBeHidden(route)"
       [color]="routeWatcher.currentRoute() === route ? 'primary' : ''"
       [routerLink]="route.path"
       (click)="routeClicked()"

@@ -26,11 +26,15 @@ export class ProcessListComponent implements AfterViewInit, OnDestroy {
 
   constructor(public sysInfo: SysInfoService) {
     // Load initial value
-    this.dataSource.data = sysInfo.data.processInfos;
+    if (sysInfo.data.processInfos != null) {
+      this.dataSource.data = sysInfo.data.processInfos;
+    }
 
     // Refresh on each tick
     this.refreshSubscription = sysInfo.onRefresh.subscribe(() => {
-      this.dataSource.data = sysInfo.data.processInfos;
+      if (sysInfo.data.processInfos != null) {
+        this.dataSource.data = sysInfo.data.processInfos;
+      }
     });
   }
 

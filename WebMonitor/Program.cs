@@ -2,10 +2,12 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using CommandLine;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using WebMonitor;
 using WebMonitor.Native;
 using WebMonitor.Options;
 
@@ -26,10 +28,13 @@ var config = Config.Load();
 var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
 
+var supportedFeatures = new SupportedFeatures();
+Console.WriteLine(JsonSerializer.Serialize(supportedFeatures, new JsonSerializerOptions { WriteIndented = true }));
+
 var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 // Initialize Settings and SysInfo early so they can start immediately
 var settings = Settings.Load();
-var sysInfo = new SysInfo(settings, version);
+var sysInfo = new SysInfo(settings, version, supportedFeatures);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +42,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(settings);
 builder.Services.AddSingleton(sysInfo);
+builder.Services.AddSingleton(supportedFeatures);
 
 if (builder.Environment.IsDevelopment())
 {
@@ -105,9 +111,6 @@ app.MapControllerRoute(
 
 app.MapFallbackToFile("index.html");
 
-app.Lifetime.ApplicationStopping.Register(() =>
-{
-    settings.Save();
-});
+app.Lifetime.ApplicationStopping.Register(() => { settings.Save(); });
 
 app.Run();

@@ -11,14 +11,14 @@ export class SysInfoUsages {
   // Data age in milliseconds
   private _millisSinceRefresh: RefreshInformation = { millisSinceLastRefresh: 0, refreshInterval: 0 };
   // Keep history of usages for these values
-  private _cpuUsages: CpuUsage[] = [];
-  private _memoryUsages: MemoryUsage[] = [];
-  private _diskUsages: DiskUsages[] = [];
-  private _gpuUsages: GpuUsages[] = [];
-  private _networkUsages: NetworkUsages[] = [];
+  private _cpuUsages: (CpuUsage | null)[] = [];
+  private _memoryUsages: (MemoryUsage | null)[] = [];
+  private _diskUsages: (DiskUsages | null)[] = [];
+  private _gpuUsages: (GpuUsages | null)[] = [];
+  private _networkUsages: (NetworkUsages | null)[] = [];
   // Don't keep history of these values
-  private _processInfos: ProcessList = [];
-  private _computerInfo: ComputerInfo | undefined;
+  private _processInfos: (ProcessList | null) = [];
+  private _computerInfo: ComputerInfo | null = null;
 
   /**
    * Constructor
@@ -41,7 +41,7 @@ export class SysInfoUsages {
   /**
    * Computer info getter
    */
-  get computerInfo(): ComputerInfo | undefined {
+  get computerInfo(): ComputerInfo | null {
     return this._computerInfo;
   }
 
@@ -49,7 +49,7 @@ export class SysInfoUsages {
    * Computer info setter
    * @param value Computer info
    */
-  set computerInfo(value: ComputerInfo | undefined) {
+  set computerInfo(value: ComputerInfo | null) {
     this._computerInfo = value;
   }
 
@@ -57,7 +57,7 @@ export class SysInfoUsages {
    * Function to update CPU usage
    * @param cpuUsage
    */
-  updateCpuUsage(cpuUsage: CpuUsage) {
+  updateCpuUsage(cpuUsage: CpuUsage | null) {
     this._cpuUsages.push(cpuUsage);
 
     if (this._cpuUsages.length > this.maxHistory) {
@@ -68,14 +68,14 @@ export class SysInfoUsages {
   /**
    * Cpu usage getter
    */
-  get cpuUsage(): CpuUsage | undefined {
+  get cpuUsage(): CpuUsage | null {
     return this._cpuUsages[this._cpuUsages.length - 1];
   }
 
   /**
    * Cpu usage history getter
    */
-  get cpuUsageHistory(): CpuUsage[] {
+  get cpuUsageHistory(): (CpuUsage | null)[] {
     return this._cpuUsages;
   }
 
@@ -83,7 +83,7 @@ export class SysInfoUsages {
    * Function to update memory usage
    * @param memoryUsage
    */
-  updateMemoryUsage(memoryUsage: MemoryUsage) {
+  updateMemoryUsage(memoryUsage: MemoryUsage  | null) {
     this._memoryUsages.push(memoryUsage);
 
     if (this._memoryUsages.length > this.maxHistory) {
@@ -94,14 +94,14 @@ export class SysInfoUsages {
   /**
    * Memory usage getter
    */
-  get memoryUsage(): MemoryUsage | undefined {
+  get memoryUsage(): MemoryUsage | null {
     return this._memoryUsages[this._memoryUsages.length - 1];
   }
 
   /**
    * Memory usage history getter
    */
-  get memoryUsageHistory(): MemoryUsage[] {
+  get memoryUsageHistory(): (MemoryUsage | null)[] {
     return this._memoryUsages;
   }
 
@@ -109,7 +109,7 @@ export class SysInfoUsages {
    * Function to update disk usage
    * @param diskUsages
    */
-  updateDiskUsages(diskUsages: DiskUsages) {
+  updateDiskUsages(diskUsages: DiskUsages | null) {
     this._diskUsages.push(diskUsages);
 
     if (this._diskUsages.length > this.maxHistory) {
@@ -120,14 +120,14 @@ export class SysInfoUsages {
   /**
    * Disk usage getter
    */
-  get diskUsages(): DiskUsages | undefined {
+  get diskUsages(): DiskUsages | null {
     return this._diskUsages[this._diskUsages.length - 1];
   }
 
   /**
    * Disk usage history getter
    */
-  get diskUsagesHistory(): DiskUsages[] {
+  get diskUsagesHistory(): (DiskUsages | null)[] {
     return this._diskUsages;
   }
 
@@ -135,7 +135,7 @@ export class SysInfoUsages {
    * Function to update GPU usage
    * @param gpuUsages
    */
-  updateGpuUsages(gpuUsages: GpuUsages) {
+  updateGpuUsages(gpuUsages: GpuUsages | null) {
     this._gpuUsages.push(gpuUsages);
 
     if (this._gpuUsages.length > this.maxHistory) {
@@ -146,14 +146,14 @@ export class SysInfoUsages {
   /**
    * GPU usage getter
    */
-  get gpuUsages(): GpuUsages | undefined {
+  get gpuUsages(): GpuUsages | null {
     return this._gpuUsages[this._gpuUsages.length - 1];
   }
 
   /**
    * GPU usage history getter
    */
-  get gpuUsagesHistory(): GpuUsages[] {
+  get gpuUsagesHistory(): (GpuUsages | null)[] {
     return this._gpuUsages;
   }
 
@@ -161,7 +161,7 @@ export class SysInfoUsages {
    * Function to update network usage
    * @param networkUsages
    */
-  updateNetworkUsages(networkUsages: NetworkUsages) {
+  updateNetworkUsages(networkUsages: NetworkUsages | null) {
     this._networkUsages.push(networkUsages);
 
     if (this._networkUsages.length > this.maxHistory) {
@@ -172,14 +172,14 @@ export class SysInfoUsages {
   /**
    * Network usage getter
    */
-  get networkUsages(): NetworkUsages | undefined {
+  get networkUsages(): NetworkUsages | null {
     return this._networkUsages[this._networkUsages.length - 1];
   }
 
   /**
    * Network usage history getter
    */
-  get networkUsagesHistory(): NetworkUsages[] {
+  get networkUsagesHistory(): (NetworkUsages | null)[] {
     return this._networkUsages;
   }
 
@@ -187,14 +187,14 @@ export class SysInfoUsages {
    * ProcessList setter
    * @param processInfos Process infos
    */
-  set processInfos(processInfos: ProcessList) {
+  set processInfos(processInfos: ProcessList | null) {
     this._processInfos = processInfos;
   }
 
   /**
    * Process infos getter
    */
-  get processInfos(): ProcessList {
+  get processInfos(): ProcessList | null {
     return this._processInfos;
   }
 

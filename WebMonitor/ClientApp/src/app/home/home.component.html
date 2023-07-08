@@ -22,18 +22,25 @@
       <mat-card-title class="mat-h1">CPU</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content>
-      <div class="mat-body-1">Name: {{ computerInfo.cpu.name }}</div>
-      <div class="mat-body-1">Core count: {{ computerInfo.cpu.numCores }}</div>
+    <mat-card-content *ngIf="supportedFeatures?.cpuInfo; else cpuInfoElse">
+      <div class="mat-body-1">Name: {{ computerInfo.cpu?.name }}</div>
+      <div class="mat-body-1">Core count: {{ computerInfo.cpu?.numCores }}</div>
       <div class="mat-body-1">
-        Thread count: {{ computerInfo.cpu.numThreads }}
+        Thread count: {{ computerInfo.cpu?.numThreads }}
       </div>
       <div class="mat-body-1">
         Frequency:
-        {{ arrayHelpers.average(computerInfo.cpu.baseFrequencies) }}
+        {{ arrayHelpers.average(computerInfo.cpu!.baseFrequencies) }}
         MHz
       </div>
     </mat-card-content>
+
+    <ng-template #cpuInfoElse>
+      <mat-card-content>
+        <div class="mat-body-1">CPU info is not supported</div>
+      </mat-card-content>
+    </ng-template>
+
   </mat-card>
 
   <mat-card>
@@ -41,35 +48,35 @@
       <mat-card-title class="mat-h1">Memory</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content>
+    <mat-card-content *ngIf="supportedFeatures?.memoryInfo && computerInfo; else memoryInfoElse">
       <div class="mat-body-1">
         Capacity:
         {{
-          computerInfo.memory.totalMemory > 0
-            ? sizeDisplay(computerInfo.memory.totalMemory)
-            : "Unknown"
+        (computerInfo!.memory?.totalMemory ?? 0) > 0
+          ? sizeDisplay(computerInfo!.memory?.totalMemory)
+          : "Unknown"
         }}
         ({{
-          numberHelpers.toByteString(computerInfo.memory.usableMemory)
+        numberHelpers.toByteString(computerInfo!.memory?.usableMemory)
         }}
-        usable<span *ngIf="computerInfo.memory.reservedMemory"
-          >,
-          {{ numberHelpers.toByteString(computerInfo.memory.reservedMemory) }}
-          reserved</span
-        >)
+        usable<span *ngIf="computerInfo!.memory?.reservedMemory"
+      >,
+        {{ numberHelpers.toByteString(computerInfo!.memory?.reservedMemory) }}
+        reserved</span
+      >)
       </div>
-      <div class="mat-body-1" *ngIf="computerInfo.memory.speed">
-        Speed: {{ computerInfo.memory.speed }} MHz
+      <div class="mat-body-1" *ngIf="computerInfo!.memory?.speed">
+        Speed: {{ computerInfo!.memory?.speed }} MHz
       </div>
       <div
         class="mat-body-1"
-        *ngIf="computerInfo.memory.type && computerInfo.memory.formFactor"
+        *ngIf="computerInfo!.memory?.type && computerInfo!.memory?.formFactor"
       >
-        Type: {{ computerInfo.memory.type }}
-        {{ computerInfo.memory.formFactor }}
+        Type: {{ computerInfo!.memory?.type }}
+        {{ computerInfo!.memory?.formFactor }}
       </div>
       <ul>
-        <li *ngFor="let stick of computerInfo.memory.memorySticks">
+        <li *ngFor="let stick of computerInfo!.memory?.memorySticks">
           <div class="mat-body-1">
             {{ sizeDisplay(stick.capacity) }} ({{ stick.manufacturer }}
             {{ stick.partNumber }})
@@ -77,6 +84,13 @@
         </li>
       </ul>
     </mat-card-content>
+
+    <ng-template #memoryInfoElse>
+      <mat-card-content>
+        <div class="mat-body-1">Memory info is not supported</div>
+      </mat-card-content>
+    </ng-template>
+
   </mat-card>
 
   <mat-card *ngFor="let disk of computerInfo.disks">

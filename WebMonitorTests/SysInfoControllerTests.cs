@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using WebMonitor;
 using WebMonitor.Controllers;
 using WebMonitor.Options;
 
@@ -39,6 +40,7 @@ public class SysInfoControllerTests
         Assert.NotEmpty(computerInfo.OsBuild);
 
         var cpuInfo = computerInfo.Cpu;
+        Assert.NotNull(cpuInfo);
         Assert.NotEmpty(cpuInfo.Name);
         Assert.NotEmpty(cpuInfo.Identifier);
         Assert.Equal(Environment.ProcessorCount, cpuInfo.NumThreads);
@@ -48,6 +50,7 @@ public class SysInfoControllerTests
         Assert.All(cpuInfo.BaseFrequencies, freq => Assert.True(freq > 0));
 
         var memoryInfo = computerInfo.Memory;
+        Assert.NotNull(memoryInfo);
         Assert.True(memoryInfo.UsableMemory > 0);
         Assert.True(memoryInfo.TotalMemory > 0);
         Assert.True(memoryInfo.Speed > 0);
@@ -56,7 +59,9 @@ public class SysInfoControllerTests
         Assert.NotEmpty(sticks);
         Assert.Equal(memoryInfo.TotalMemory, sticks.Select(ms => ms.Capacity).Aggregate((a, b) => a + b));
 
-        var diskInfos = computerInfo.Disks.ToList();
+        var disks = computerInfo.Disks;
+        Assert.NotNull(disks);
+        var diskInfos = disks.ToList();
         Assert.All(diskInfos, diskInfo =>
         {
             Assert.NotEmpty(diskInfo.Name);

@@ -19,11 +19,13 @@ public class SysInfoController : ControllerBase
 {
     private readonly SysInfo _sysInfo;
     private readonly Settings _settings;
+    private readonly SupportedFeatures _supportedFeatures;
 
     public SysInfoController(IServiceProvider serviceProvider)
     {
         _sysInfo = serviceProvider.GetRequiredService<SysInfo>();
         _settings = serviceProvider.GetRequiredService<Settings>();
+        _supportedFeatures = serviceProvider.GetRequiredService<SupportedFeatures>();
     }
 
     /// <summary>
@@ -31,6 +33,12 @@ public class SysInfoController : ControllerBase
     /// </summary>
     [HttpGet("version")]
     public ActionResult<string?> Version() => _sysInfo.Version; 
+    
+    /// <summary>
+    /// Returns server supported features
+    /// </summary>
+    [HttpGet("supportedFeatures")]
+    public ActionResult<SupportedFeatures> SupportedFeatures() => _supportedFeatures;
     
     /// <summary>
     /// Returns the client IP address
@@ -75,38 +83,38 @@ public class SysInfoController : ControllerBase
     /// Fetches current memory usage
     /// </summary>
     [HttpGet("memoryUsage")]
-    public ActionResult<MemoryUsage> MemoryUsage() => _sysInfo.MemoryUsage;
+    public ActionResult<MemoryUsage?> MemoryUsage() => _sysInfo.MemoryUsage;
 
     /// <summary>
     /// Fetches data about currently running processes
     /// </summary>
     [HttpGet("processList")]
-    public ActionResult<IEnumerable<ProcessInfo>> ProcessList() => _sysInfo.Processes.ToList();
+    public ActionResult<IEnumerable<ProcessInfo>?> ProcessList() => _sysInfo.Processes?.ToList();
 
     /// <summary>
     /// Fetches per thread usage
     /// </summary>
     [HttpGet("cpuUsage")]
-    public ActionResult<CpuUsage> CpuUsage() => _sysInfo.CpuUsage;
+    public ActionResult<CpuUsage?> CpuUsage() => _sysInfo.CpuUsage;
 
     /// <summary>
     /// Fetches GPU usages
     /// </summary>
     /// <returns></returns>
     [HttpGet("gpuUsages")]
-    public ActionResult<IEnumerable<IGpuUsage>> GpuUsages() => _sysInfo.GpuUsages.ToList();
+    public ActionResult<IEnumerable<IGpuUsage>?> GpuUsages() => _sysInfo.GpuUsages?.ToList();
 
     /// <summary>
     /// Fetches disk usages
     /// </summary>
     [HttpGet("diskUsages")]
-    public ActionResult<IEnumerable<DiskUsage>> DiskUsages() => _sysInfo.DiskUsages;
+    public ActionResult<IEnumerable<DiskUsage>?> DiskUsages() => _sysInfo.DiskUsages;
 
     /// <summary>
     /// Fetches usage statistics per NIC
     /// </summary>
     [HttpGet("networkUsages")]
-    public ActionResult<IEnumerable<NetworkUsage>> NetworkUsages() => _sysInfo.NetworkUsages.ToList();
+    public ActionResult<IEnumerable<NetworkUsage>?> NetworkUsages() => _sysInfo.NetworkUsages?.ToList();
 
     /// <summary>
     /// Fetches the current Nvidia refresh settings

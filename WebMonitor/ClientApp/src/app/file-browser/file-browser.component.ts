@@ -8,11 +8,12 @@ import { BreadcrumbItem } from '../components/breadcrumbs/breadcrumbs.component'
 import { SysInfoService } from 'src/services/sys-info.service';
 import { ComputerInfo } from "../../model/computer-info";
 import { MatDialog } from '@angular/material/dialog';
-import { FileDialogComponent } from '../components/file-dialog/file-dialog.component';
+import { FileDialogComponent, FileDialogData } from '../components/file-dialog/file-dialog.component';
 import { Subscription, finalize } from 'rxjs';
 import { HttpEventType } from '@angular/common/http';
 import { FileUploadInfo } from 'src/model/file-upload-info';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
+import { SupportedFeatures } from "../../model/supported-features";
 
 @Component({
   selector: 'app-file-browser',
@@ -33,6 +34,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
   numberOfSelectedFiles = 0;
   uploadSubscription: Subscription | undefined;
   uploadFile: { progress: number; file: File; } | undefined;
+  supportedFeatures?: SupportedFeatures;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild("fileUpload") fileUpload!: ElementRef<HTMLInputElement>;
@@ -45,6 +47,9 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     private snackBar: MatSnackBar
   ) {
     this.resetBreadcrumbs();
+
+    sysInfo.getSupportedFeatures()
+      .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
   }
 
   resetBreadcrumbs() {
@@ -142,9 +147,12 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
 
   async onFileClick(file: FileOrDir) {
     const fileInfo = await this.fileBrowser.getFileInfo(file.path);
-    const data = {
-      fileInfo: fileInfo,
-      download: () => this.fileBrowser.downloadFile(file.path)
+    let data: FileDialogData = {
+      fileInfo: fileInfo
+    }
+    // Only add download function if it's supported
+    if (this.supportedFeatures?.fileDownload) {
+      data.download = () => this.fileBrowser.downloadFile(file.path);
     }
     const dialogRef = this.dialog.open(FileDialogComponent, { data });
   }

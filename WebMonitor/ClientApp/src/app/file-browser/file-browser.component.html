@@ -36,7 +36,7 @@
       <!-- File -->
       <ng-container *ngIf="element.type == 'file'">{{
         numberHelpers.toByteString(element.size)
-      }}</ng-container>
+        }}</ng-container>
 
       <!-- Directory -->
       <ng-container *ngIf="element.type == 'dir'">
@@ -63,10 +63,10 @@
     <mat-card-title>
       <h6>
         Uploading "{{ uploadFile.file.name }} ({{
-          numberHelpers.toByteStringRatio(
-            uploadFile.progress * uploadFile.file.size,
-            uploadFile.file.size
-          )
+        numberHelpers.toByteStringRatio(
+          uploadFile.progress * uploadFile.file.size,
+          uploadFile.file.size
+        )
         }})"
       </h6>
     </mat-card-title>
@@ -79,8 +79,8 @@
   </mat-card-content>
 </mat-card>
 
-<!-- If we are located somewhere on the filesystem show upload button -->
-<ng-container *ngIf="currentDir">
+<!-- If we are located somewhere on the filesystem and upload is supported show upload button -->
+<ng-container *ngIf="currentDir && supportedFeatures?.fileUpload">
   <button
     class="mt-4 mb-4"
     type="button"

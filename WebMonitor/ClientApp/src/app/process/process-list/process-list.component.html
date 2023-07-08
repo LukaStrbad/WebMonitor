@@ -35,7 +35,7 @@
 
     <span *ngIf="filterValue" class="col-12 col-md-4 align-self-center">
       Showing {{ dataSource.filteredData.length }} /
-      {{ sysInfo.data.processInfos.length }} processes
+      {{ sysInfo.data.processInfos?.length }} processes
     </span>
   </div>
 </div>

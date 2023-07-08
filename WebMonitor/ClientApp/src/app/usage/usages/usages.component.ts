@@ -8,16 +8,17 @@ import {
   ViewChildren,
   computed
 } from '@angular/core';
-import {UsageGraphComponent} from "../../components/usage-graph/usage-graph.component";
-import {SysInfoService} from "../../../services/sys-info.service";
-import {NetworkUsage, NetworkUsages} from 'src/model/network-usage';
+import { UsageGraphComponent } from "../../components/usage-graph/usage-graph.component";
+import { SysInfoService } from "../../../services/sys-info.service";
+import { NetworkUsage, NetworkUsages } from 'src/model/network-usage';
 import * as arrayHelpers from "../../../helpers/array-helpers";
-import {DiskUsage, DiskUsages} from 'src/model/disk-usage';
-import {GpuUsages} from 'src/model/gpu-usage';
+import { DiskUsage, DiskUsages } from 'src/model/disk-usage';
+import { GpuUsages } from 'src/model/gpu-usage';
 import * as numberHelpers from "../../../helpers/number-helpers";
-import {replaceValues} from "../../../helpers/object-helpers";
-import {Subscription} from 'rxjs';
-import {AppSettingsService, GraphColors} from 'src/services/app-settings.service';
+import { replaceValues } from "../../../helpers/object-helpers";
+import { Subscription } from 'rxjs';
+import { AppSettingsService, GraphColors } from 'src/services/app-settings.service';
+import { SupportedFeatures } from "../../../model/supported-features";
 
 @Component({
   selector: 'app-usages',
@@ -39,12 +40,16 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   gpuUsages: GpuUsages = [];
 
   refreshSubscription: Subscription | undefined;
+  supportedFeatures?: SupportedFeatures;
 
   constructor(
     public sysInfo: SysInfoService,
     appSettings: AppSettingsService
   ) {
     this.graphColors = computed(() => appSettings.settings().graphColors);
+
+    sysInfo.getSupportedFeatures()
+      .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
   }
 
   ngOnDestroy(): void {
@@ -131,8 +136,9 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   }
 
   averageCpuUsageHistory(): number[] {
-    return this.sysInfo.data.cpuUsageHistory.map(usage =>
-      arrayHelpers.average(usage.threadUsages));
+    return this.sysInfo.data.cpuUsageHistory
+      .filter(usage => usage != null)
+      .map(usage => arrayHelpers.average(usage!.threadUsages));
   }
 
   memoryUsagePercentage(): number {
@@ -140,13 +146,15 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   }
 
   memoryUsagePercentageHistory(): number[] {
-    return this.sysInfo.data.memoryUsageHistory.map(usage =>
-      Number(usage.used) / Number(usage.total) * 100);
+    return this.sysInfo.data.memoryUsageHistory
+      .filter(usage => usage != null)
+      .map(usage => Number(usage!.used) / Number(usage!.total) * 100);
   }
 
   diskUsageUtilizationHistory(diskUsage: DiskUsage): number[] {
-    return this.sysInfo.data.diskUsagesHistory.map(usages =>
-      usages.find(usage => usage.name === diskUsage.name)?.utilization ?? 0);
+    return this.sysInfo.data.diskUsagesHistory
+      .filter(usages => usages != null)
+      .map(usages => usages!.find(usage => usage.name === diskUsage.name)?.utilization ?? 0);
   }
 
   diskSpeeds(diskUsage: DiskUsage): string {
@@ -175,13 +183,15 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   }
 
   networkDownloadSpeedHistory(networkUsage: NetworkUsage): number[] {
-    return this.sysInfo.data.networkUsagesHistory.map(usages =>
-      usages.find(usage => usage.name === networkUsage.name)?.downloadSpeed ?? 0);
+    return this.sysInfo.data.networkUsagesHistory
+      .filter(usages => usages != null)
+      .map(usages => usages!.find(usage => usage.name === networkUsage.name)?.downloadSpeed ?? 0);
   }
 
   networkUploadSpeedHistory(networkUsage: NetworkUsage): number[] {
-    return this.sysInfo.data.networkUsagesHistory.map(usages =>
-      usages.find(usage => usage.name === networkUsage.name)?.uploadSpeed ?? 0);
+    return this.sysInfo.data.networkUsagesHistory
+      .filter(usages => usages != null)
+      .map(usages => usages!.find(usage => usage.name === networkUsage.name)?.uploadSpeed ?? 0);
   }
 
   networkUsageFilter(usage: NetworkUsage): boolean {
@@ -200,8 +210,9 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   }
 
   gpuUsageUtilizationHistory(name: string): number[] {
-    return this.sysInfo.data.gpuUsagesHistory.map(usages =>
-      usages.find(usage => usage.name === name)?.utilization ?? 0);
+    return this.sysInfo.data.gpuUsagesHistory
+      .filter(usages => usages != null)
+      .map(usages => usages!.find(usage => usage.name === name)?.utilization ?? 0);
   }
 
 }

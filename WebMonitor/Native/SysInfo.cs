@@ -17,10 +17,10 @@ internal class SysInfo
     private readonly Settings _settings;
     private readonly Timer _timer;
     private readonly List<IRefreshable> _refreshables;
-    private readonly ProcessTracker _processTracker;
-    private readonly NetworkUsageTracker _networkUsageTracker;
-    private readonly DiskUsageTracker _diskUsageTracker;
-    public long LastRefresh { get; private set; }
+    private readonly ProcessTracker? _processTracker;
+    private readonly NetworkUsageTracker? _networkUsageTracker;
+    private readonly DiskUsageTracker? _diskUsageTracker;
+    private long LastRefresh { get; set; }
 
     public RefreshInformation RefreshInfo => new()
     {
@@ -29,19 +29,19 @@ internal class SysInfo
     };
 
     public readonly string? Version;
-    public CpuUsage CpuUsage { get; } = new();
+    public CpuUsage? CpuUsage { get; }
     public ComputerInfo ComputerInfo { get; }
-    public MemoryUsage MemoryUsage { get; }
-    public IEnumerable<ProcessInfo> Processes => _processTracker.Processes.Values;
-    public IEnumerable<NetworkUsage> NetworkUsages => _networkUsageTracker.Interfaces;
-    public List<DiskUsage> DiskUsages => _diskUsageTracker.DiskUsages;
-    public IEnumerable<IGpuUsage> GpuUsages { get; }
+    public MemoryUsage? MemoryUsage { get; }
+    public IEnumerable<ProcessInfo>? Processes => _processTracker?.Processes.Values;
+    public IEnumerable<NetworkUsage>? NetworkUsages => _networkUsageTracker?.Interfaces;
+    public List<DiskUsage>? DiskUsages => _diskUsageTracker?.DiskUsages;
+    public IEnumerable<IGpuUsage>? GpuUsages { get; }
 
-    public SysInfo(Settings settings, string? version)
+    public SysInfo(Settings settings, string? version, SupportedFeatures supportedFeatures)
     {
         _settings = settings;
         Version = version;
-        
+
         var updateVisitor = new UpdateVisitor();
         var computer = new Computer
         {
@@ -52,15 +52,32 @@ internal class SysInfo
         computer.Open();
         computer.Accept(updateVisitor);
 
-        ComputerInfo = new ComputerInfo(computer);
+        var refreshables = new List<IRefreshable>();
+
+        if (supportedFeatures.CpuUsage)
+        {
+            CpuUsage = new CpuUsage();
+            refreshables.Add(CpuUsage);
+        }
+
+        ComputerInfo = new ComputerInfo(computer, supportedFeatures);
         // Disable CPU because it is only used for one-time info
         computer.IsCpuEnabled = false;
 
-        MemoryUsage = new MemoryUsage();
+        if (supportedFeatures.MemoryUsage)
+        {
+            MemoryUsage = new MemoryUsage();
+            refreshables.Add(MemoryUsage);
+        }
+
+        var supportedGpuHardware = new List<HardwareType>();
+        if (supportedFeatures.AmdGpuUsage)
+            supportedGpuHardware.Add(HardwareType.GpuAmd);
+        if (supportedFeatures.IntelGpuUsage)
+            supportedGpuHardware.Add(HardwareType.GpuIntel);
 
         var gpuUsages = computer.Hardware
-            .Where(hardware =>
-                hardware.HardwareType is HardwareType.GpuIntel or HardwareType.GpuAmd)
+            .Where(hardware => supportedGpuHardware.Contains(hardware.HardwareType))
             .Select(gpu => new LhmGpuUsage(gpu)
             {
                 UpdateVisitor = updateVisitor,
@@ -68,31 +85,39 @@ internal class SysInfo
             .Cast<IGpuUsage>()
             .ToList();
 
-        // NVML is only supported on x64
-        if (RuntimeInformation.OSArchitecture == Architecture.X64)
+        if (supportedFeatures.NvidiaGpuUsage)
         {
-            // GeForce experience overlay causes high CPU usage
-            // Using NVML may fix the issue with the added benefit of linux support
             gpuUsages.AddRange(NvidiaGpuUsage.GetNvidiaGpus(_settings.NvidiaRefreshSettings));
         }
 
-        GpuUsages = gpuUsages;
-
-        // Refreshables
-        _processTracker = new ProcessTracker();
-        _networkUsageTracker = new NetworkUsageTracker();
-        _diskUsageTracker = new DiskUsageTracker();
-
-        _refreshables = new List<IRefreshable>
+        // Only add GPU usage if at least one GPU type is supported
+        if (supportedFeatures.AmdGpuUsage || supportedFeatures.IntelGpuUsage || supportedFeatures.NvidiaGpuUsage)
         {
-            CpuUsage,
-            MemoryUsage,
-            _processTracker,
-            _networkUsageTracker,
-            _diskUsageTracker
-        };
-        _refreshables.AddRange(GpuUsages);
-            
+            GpuUsages = gpuUsages;
+            refreshables.AddRange(GpuUsages);
+        }
+
+        
+        if (supportedFeatures.Processes)
+        {
+            _processTracker = new ProcessTracker();
+            refreshables.Add(_processTracker);
+        }
+
+        if (supportedFeatures.NetworkUsage)
+        {
+            _networkUsageTracker = new NetworkUsageTracker();
+            refreshables.Add(_networkUsageTracker);
+        }
+
+        if (supportedFeatures.DiskUsage)
+        {
+            _diskUsageTracker = new DiskUsageTracker();
+            refreshables.Add(_diskUsageTracker);
+        }
+
+        _refreshables = refreshables;
+
         // Initial refresh
         Refresh(this, null);
         // Timer that refreshes every second
@@ -102,9 +127,9 @@ internal class SysInfo
 
         _settings.SettingsChanged += (_, changedSettings) =>
         {
-            if (changedSettings == SettingsBase.ChangedSettings.RefreshInterval) 
+            if (changedSettings == SettingsBase.ChangedSettings.RefreshInterval)
                 return;
-            
+
             // Change refresh interval if it was changed
             _timer.Enabled = false;
             _timer.Interval = _settings.RefreshInterval;

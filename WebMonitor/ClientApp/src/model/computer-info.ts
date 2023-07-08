@@ -8,7 +8,7 @@ export interface ComputerInfo {
   osName: string;
   osVersion: string;
   osBuild: string | null;
-  cpu: CpuInfo;
-  memory: MemoryInfo;
-  disks: DiskInfo[];
+  cpu: CpuInfo | null;
+  memory: MemoryInfo | null;
+  disks: DiskInfo[] | null;
 }

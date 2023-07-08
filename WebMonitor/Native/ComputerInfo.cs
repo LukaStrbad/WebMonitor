@@ -28,7 +28,7 @@ public class ComputerInfo
     /// OS version
     /// </summary>
     public string OsVersion { get; }
-    
+
     /// <summary>
     /// OS build number
     /// </summary>
@@ -37,22 +37,21 @@ public class ComputerInfo
     /// <summary>
     /// CPU info
     /// </summary>
-    public CpuInfo Cpu { get; }
-    
+    public CpuInfo? Cpu { get; }
+
     /// <summary>
     /// Memory info
     /// </summary>
-    public MemoryInfo Memory { get; } = new();
+    public MemoryInfo? Memory { get; }
 
     /// <summary>
     /// List disk infos
     /// </summary>
-    public IEnumerable<DiskInfo> Disks { get; }
-    
-    [SupportedOSPlatform("linux")]
-    private readonly Dictionary<string, string>? _osReleaseValues;
+    public IEnumerable<DiskInfo>? Disks { get; }
 
-    public ComputerInfo(IComputer computer)
+    [SupportedOSPlatform("linux")] private readonly Dictionary<string, string>? _osReleaseValues;
+
+    public ComputerInfo(IComputer computer, SupportedFeatures supportedFeatures)
     {
         if (OperatingSystem.IsLinux())
         {
@@ -70,16 +69,20 @@ public class ComputerInfo
                     .ToDictionary(line => line[0], line => line[1]);
             }
         }
-        
+
         Hostname = Environment.MachineName;
         CurrentUser = Environment.UserName;
         OsName = GetOsName();
         OsVersion = GetOsVersion();
         OsBuild = GetOsBuild();
-        Cpu = new CpuInfo(computer);
-        Disks = DiskInfo.GetDiskInfos();
+        if (supportedFeatures.CpuInfo)
+            Cpu = new CpuInfo(computer);
+        if (supportedFeatures.MemoryInfo)
+            Memory = new MemoryInfo();
+        if (supportedFeatures.DiskInfo)
+            Disks = DiskInfo.GetDiskInfos();
     }
-    
+
     private string GetOsName()
     {
         if (OperatingSystem.IsWindows())
@@ -87,7 +90,8 @@ public class ComputerInfo
             // 22000 is the first build number of Windows 11
             // Older versions of Windows are not supported
             var baseVersion = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)
-                ? "Windows 11" : "Windows 10";
+                ? "Windows 11"
+                : "Windows 10";
 
             var versionKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
             var edition = versionKey?.GetValue("EditionID")?.ToString();

@@ -38,6 +38,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatRippleModule } from '@angular/material/core';
 import { EllipsisPipe } from '../pipes/ellipsis.pipe';
 import { MatSelectModule } from '@angular/material/select';
+import { MatListModule } from "@angular/material/list";
 
 @NgModule({
   declarations: [
@@ -55,30 +56,31 @@ import { MatSelectModule } from '@angular/material/select';
     FileDialogComponent,
     EllipsisPipe
   ],
-  imports: [
-    BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
-    HttpClientModule,
-    FormsModule,
-    RouterModule.forRoot(appRoutes),
-    BrowserAnimationsModule,
-    MatButtonModule,
-    MatCardModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatSidenavModule,
-    MatExpansionModule,
-    MatProgressBarModule,
-    MatTableModule,
-    MatSortModule,
-    MatSlideToggleModule,
-    MatCheckboxModule,
-    MatTooltipModule,
-    MatInputModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatRippleModule,
-    MatSelectModule
-  ],
+    imports: [
+        BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
+        HttpClientModule,
+        FormsModule,
+        RouterModule.forRoot(appRoutes),
+        BrowserAnimationsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatToolbarModule,
+        MatIconModule,
+        MatSidenavModule,
+        MatExpansionModule,
+        MatProgressBarModule,
+        MatTableModule,
+        MatSortModule,
+        MatSlideToggleModule,
+        MatCheckboxModule,
+        MatTooltipModule,
+        MatInputModule,
+        MatDialogModule,
+        MatSnackBarModule,
+        MatRippleModule,
+        MatSelectModule,
+        MatListModule
+    ],
   providers: [{ provide: LOCALE_ID, useValue: "hr-HR" }],
   bootstrap: [AppComponent]
 })

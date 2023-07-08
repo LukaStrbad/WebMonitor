@@ -11,7 +11,7 @@ $primary: mat.define-palette(mat.$indigo-palette);
 $accent: mat.define-palette(mat.$pink-palette);
 $warn: mat.define-palette(mat.$red-palette);
 
-$ligth-theme: mat.define-light-theme((
+$light-theme: mat.define-light-theme((
   color: (
     primary: $primary,
     accent: $accent,
@@ -32,15 +32,34 @@ $dark-theme: mat.define-dark-theme((
 
 .dark-theme {
   @include mat.all-component-themes($dark-theme);
+
+  .primary-color {
+    color: mat.get-color-from-palette($primary-dark, 500);
+  }
+
+  .accent-color {
+    color: mat.get-color-from-palette($accent-dark, 500);
+  }
+
+  .warn-color {
+    color: mat.get-color-from-palette($warn-dark, 500);
+  }
 }
 
 .light-theme {
-  @include mat.all-component-themes($ligth-theme);
-}
+  @include mat.all-component-themes($light-theme);
 
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
+  .primary-color {
+    color: mat.get-color-from-palette($primary-dark, 500);
+  }
+
+  .accent-color {
+    color: mat.get-color-from-palette($accent-dark, 500);
+  }
+
+  .warn-color {
+    color: mat.get-color-from-palette($warn-dark, 500);
+  }
 }
 
 html,

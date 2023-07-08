@@ -7,5 +7,11 @@
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCloseClick()">Close</button>
-  <button mat-button (click)="data.download()" cdkFocusInitial>Download</button>
+  <button
+    *ngIf="data.download"
+    mat-button
+    cdkFocusInitial
+    (click)="data.download()"
+  >Download
+  </button>
 </div>

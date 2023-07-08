@@ -84,10 +84,10 @@ function getPrefixAndExponent(value: number, multiplier: number): [string, numbe
 }
 
 export function toByteString(
-  value: number | bigint,
+  value: number | bigint | undefined,
   options = new MemoryByteOptions()
 ) {
-  if (value < 0) {
+  if (value == undefined || value < 0) {
     throw new Error('Value must be greater than or equal to 0.');
   }
 

@@ -24,10 +24,10 @@ public class FileBrowserController : ControllerBase
     {
         if (requestedDirectory is null)
         {
-            IEnumerable<FileOrDir> rootDirs;
+            List<FileOrDir> rootDirs;
             if (OperatingSystem.IsLinux())
             {
-                // On Linux hardcode folder to / and ~
+                // On Linux hardcode folders to / and ~
                 rootDirs = new List<FileOrDir>
                 {
                     FileOrDir.Dir(new DirectoryInfo("/")),
@@ -36,9 +36,14 @@ public class FileBrowserController : ControllerBase
             }
             else
             {
-                rootDirs = DriveInfo.GetDrives()
-                    .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory));
+                rootDirs = DriveInfo
+                    .GetDrives()
+                    .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory))
+                    .ToList();
             }
+
+            if (!rootDirs.Any())
+                return new NotFoundResult();
 
             return new JsonResult(rootDirs)
             {

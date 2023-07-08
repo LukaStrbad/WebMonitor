@@ -11,7 +11,7 @@ import { ProcessList } from "../model/process-info";
 import { ComputerInfo } from "../model/computer-info";
 import { RefreshInformation } from 'src/model/refresh-information';
 import { NvidiaRefreshSetting, NvidiaRefreshSettings } from 'src/model/nvidia-refresh-setting';
-import { toObservable } from "@angular/core/rxjs-interop";
+import { SupportedFeatures } from "../model/supported-features";
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +33,7 @@ export class SysInfoService {
   serverVersion: string | null = null;
   refreshDelay: number = 0;
   lastSettingsUpdate = 0n;
+  private supportedFeatures: SupportedFeatures | null = null;
 
   constructor(
     private http: HttpClient,
@@ -77,6 +78,14 @@ export class SysInfoService {
     }
 
     return this.data.computerInfo!;
+  }
+
+  async getSupportedFeatures() : Promise<SupportedFeatures> {
+    if (this.supportedFeatures == null) {
+      await this.refreshSupportedFeatures();
+    }
+
+    return this.supportedFeatures!;
   }
 
   private async refreshLoop() {
@@ -158,32 +167,42 @@ export class SysInfoService {
     );
   }
 
+  private async refreshSupportedFeatures() {
+    this.supportedFeatures = await firstValueFrom(
+      this.http.get<SupportedFeatures>(this.apiUrl + "supportedFeatures")
+    );
+  }
+
   private async refreshCpuUsage() {
     const response = await firstValueFrom(
-      this.http.get<CpuUsage>(this.apiUrl + "cpuUsage")
+      this.http.get<CpuUsage | null>(this.apiUrl + "cpuUsage")
     );
+
     this.data.updateCpuUsage(response);
   }
 
   private async refreshMemoryUsage() {
     const response = await firstValueFrom(
-      this.http.get<MemoryUsage>(this.apiUrl + "memoryUsage")
+      this.http.get<MemoryUsage | null>(this.apiUrl + "memoryUsage")
     );
+
     this.data.updateMemoryUsage(response);
   }
 
   private async refreshDiskUsages() {
     const response = await firstValueFrom(
-      this.http.get<DiskUsages>(this.apiUrl + "diskUsages")
+      this.http.get<DiskUsages | null>(this.apiUrl + "diskUsages")
     );
+
     this.data.updateDiskUsages(response);
   }
 
   private async refreshGpuUsages() {
     const response = await firstValueFrom(
-      this.http.get<GpuUsages>(this.apiUrl + "gpuUsages")
+      this.http.get<GpuUsages | null>(this.apiUrl + "gpuUsages")
     );
-    if (this.nvidiaRefreshSettings().refreshSetting === NvidiaRefreshSetting.Disabled) {
+
+    if (this.nvidiaRefreshSettings().refreshSetting === NvidiaRefreshSetting.Disabled && response != null) {
       this.data.updateGpuUsages(response.filter(g => g.manufacturer !== "NVIDIA"));
     } else {
       this.data.updateGpuUsages(response);
@@ -192,14 +211,15 @@ export class SysInfoService {
 
   private async refreshNetworkUsages() {
     const response = await firstValueFrom(
-      this.http.get<NetworkUsages>(this.apiUrl + "networkUsages")
+      this.http.get<NetworkUsages | null>(this.apiUrl + "networkUsages")
     );
+
     this.data.updateNetworkUsages(response);
   }
 
   private async refreshProcessInfos() {
     this.data.processInfos = await firstValueFrom(
-      this.http.get<ProcessList>(this.apiUrl + "processList")
+      this.http.get<ProcessList | null>(this.apiUrl + "processList")
     );
   }
 
