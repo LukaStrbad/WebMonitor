@@ -28,6 +28,7 @@ var config = Config.Load();
 var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
 
+Console.WriteLine("Analyzing supported features...");
 var supportedFeatures = new SupportedFeatures();
 
 var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
@@ -112,4 +113,5 @@ app.MapFallbackToFile("index.html");
 
 app.Lifetime.ApplicationStopping.Register(() => { settings.Save(); });
 
+Console.WriteLine("Starting server...");
 app.Run();
