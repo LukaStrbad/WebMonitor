@@ -50,15 +50,15 @@ $dark-theme: mat.define-dark-theme((
   @include mat.all-component-themes($light-theme);
 
   .primary-color {
-    color: mat.get-color-from-palette($primary-dark, 500);
+    color: mat.get-color-from-palette($primary, 500);
   }
 
   .accent-color {
-    color: mat.get-color-from-palette($accent-dark, 500);
+    color: mat.get-color-from-palette($accent, 500);
   }
 
   .warn-color {
-    color: mat.get-color-from-palette($warn-dark, 500);
+    color: mat.get-color-from-palette($warn, 500);
   }
 }
 

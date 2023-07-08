@@ -1,9 +1,6 @@
-using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using CommandLine;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
