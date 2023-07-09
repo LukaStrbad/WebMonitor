@@ -3,7 +3,6 @@ $assemblyInfo = Get-ChildItem -Path . -Recurse -Filter "AssemblyInfo.cs" -ErrorA
 # Get version from AssemblyInfo.cs
 $version = (Get-Content $assemblyInfo | Select-String "AssemblyVersion" -Context 0, 1).Context.PostContext[0].Split('"')[1]
 
-
 $baseDir = "bin\Release\Version_$version"
 
 Write-Output "Publishing version $version to $baseDir"
