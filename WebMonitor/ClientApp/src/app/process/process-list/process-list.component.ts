@@ -9,7 +9,7 @@ import * as numberHelpers from "../../../helpers/number-helpers";
 @Component({
   selector: 'app-process-list',
   templateUrl: './process-list.component.html',
-  styleUrls: ['./process-list.component.css'],
+  styleUrls: ['./process-list.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
 export class ProcessListComponent implements AfterViewInit, OnDestroy {

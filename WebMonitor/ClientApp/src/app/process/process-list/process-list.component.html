@@ -10,7 +10,7 @@
       >
         <mat-option *ngFor="let filter of filters" [value]="filter">{{
           processFilterName(filter)
-        }}</mat-option>
+          }}</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -77,6 +77,6 @@
     </td>
   </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="headers"></tr>
+  <tr mat-header-row *matHeaderRowDef="headers; sticky: true"></tr>
   <tr mat-row *matRowDef="let row; columns: headers"></tr>
 </table>
