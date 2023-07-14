@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Native;
+using WebMonitor.Native.Battery;
 using WebMonitor.Native.Cpu;
 using WebMonitor.Native.Disk;
 using WebMonitor.Native.Gpu;
@@ -142,4 +143,10 @@ public class SysInfoController : ControllerBase
         _settings.NvidiaRefreshSettings.NRefreshIntervals = (int)nRefreshIntervals;
         return Ok();
     }
+    
+    /// <summary>
+    /// Fetches info about the battery
+    /// </summary>
+    [HttpGet("batteryInfo")]
+    public ActionResult<BatteryInfo?> BatteryInfo() => _sysInfo.BatteryInfo;
 }

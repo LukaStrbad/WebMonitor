@@ -65,9 +65,7 @@ public class LhmGpuUsage : IGpuUsage
     public void Refresh(int millisSinceRefresh)
     {
         if (UpdateVisitor is null)
-        {
             return;
-        }
 
         _gpu.Accept(UpdateVisitor);
     }

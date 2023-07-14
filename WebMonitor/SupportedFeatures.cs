@@ -3,6 +3,7 @@ using LibreHardwareMonitor.Hardware;
 using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Controllers;
 using WebMonitor.Native;
+using WebMonitor.Native.Battery;
 using WebMonitor.Native.Cpu;
 using WebMonitor.Native.Disk;
 using WebMonitor.Native.Memory;
@@ -40,7 +41,8 @@ public class SupportedFeatures
         var computer = new Computer
         {
             IsCpuEnabled = true,
-            IsGpuEnabled = true
+            IsGpuEnabled = true,
+            IsBatteryEnabled = true
         };
 
         computer.Open();
@@ -85,7 +87,7 @@ public class SupportedFeatures
         });
         FileDownload = true;
         FileUpload = true;
-        
+
         // NVML is only supported on x64
         if (RuntimeInformation.OSArchitecture == Architecture.X64)
         {
@@ -103,7 +105,7 @@ public class SupportedFeatures
         {
             NvidiaGpuUsage = false;
         }
-        
+
         if (OperatingSystem.IsLinux())
         {
             // AMD GPU usage is not yet supported on Linux
@@ -120,8 +122,16 @@ public class SupportedFeatures
 
         // LibreHardwareMonitor does not support Intel GPUs
         IntelGpuUsage = false;
-        // TODO: Implement this feature
-        BatteryInfo = false;
+
+        BatteryInfo = CheckFeature(() =>
+        {
+            var batteryInfo =
+                new BatteryInfo(computer.Hardware.First(hardware => hardware.HardwareType == HardwareType.Battery))
+                {
+                    UpdateVisitor = updateVisitor
+                };
+            batteryInfo.Refresh(1000);
+        });
     }
 
     private static bool CheckFeature(Action action)

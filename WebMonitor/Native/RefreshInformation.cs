@@ -9,7 +9,13 @@ public class RefreshInformation
     /// Time since last refresh
     /// </summary>
     public long MillisSinceLastRefresh { get; set; }
+    
+    /// <summary>
+    /// Time since last refresh for the second timer
+    /// </summary>
 
+    public long MilllisSinceLastRefresh2 { get; set; }
+    
     /// <summary>
     /// Interval between refreshes in milliseconds
     /// </summary>

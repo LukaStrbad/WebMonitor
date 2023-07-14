@@ -1,5 +1,5 @@
-import { Inject, Injectable, effect, signal, OnDestroy } from '@angular/core';
-import { firstValueFrom, Subject, Subscription } from "rxjs";
+import { effect, Inject, Injectable, signal } from '@angular/core';
+import { firstValueFrom, Subject } from "rxjs";
 import { SysInfoUsages } from "../model/sys-info/sys-info-usages";
 import { HttpClient } from "@angular/common/http";
 import { CpuUsage } from "../model/cpu-usage";
@@ -12,6 +12,7 @@ import { ComputerInfo } from "../model/computer-info";
 import { RefreshInformation } from 'src/model/refresh-information';
 import { NvidiaRefreshSetting, NvidiaRefreshSettings } from 'src/model/nvidia-refresh-setting';
 import { SupportedFeatures } from "../model/supported-features";
+import { BatteryInfo } from "../model/battery-info";
 
 @Injectable({
   providedIn: 'root'
@@ -80,7 +81,7 @@ export class SysInfoService {
     return this.data.computerInfo!;
   }
 
-  async getSupportedFeatures() : Promise<SupportedFeatures> {
+  async getSupportedFeatures(): Promise<SupportedFeatures> {
     if (this.supportedFeatures == null) {
       await this.refreshSupportedFeatures();
     }
@@ -112,6 +113,7 @@ export class SysInfoService {
       this.refreshGpuUsages(),
       this.refreshNetworkUsages(),
       this.refreshProcessInfos(),
+      this.refreshBatteryInfo()
     ]);
     // Notify subscribers that data has been refreshed
     this.onRefresh.next();
@@ -231,5 +233,15 @@ export class SysInfoService {
 
   private async updateNvidiaRefreshSettings(settings: NvidiaRefreshSettings) {
     await firstValueFrom(this.http.post(this.apiUrl + "nvidiaRefreshSettings", settings));
+  }
+
+  private async refreshBatteryInfo() {
+    // Refresh battery info only if it has not been refreshed for a long time
+    if (this.data.refreshInfo.millisSinceLastRefresh2 < (this.data.refreshInfo.refreshInterval * 5) * 0.9)
+      return;
+
+    this.data.batteryInfo = await firstValueFrom(
+      this.http.get<BatteryInfo | null>(this.apiUrl + "batteryInfo")
+    );
   }
 }

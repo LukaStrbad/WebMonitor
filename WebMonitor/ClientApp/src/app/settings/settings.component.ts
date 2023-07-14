@@ -59,7 +59,11 @@ export class SettingsComponent {
             supported: supportedFeatures.nvidiaRefreshSettings,
             note: "This feature is only supported on Windows because of high CPU usage on Windows on NVIDIA GPUs"
           },
-          { name: "Battery info", supported: supportedFeatures.batteryInfo, note: "This feature is work in progress" }
+          {
+            name: "Battery info",
+            supported: supportedFeatures.batteryInfo,
+            note: "This feature is unsupported or the PC doesn't contain a battery"
+          }
         ].map(f => {
           if (f.supported) {
             f.note = "This feature is supported";

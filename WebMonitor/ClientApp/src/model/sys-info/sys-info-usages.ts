@@ -6,10 +6,15 @@ import { NetworkUsages } from "../network-usage";
 import { ProcessList } from "../process-info";
 import { ComputerInfo } from "../computer-info";
 import { RefreshInformation } from "../refresh-information";
+import { BatteryInfo } from "../battery-info";
 
 export class SysInfoUsages {
   // Data age in milliseconds
-  private _millisSinceRefresh: RefreshInformation = { millisSinceLastRefresh: 0, refreshInterval: 0 };
+  private _millisSinceRefresh: RefreshInformation = {
+    millisSinceLastRefresh: 0,
+    millisSinceLastRefresh2: 0,
+    refreshInterval: 0
+  };
   // Keep history of usages for these values
   private _cpuUsages: (CpuUsage | null)[] = [];
   private _memoryUsages: (MemoryUsage | null)[] = [];
@@ -19,6 +24,7 @@ export class SysInfoUsages {
   // Don't keep history of these values
   private _processInfos: (ProcessList | null) = [];
   private _computerInfo: ComputerInfo | null = null;
+  private _batteryInfo: BatteryInfo | null = null;
 
   /**
    * Constructor
@@ -83,7 +89,7 @@ export class SysInfoUsages {
    * Function to update memory usage
    * @param memoryUsage
    */
-  updateMemoryUsage(memoryUsage: MemoryUsage  | null) {
+  updateMemoryUsage(memoryUsage: MemoryUsage | null) {
     this._memoryUsages.push(memoryUsage);
 
     if (this._memoryUsages.length > this.maxHistory) {
@@ -198,4 +204,18 @@ export class SysInfoUsages {
     return this._processInfos;
   }
 
+  /**
+   * Battery info getter
+   */
+  get batteryInfo(): BatteryInfo | null {
+    return this._batteryInfo;
+  }
+
+  /**
+   * Battery info setter
+   * @param value Battery info
+   */
+  set batteryInfo(value: BatteryInfo | null) {
+    this._batteryInfo = value;
+  }
 }

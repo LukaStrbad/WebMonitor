@@ -110,4 +110,48 @@
       </div>
     </mat-card-content>
   </mat-card>
+
+  <mat-card *ngIf="supportedFeatures?.batteryInfo">
+    <mat-card-header>
+      <mat-card-title class="mat-h1">Battery</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content *ngIf="sysInfo.data.batteryInfo">
+      <div class="mat-body-1">Charge level: {{ sysInfo.data.batteryInfo.chargeLevel | number:'1.0-1' }} %</div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.voltage">
+        Voltage: {{ sysInfo.data.batteryInfo.voltage / 1000 | number:'1.0-1' }} V
+      </div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.power != null">
+        <span matTooltip="Battery power (negative for discharging)">
+          Power: {{ sysInfo.data.batteryInfo.power / 1000 | number:'1.0-1' }} W
+        </span>
+      </div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.current != null">
+        <span matTooltip="Battery current (negative for discharging)">
+          Current: {{ sysInfo.data.batteryInfo.current / 1000 | number:'1.0-1' }} A
+        </span>
+      </div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.currentCapacity">
+        <span matTooltip="How much energy the battery currently holds">
+          Current capacity: {{ sysInfo.data.batteryInfo.currentCapacity / 1000 }} Wh
+        </span>
+      </div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.fullCapacity">
+        <span matTooltip="How much energy the battery holds when it's fully charged">
+          Full capacity: {{ sysInfo.data.batteryInfo.fullCapacity / 1000 }} Wh
+        </span>
+      </div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.designCapacity">
+        <span matTooltip="How much energy the battery should hold by design">
+          Design capacity: {{ sysInfo.data.batteryInfo.designCapacity / 1000 }} Wh
+        </span>
+      </div>
+      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.designCapacity && sysInfo.data.batteryInfo.fullCapacity">
+        <span matTooltip="The percentage of energy that the battery can hold compared to its design capacity">
+          Health: {{ sysInfo.data.batteryInfo.fullCapacity / sysInfo.data.batteryInfo.designCapacity * 100 | number: '1.0-2' }}
+          %
+        </span>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>
