@@ -103,7 +103,10 @@ export class ProcessListComponent implements AfterViewInit, OnDestroy {
       }
     }
 
-    dialogRef = this.dialog.open(ProcessDialogComponent, { data });
+    dialogRef = this.dialog.open(ProcessDialogComponent, {
+      data,
+      panelClass: "responsive-dialog"
+    });
   }
 }
 

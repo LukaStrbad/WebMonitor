@@ -19,3 +19,13 @@ $grey: mat.define-palette(mat.$grey-palette);
 table th {
   background-color: mat.get-color-from-palette($grey, 800);;
 }
+
+.responsive-dialog {
+  max-width: 800px !important;
+}
+
+@media (max-width: 970px) {
+  .responsive-dialog {
+    max-width: 80vw !important;
+  }
+}
