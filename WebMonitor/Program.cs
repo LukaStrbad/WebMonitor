@@ -32,6 +32,7 @@ var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
 // Initialize Settings and SysInfo early so they can start immediately
 var settings = Settings.Load();
 var sysInfo = new SysInfo(settings, version, supportedFeatures);
+var manager = new Manager(supportedFeatures);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(settings);
 builder.Services.AddSingleton(sysInfo);
 builder.Services.AddSingleton(supportedFeatures);
+builder.Services.AddSingleton(manager);
 
 if (builder.Environment.IsDevelopment())
 {

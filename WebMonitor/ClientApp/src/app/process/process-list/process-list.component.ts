@@ -5,6 +5,11 @@ import { Subscription } from 'rxjs';
 import { ProcessInfo } from 'src/model/process-info';
 import { SysInfoService } from 'src/services/sys-info.service';
 import * as numberHelpers from "../../../helpers/number-helpers";
+import { ManagerService } from "../../../services/manager.service";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { showErrorSnackbar, showOkSnackbar } from "../../../helpers/snackbar-helpers";
+import { ProcessDialogComponent, ProcessDialogData } from "../../components/process-dialog/process-dialog.component";
+import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 
 @Component({
   selector: 'app-process-list',
@@ -22,24 +27,36 @@ export class ProcessListComponent implements AfterViewInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
   numberHelpers = numberHelpers;
 
-  private readonly refreshSubscription: Subscription;
+  private readonly subscriptions: Subscription[] = [];
 
-  constructor(public sysInfo: SysInfoService) {
+  constructor(
+    public sysInfo: SysInfoService,
+    private manager: ManagerService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {
     // Load initial value
     if (sysInfo.data.processInfos != null) {
       this.dataSource.data = sysInfo.data.processInfos;
     }
 
     // Refresh on each tick
-    this.refreshSubscription = sysInfo.onRefresh.subscribe(() => {
+    this.subscriptions.push(sysInfo.onRefresh.subscribe(() => {
       if (sysInfo.data.processInfos != null) {
         this.dataSource.data = sysInfo.data.processInfos;
       }
-    });
+    }));
+
+    this.subscriptions.push(
+      manager.okEmitter.subscribe(message => showOkSnackbar(this.snackBar, message))
+    );
+    this.subscriptions.push(
+      manager.errorEmitter.subscribe(message => showErrorSnackbar(this.snackBar, message))
+    );
   }
 
   ngOnDestroy(): void {
-    this.refreshSubscription.unsubscribe();
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   ngAfterViewInit(): void {
@@ -73,6 +90,20 @@ export class ProcessListComponent implements AfterViewInit, OnDestroy {
       case ProcessFilter.Name:
         return "Name";
     }
+  }
+
+  async onProcessClick(process: ProcessInfo) {
+    let dialogRef: MatDialogRef<ProcessDialogComponent> | undefined = undefined;
+
+    let data: ProcessDialogData = {
+      processInfo: process,
+      onKill: async () => {
+        dialogRef?.close();
+        await this.manager.killProcess(process.pid);
+      }
+    }
+
+    dialogRef = this.dialog.open(ProcessDialogComponent, { data });
   }
 }
 

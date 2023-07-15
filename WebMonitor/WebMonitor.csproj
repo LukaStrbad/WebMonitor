@@ -35,6 +35,7 @@
 
     <ItemGroup>
       <Folder Include="ClientApp\src\app\usage\" />
+      <Folder Include="ClientApp\src\interceptors\" />
       <Folder Include="ClientApp\src\services\" />
     </ItemGroup>
 

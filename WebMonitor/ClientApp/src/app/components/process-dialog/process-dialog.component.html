@@ -1,0 +1,14 @@
+<h1 mat-dialog-title>{{ data.processInfo.name }} ({{ data.processInfo.pid }})</h1>
+<div mat-dialog-content>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onCloseClick()">Close</button>
+  <button
+    *ngIf="data.onKill"
+    mat-button
+    cdkFocusInitial
+    (click)="data.onKill()"
+  >Kill
+  </button>
+</div>

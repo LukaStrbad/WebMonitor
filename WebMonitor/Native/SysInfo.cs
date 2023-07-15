@@ -40,7 +40,7 @@ internal class SysInfo
     public IEnumerable<NetworkUsage>? NetworkUsages => _networkUsageTracker?.Interfaces;
     public List<DiskUsage>? DiskUsages => _diskUsageTracker?.DiskUsages;
     public IEnumerable<IGpuUsage>? GpuUsages { get; }
-    public BatteryInfo BatteryInfo { get; }
+    public BatteryInfo? BatteryInfo { get; }
 
     public SysInfo(Settings settings, string? version, SupportedFeatures supportedFeatures)
     {

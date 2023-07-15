@@ -44,6 +44,17 @@ $dark-theme: mat.define-dark-theme((
   .warn-color {
     color: mat.get-color-from-palette($warn-dark, 500);
   }
+
+  .mat-mdc-snack-bar-container {
+    &.error-snackbar {
+      background: mat.get-color-from-palette($warn-dark, 300);
+      // Dummy value to make the line above work
+      --mdc-snackbar-container-color: mat.get-color-from-palette($warn-dark, 300);
+      color: mat.get-color-from-palette($warn-dark, 50);
+      // Dummy value to make the line above work
+      --mdc-snackbar-supporting-text-color: mat.get-color-from-palette($warn-dark, 50);
+    }
+  }
 }
 
 .light-theme {
@@ -59,6 +70,17 @@ $dark-theme: mat.define-dark-theme((
 
   .warn-color {
     color: mat.get-color-from-palette($warn, 500);
+  }
+
+  .mat-mdc-snack-bar-container {
+    &.error-snackbar {
+      background: mat.get-color-from-palette($warn, 300);
+      // Dummy value to make the line above work
+      --mdc-snackbar-container-color: mat.get-color-from-palette($warn, 300);
+      color: mat.get-color-from-palette($warn, 50);
+      // Dummy value to make the line above work
+      --mdc-snackbar-supporting-text-color: mat.get-color-from-palette($warn, 50);
+    }
   }
 }
 
