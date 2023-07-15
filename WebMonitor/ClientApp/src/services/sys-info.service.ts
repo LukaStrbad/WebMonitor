@@ -1,7 +1,7 @@
-import { effect, Inject, Injectable, signal } from '@angular/core';
-import { firstValueFrom, Subject } from "rxjs";
+import { effect, EventEmitter, Inject, Injectable, signal } from '@angular/core';
+import { catchError, firstValueFrom, Subject, throwError } from "rxjs";
 import { SysInfoUsages } from "../model/sys-info/sys-info-usages";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { CpuUsage } from "../model/cpu-usage";
 import { MemoryUsage } from "../model/memory-usage";
 import { DiskUsages } from "../model/disk-usage";
@@ -13,6 +13,7 @@ import { RefreshInformation } from 'src/model/refresh-information';
 import { NvidiaRefreshSetting, NvidiaRefreshSettings } from 'src/model/nvidia-refresh-setting';
 import { SupportedFeatures } from "../model/supported-features";
 import { BatteryInfo } from "../model/battery-info";
+import { ExtendedProcessInfo } from "../model/extended-process-info";
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +36,8 @@ export class SysInfoService {
   refreshDelay: number = 0;
   lastSettingsUpdate = 0n;
   private supportedFeatures: SupportedFeatures | null = null;
+
+  errorEmitter = new EventEmitter<[SysInfoError, string]>();
 
   constructor(
     private http: HttpClient,
@@ -244,4 +247,18 @@ export class SysInfoService {
       this.http.get<BatteryInfo | null>(this.apiUrl + "batteryInfo")
     );
   }
+
+  async getExtendedProcessInfo(pid: number): Promise<ExtendedProcessInfo> {
+    return await firstValueFrom(
+      this.http.get<ExtendedProcessInfo>(`${this.apiUrl}extendedProcessInfo?pid=${pid}`)
+        .pipe(catchError((err: HttpErrorResponse) => {
+          this.errorEmitter.emit([SysInfoError.ExtendedProcessInfo, err.error]);
+          return throwError(() => err.error);
+        }))
+    );
+  }
+}
+
+export enum SysInfoError {
+  ExtendedProcessInfo
 }

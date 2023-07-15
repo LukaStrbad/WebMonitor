@@ -40,6 +40,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from "@angular/material/list";
 import { ProcessDialogComponent } from './components/process-dialog/process-dialog.component';
 import { HttpClientModule } from "@angular/common/http";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatChipsModule } from "@angular/material/chips";
 
 @NgModule({
   declarations: [
@@ -81,7 +83,9 @@ import { HttpClientModule } from "@angular/common/http";
     MatSnackBarModule,
     MatRippleModule,
     MatSelectModule,
-    MatListModule
+    MatListModule,
+    MatProgressSpinnerModule,
+    MatChipsModule
   ],
   providers: [{ provide: LOCALE_ID, useValue: "hr-HR" }],
   bootstrap: [AppComponent]

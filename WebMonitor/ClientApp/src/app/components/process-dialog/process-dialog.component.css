@@ -1,0 +1,11 @@
+mat-spinner {
+  margin: 0 auto;
+}
+
+.extended-info > p {
+  margin-bottom: 0;
+}
+
+.extended-info > p:last-of-type {
+  margin-bottom: 12pt;
+}

@@ -1,5 +1,48 @@
 <h1 mat-dialog-title>{{ data.processInfo.name }} ({{ data.processInfo.pid }})</h1>
 <div mat-dialog-content>
+  <mat-spinner *ngIf="!extendedInfo && !error"></mat-spinner>
+  <div *ngIf="error" class="mat-headline-6 warn-color">{{ error }}</div>
+  <div *ngIf="extendedInfo" class="extended-info">
+    <p *ngIf="extendedInfo.owner">Owner: {{ extendedInfo.owner }}</p>
+    <p *ngIf="extendedInfo.priorityWin" class="mat-body-1">
+      Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
+    </p>
+    <p>Thread count: {{ extendedInfo.threadCount }}</p>
+    <p>Handle count: {{ extendedInfo.handleCount }}</p>
+    <p>
+      <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakWorkingSet) }}">
+        Working set: {{ numberHelpers.toByteString(extendedInfo.workingSet) }}
+      </span>
+    </p>
+    <p>
+      <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakPagedMemory) }}">
+        Virtual size: {{ numberHelpers.toByteString(extendedInfo.pagedMemory) }}
+      </span>
+    </p>
+    <p>
+      <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakVirtualMemory) }}">
+        Paged memory: {{ numberHelpers.toByteString(extendedInfo.virtualMemory) }}
+      </span>
+    </p>
+    <p>
+      Private memory: {{ numberHelpers.toByteString(extendedInfo.privateMemory) }}
+    </p>
+
+
+    <mat-card *ngIf="affinityThreads" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title matTooltip="Which threads this process can run on">Enabled threads (affinity)</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-chip-listbox [selectable]="false" multiple>
+          <mat-chip-option *ngFor="let thread of affinityThreads; let i = index" [selected]="thread">
+            CPU {{ i }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
 
 <div mat-dialog-actions>

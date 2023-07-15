@@ -9,6 +9,7 @@ using WebMonitor.Native.Gpu;
 using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
+using WebMonitor.Native.Process.Win;
 using WebMonitor.Options;
 
 namespace WebMonitor.Controllers;
@@ -33,14 +34,14 @@ public class SysInfoController : ControllerBase
     /// Returns the current version of WebMonitor
     /// </summary>
     [HttpGet("version")]
-    public ActionResult<string?> Version() => _sysInfo.Version; 
-    
+    public ActionResult<string?> Version() => _sysInfo.Version;
+
     /// <summary>
     /// Returns server supported features
     /// </summary>
     [HttpGet("supportedFeatures")]
     public ActionResult<SupportedFeatures> SupportedFeatures() => _supportedFeatures;
-    
+
     /// <summary>
     /// Returns the client IP address
     /// </summary>
@@ -52,7 +53,7 @@ public class SysInfoController : ControllerBase
     /// </summary>
     [HttpGet("refreshInfo")]
     public ActionResult<RefreshInformation> RefreshInfo() => _sysInfo.RefreshInfo;
-    
+
     /// <summary>
     /// Returns milliseconds since Unix epoch when the settings were last updated
     /// </summary>
@@ -143,10 +144,29 @@ public class SysInfoController : ControllerBase
         _settings.NvidiaRefreshSettings.NRefreshIntervals = (int)nRefreshIntervals;
         return Ok();
     }
-    
+
     /// <summary>
     /// Fetches info about the battery
     /// </summary>
     [HttpGet("batteryInfo")]
     public ActionResult<BatteryInfo?> BatteryInfo() => _sysInfo.BatteryInfo;
+
+    [HttpGet("extendedProcessInfo")]
+    public ActionResult<ExtendedProcessInfo> ExtendedProcessInfo([FromQuery] int pid)
+    {
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                var processInfo = new ExtendedProcessInfoWin(pid);
+                return new OkObjectResult(processInfo);
+            }
+        }
+        catch (Exception e)
+        {
+            return new BadRequestObjectResult(e.Message);
+        }
+
+        return new BadRequestResult();
+    }
 }
