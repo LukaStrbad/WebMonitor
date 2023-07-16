@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, Inject, LOCALE_ID, OnDestroy } from '@angular/core';
 import { ProcessInfo } from "../../../model/process-info";
-import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { ExtendedProcessInfo } from "../../../model/extended-process-info";
 import { SysInfoError, SysInfoService } from "../../../services/sys-info.service";
 import { Subscription } from "rxjs";
@@ -8,6 +8,7 @@ import { ProcessPriorityWin } from "../../../model/process-priority";
 import * as numberHelpers from "../../../helpers/number-helpers";
 import { SupportedFeatures } from "../../../model/supported-features";
 import { ManagerService } from "../../../services/manager.service";
+import { ActionsDialogComponent, ActionsDialogData } from "../actions-dialog/actions-dialog.component";
 
 @Component({
   selector: 'app-process-dialog',
@@ -22,26 +23,30 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
   error?: string;
   supportedFeatures?: SupportedFeatures;
 
+  selectedPriority = ProcessPriorityWin.Normal;
+  allProcessPriorities = [
+    ProcessPriorityWin.Realtime, ProcessPriorityWin.High, ProcessPriorityWin.AboveNormal,
+    ProcessPriorityWin.Normal, ProcessPriorityWin.BelowNormal, ProcessPriorityWin.Idle
+  ];
+
   numberHelpers = numberHelpers;
 
   constructor(
-    public dialogRef: MatDialogRef<ProcessDialogComponent>,
     private sysInfo: SysInfoService,
     private manager: ManagerService,
-    @Inject(MAT_DIALOG_DATA) public data: ProcessDialogData,
-    @Inject(LOCALE_ID) public locale: string
+    public dialog: MatDialog,
+    @Inject(MAT_DIALOG_DATA) public data: ProcessDialogData
   ) {
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
   }
 
-  onCloseClick() {
-    this.dialogRef.close();
-  }
-
   ngAfterViewInit(): void {
     this.sysInfo.getExtendedProcessInfo(this.data.processInfo.pid).then(async info => {
       this.extendedInfo = info;
+      if (info.priorityWin) {
+        this.selectedPriority = info.priorityWin;
+      }
 
       const computerInfo = await this.sysInfo.getComputerInfo();
       if (!computerInfo.cpu || !this.supportedFeatures?.processAffinity) {
@@ -50,7 +55,6 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
 
       this.affinityThreads = this.getAffinityArray(computerInfo.cpu.numThreads, info.affinity);
       this.rowsArray = this.getRowsArray(this.affinityThreads);
-      console.log(this.rowsArray);
     });
 
     this.subscription = this.sysInfo.errorEmitter.subscribe(message => {
@@ -165,6 +169,36 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
       if (this.affinityThreads![i] !== affinityArray[i]) {
         this.affinityThreads![i] = affinityArray[i];
       }
+    }
+  }
+
+  /**
+   * Function that is called when the priority is changed.
+   */
+  async onPriorityChange() {
+    if (this.selectedPriority === ProcessPriorityWin.Realtime) {
+      let data: ActionsDialogData = {
+        title: "Are you sure you want to set the priority to Real time?",
+        content: "This will set the process priority to Real time. This could make the system completely unresponsive if the process is using too much CPU.",
+        positiveButton: ["Yes, set to Real time", async () => await this.changePriority()]
+      };
+      this.dialog.open(ActionsDialogComponent, { data });
+    } else {
+      await this.changePriority();
+    }
+  }
+
+  /**
+   * Change the priority of the process.
+   */
+  private async changePriority() {
+    const response = await this.manager.changeProcessPriority({
+      pid: this.data.processInfo.pid,
+      priority: this.selectedPriority
+    });
+
+    if (response) {
+      this.extendedInfo!.priorityWin = this.selectedPriority;
     }
   }
 }
