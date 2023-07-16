@@ -1,8 +1,8 @@
 ﻿export enum ProcessPriorityWin {
-  Realtime,
-  High,
-  AboveNormal,
-  Normal,
-  BelowNormal,
-  Low
+  Normal = 0x20,
+  Idle = 0x40,
+  High = 0x80,
+  Realtime = 0x100,
+  BelowNormal = 0x4000,
+  AboveNormal = 0x8000
 }

@@ -63,7 +63,10 @@ export class SettingsComponent {
             name: "Battery info",
             supported: supportedFeatures.batteryInfo,
             note: "This feature is unsupported or the PC doesn't contain a battery"
-          }
+          },
+          { name: "Process priority", supported: supportedFeatures.processPriority },
+          { name: "Process priority change", supported: supportedFeatures.processPriorityChange },
+          { name: "Process affinity", supported: supportedFeatures.processAffinity },
         ].map(f => {
           if (f.supported) {
             f.note = "This feature is supported";

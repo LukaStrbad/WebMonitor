@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using WebMonitor.Model;
 using WebMonitor.Native;
 
 namespace WebMonitor.Controllers;
@@ -27,6 +29,42 @@ public class ManagerController
         {
             var name = Manager.KillProcess(pid);
             return new OkObjectResult(name);
+        }
+        catch (Exception e)
+        {
+            return new BadRequestObjectResult(e.Message);
+        }
+    }
+    
+    /// <summary>
+    /// Changes the priority of a process by its PID
+    /// </summary>
+    /// <param name="request">Object containing process ID and new priority</param>
+    /// <returns>The set priority or null if not supported</returns>
+    [HttpPost("changeProcessPriority")]
+    public ActionResult<ProcessPriorityClass?> ChangeProcessPriority([FromBody] ChangePriorityRequest request)
+    {
+        try
+        {
+            var priority = _manager.ChangePriority(request.Pid, request.Priority);
+            return new OkObjectResult(priority);
+        }
+        catch (Exception e)
+        {
+            return new BadRequestObjectResult(e.Message);
+        }
+    }
+
+    [HttpPost("changeProcessAffinity")]
+    public ActionResult<ulong> ChangeProcessAffinity([FromBody] ChangeAffinityRequest request)
+    {
+        if (!OperatingSystem.IsWindows() && !OperatingSystem.IsLinux())
+            return new BadRequestObjectResult("This platform is unsupported");
+        
+        try
+        {
+            var affinity = _manager.ChangeAffinity(request.Pid, request.ThreadNumber, request.On);
+            return new OkObjectResult(affinity);
         }
         catch (Exception e)
         {

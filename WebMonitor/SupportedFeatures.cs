@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using LibreHardwareMonitor.Hardware;
 using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Controllers;
@@ -34,6 +35,9 @@ public class SupportedFeatures
     public bool FileUpload { get; set; }
     public bool NvidiaRefreshSettings { get; set; }
     public bool BatteryInfo { get; set; }
+    public bool ProcessPriority { get; set; }
+    public bool ProcessPriorityChange { get; set; }
+    public bool ProcessAffinity { get; set; }
 
     public SupportedFeatures()
     {
@@ -112,14 +116,23 @@ public class SupportedFeatures
             AmdGpuUsage = false;
             // This is unnecessary on Linux
             NvidiaRefreshSettings = false;
+            ProcessPriority = false;
+            ProcessPriorityChange = false;
         }
         else if (OperatingSystem.IsWindows())
         {
             AmdGpuUsage = true;
             IntelGpuUsage = false;
             NvidiaRefreshSettings = NvidiaGpuUsage;
+            ProcessPriority = true;
+            ProcessPriorityChange = CheckFeature(() =>
+            {
+                var currentProcess = Process.GetCurrentProcess();
+                currentProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
+                currentProcess.PriorityClass = ProcessPriorityClass.Normal;
+            });
         }
-
+        
         // LibreHardwareMonitor does not support Intel GPUs
         IntelGpuUsage = false;
 
@@ -132,6 +145,8 @@ public class SupportedFeatures
                 };
             batteryInfo.Refresh(1000);
         });
+
+        ProcessAffinity = OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
     }
 
     private static bool CheckFeature(Action action)

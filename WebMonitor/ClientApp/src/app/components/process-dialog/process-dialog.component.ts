@@ -6,6 +6,7 @@ import { SysInfoError, SysInfoService } from "../../../services/sys-info.service
 import { Subscription } from "rxjs";
 import { ProcessPriorityWin } from "../../../model/process-priority";
 import * as numberHelpers from "../../../helpers/number-helpers";
+import { SupportedFeatures } from "../../../model/supported-features";
 
 @Component({
   selector: 'app-process-dialog',
@@ -17,6 +18,7 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
   affinityThreads: boolean[] | null = null;
   subscription?: Subscription;
   error?: string;
+  supportedFeatures?: SupportedFeatures;
 
   numberHelpers = numberHelpers;
 
@@ -26,6 +28,8 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
     @Inject(MAT_DIALOG_DATA) public data: ProcessDialogData,
     @Inject(LOCALE_ID) public locale: string
   ) {
+    sysInfo.getSupportedFeatures()
+      .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
   }
 
   onCloseClick() {
@@ -34,8 +38,10 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.sysInfo.getExtendedProcessInfo(this.data.processInfo.pid).then(async info => {
+      this.extendedInfo = info;
+
       const computerInfo = await this.sysInfo.getComputerInfo();
-      if (!computerInfo.cpu) {
+      if (!computerInfo.cpu || !this.supportedFeatures?.processAffinity) {
         return;
       }
 
@@ -51,7 +57,6 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
         }
       }
 
-      this.extendedInfo = info;
     });
 
     this.subscription = this.sysInfo.errorEmitter.subscribe(message => {
@@ -69,19 +74,19 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
   processPriorityName(priority: ProcessPriorityWin) {
     switch (priority) {
       case ProcessPriorityWin.Realtime:
-        return "Real time";
+        return 'Real time';
       case ProcessPriorityWin.High:
-        return "High";
+        return 'High';
       case ProcessPriorityWin.AboveNormal:
-        return "Above normal";
+        return 'Above normal';
       case ProcessPriorityWin.Normal:
-        return "Normal";
+        return 'Normal';
       case ProcessPriorityWin.BelowNormal:
-        return "Below normal";
-      case ProcessPriorityWin.Low:
-        return "Idle";
+        return 'Below normal';
+      case ProcessPriorityWin.Idle:
+        return 'Idle';
       default:
-        return "Unknown";
+        return 'Unknown';
     }
   }
 

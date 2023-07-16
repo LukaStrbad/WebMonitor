@@ -1,4 +1,5 @@
-﻿using System.Management;
+﻿using System.Diagnostics;
+using System.Management;
 using System.Runtime.Versioning;
 
 using SystemProcess = System.Diagnostics.Process;
@@ -10,14 +11,14 @@ public class ExtendedProcessInfoWin : ExtendedProcessInfo
     /// <summary>
     /// Process priority
     /// </summary>
-    public ProcessPriority PriorityWin { get; init; }
+    public ProcessPriorityClass PriorityWin { get; init; }
 
 
     [SupportedOSPlatform("windows")]
     public ExtendedProcessInfoWin(int pid) : base(pid)
     {
         Owner = GetProcessOwner(pid);
-        PriorityWin = GetPriorityFromNumber(Process.BasePriority);
+        PriorityWin = Process.PriorityClass;
     }
 
     [SupportedOSPlatform("windows")]
@@ -39,22 +40,4 @@ public class ExtendedProcessInfoWin : ExtendedProcessInfo
 
         return null;
     }
-
-    /// <summary>
-    /// Returns the process priority from base priority number
-    /// </summary>
-    /// <param name="value">Base priority number from <see cref="System.Diagnostics.Process.BasePriority"/></param>
-    /// <returns><see cref="ProcessPriority"/></returns>
-    [SupportedOSPlatform("windows")]
-    private static ProcessPriority GetPriorityFromNumber(int value)
-        => value switch
-        {
-            4 => ProcessPriority.Low,
-            6 => ProcessPriority.BelowNormal,
-            8 => ProcessPriority.Normal,
-            10 => ProcessPriority.AboveNormal,
-            13 => ProcessPriority.High,
-            24 => ProcessPriority.Realtime,
-            _ => ProcessPriority.Normal
-        };
 }

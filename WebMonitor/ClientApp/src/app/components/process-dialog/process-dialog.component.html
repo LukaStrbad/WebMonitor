@@ -1,12 +1,24 @@
 <h1 mat-dialog-title>{{ data.processInfo.name }} ({{ data.processInfo.pid }})</h1>
+
 <div mat-dialog-content>
+
   <mat-spinner *ngIf="!extendedInfo && !error"></mat-spinner>
+
   <div *ngIf="error" class="mat-headline-6 warn-color">{{ error }}</div>
+
   <div *ngIf="extendedInfo" class="extended-info">
     <p *ngIf="extendedInfo.owner">Owner: {{ extendedInfo.owner }}</p>
-    <p *ngIf="extendedInfo.priorityWin" class="mat-body-1">
-      Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
-    </p>
+    <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityWin">
+      <p *ngIf="supportedFeatures?.processPriorityChange; else noPriorityChange">
+        <!-- TODO: Add ability to change priority -->
+        Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
+      </p>
+      <ng-template #noPriorityChange>
+        <p>
+          Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
+        </p>
+      </ng-template>
+    </ng-container>
     <p>Thread count: {{ extendedInfo.threadCount }}</p>
     <p>Handle count: {{ extendedInfo.handleCount }}</p>
     <p>
@@ -42,6 +54,7 @@
         </mat-chip-listbox>
       </mat-card-content>
     </mat-card>
+
   </div>
 </div>
 

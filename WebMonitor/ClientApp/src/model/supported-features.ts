@@ -15,4 +15,7 @@
   fileUpload: boolean;
   nvidiaRefreshSettings: boolean;
   batteryInfo: boolean;
+  processPriority: boolean;
+  processPriorityChange: boolean;
+  processAffinity: boolean;
 }
