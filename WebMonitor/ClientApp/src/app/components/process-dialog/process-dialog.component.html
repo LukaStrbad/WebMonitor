@@ -47,9 +47,17 @@
       </mat-card-header>
 
       <mat-card-content>
-        <mat-chip-listbox [selectable]="false" multiple>
-          <mat-chip-option *ngFor="let thread of affinityThreads; let i = index" [selected]="thread">
+        <!-- Multiple rows ensure that chips have correct animations -->
+        <mat-chip-listbox [selectable]="false" *ngFor="let row of rowsArray" multiple>
+          <mat-chip-option *ngFor="let i of row" [selected]="affinityThreads[i]" (click)="changeAffinity(i)">
             CPU {{ i }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+
+        <mat-chip-listbox [selectable]="false">
+          <mat-chip-option [selected]="allAffinityThreadsSelected()" (click)="enableAllThreads()"
+          matTooltip="Enable all threads">
+            CPU 0 - {{ affinityThreads.length - 1 }}
           </mat-chip-option>
         </mat-chip-listbox>
       </mat-card-content>

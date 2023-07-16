@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.Versioning;
+using WebMonitor.Model;
 using SystemProcess = System.Diagnostics.Process;
 
 namespace WebMonitor.Native;
@@ -33,32 +34,36 @@ public class Manager
 
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]
-    public ulong ChangeAffinity(int pid, int threadNumber, bool on)
+    public ulong ChangeAffinity(int pid, List<ChangeAffinityRequest.ThreadInfo> threadInfos)
     {
         if (!_supportedFeatures.ProcessAffinity)
             return 0;
-
-        if (threadNumber < 0 || threadNumber >= Environment.ProcessorCount)
-            throw new ArgumentOutOfRangeException(nameof(threadNumber),
-                "Thread number must be between 0 and the number of logical processors - 1");
+        
+        if (threadInfos.Any(t => t.ThreadIndex < 0 || t.ThreadIndex >= Environment.ProcessorCount))
+            throw new ArgumentOutOfRangeException(nameof(threadInfos),
+                "Thread index must be between 0 and the number of logical processors - 1");
 
         var process = SystemProcess.GetProcessById(pid);
-        if (on)
+
+        foreach (var threadInfo in threadInfos)
         {
-            process.ProcessorAffinity |= (nint)(1UL << threadNumber);
-        }
-        else
-        {
-            ulong bitMask = 1;
-            for (var i = 0; i < Environment.ProcessorCount; i++)
+            if (threadInfo.On)
             {
-                bitMask *= 2;
+                process.ProcessorAffinity |= (nint)(1UL << threadInfo.ThreadIndex);
             }
+            else
+            {
+                ulong bitMask = 1;
+                for (var i = 0; i < Environment.ProcessorCount; i++)
+                {
+                    bitMask *= 2;
+                }
 
-            bitMask--;
-            bitMask &= ~(1UL << threadNumber);
+                bitMask--;
+                bitMask &= ~(1UL << threadInfo.ThreadIndex);
 
-            process.ProcessorAffinity &= (nint)bitMask;
+                process.ProcessorAffinity &= (nint)bitMask;
+            }
         }
 
         return (ulong)process.ProcessorAffinity;

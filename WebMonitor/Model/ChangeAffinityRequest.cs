@@ -8,12 +8,14 @@ public class ChangeAffinityRequest
     public int Pid { get; set; }
 
     /// <summary>
-    /// Thread number to change processor affinity for
+    /// Information about the threads
     /// </summary>
-    public int ThreadNumber { get; set; }
+    public List<ThreadInfo> Threads { get; set; } = new();
 
     /// <summary>
     /// Whether the thread should be active or not
     /// </summary>
-    public bool On { get; set; }
+    /// <param name="ThreadIndex">Thread index to change processor affinity for</param>
+    /// <param name="On">Whether the thread should be active or not</param>
+    public record ThreadInfo(int ThreadIndex, bool On);
 }

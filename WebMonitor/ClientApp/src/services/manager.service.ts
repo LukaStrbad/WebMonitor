@@ -1,7 +1,9 @@
 import { EventEmitter, Inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpResponse } from "@angular/common/http";
 import { catchError, firstValueFrom, throwError } from "rxjs";
-import { showErrorSnackbar } from "../helpers/snackbar-helpers";
+import { ChangePriorityRequest } from "../model/requests/change-priority-request";
+import { ProcessPriorityWin } from "../model/process-priority";
+import { ChangeAffinityRequest } from "../model/requests/change-affinity-request";
 
 @Injectable({
   providedIn: 'root'
@@ -36,5 +38,31 @@ export class ManagerService {
       this.errorEmitter.emit("Error: " + error.error);
     }
     return throwError(() => error.error);
+  }
+
+  async changeProcessPriority(value: ChangePriorityRequest) {
+    const response = await firstValueFrom(
+      this.http.post<ProcessPriorityWin>(this.apiUrl + "changeProcessPriority", value, { observe: "response" })
+        .pipe(catchError(e => this.handleError(e, `Failed to change priority of process with PID ${value.pid}`)))
+    );
+
+    if (response.ok && value.priority == response.body) {
+      this.okEmitter.emit(`Successfully changed priority of process with PID ${value.pid}`);
+    }
+
+    return response.body;
+  }
+
+  async changeProcessAffinity(value: ChangeAffinityRequest) {
+    const response = await firstValueFrom(
+      this.http.post<bigint>(this.apiUrl + "changeProcessAffinity", value, { observe: "response" })
+        .pipe(catchError(e => this.handleError(e, `Failed to change affinity of process with PID ${value.pid}`)))
+    );
+
+    if (response.ok) {
+      this.okEmitter.emit(`Successfully changed affinity of process with PID ${value.pid}`);
+    }
+
+    return response.body;
   }
 }

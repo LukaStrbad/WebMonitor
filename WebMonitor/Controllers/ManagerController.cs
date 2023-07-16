@@ -55,6 +55,11 @@ public class ManagerController
         }
     }
 
+    /// <summary>
+    /// Changes the affinity of a process by its PID
+    /// </summary>
+    /// <param name="request">Object containing process ID nad thread indices and if the threads should be on or off</param>
+    /// <returns>The set affinity of the process</returns>
     [HttpPost("changeProcessAffinity")]
     public ActionResult<ulong> ChangeProcessAffinity([FromBody] ChangeAffinityRequest request)
     {
@@ -63,7 +68,7 @@ public class ManagerController
         
         try
         {
-            var affinity = _manager.ChangeAffinity(request.Pid, request.ThreadNumber, request.On);
+            var affinity = _manager.ChangeAffinity(request.Pid, request.Threads);
             return new OkObjectResult(affinity);
         }
         catch (Exception e)
