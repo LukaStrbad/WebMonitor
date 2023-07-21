@@ -11,14 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "get-port": "^7.0.0",
-    "node-polyfill-webpack-plugin": "^2.0.1",
     "node-pty": "0.10.1",
     "ws": "^8.13.0"
   },
   "bin": {
     "terminal-server": "index.js"
-  },
-  "devDependencies": {
-    "ncc": "^0.3.6"
   }
 }

@@ -21,16 +21,18 @@ public class TerminalPlugin : ITerminalPlugin
         Port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
 
-        var fileName = OperatingSystem.IsWindows() ? @"cmd.exe" : "bash";
-        var arguments = OperatingSystem.IsWindows() ? "/c node" : "-c node";
+        var fileName = OperatingSystem.IsWindows() ? "cmd.exe" : "bash";
         var indexJs = Path.Combine(parentDirectory, "index.js");
+        var arguments = OperatingSystem.IsWindows() 
+            ? $"/c node {indexJs} {Port}" 
+            : $"""-c "node {indexJs} {Port}" """;
 
         _process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = fileName,
-                Arguments = $"{arguments} {indexJs} {Port}",
+                Arguments = arguments,
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             }
@@ -39,7 +41,11 @@ public class TerminalPlugin : ITerminalPlugin
 
         var output = _process.StandardOutput.ReadLine();
 
-        return output == $"Terminal server started on port {Port}";
+        var result = output == $"Terminal server started on port {Port}";
+        if (!result) 
+            Port = null;
+
+        return result;
     }
 
     public bool Stop()

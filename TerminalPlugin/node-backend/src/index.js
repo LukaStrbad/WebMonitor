@@ -3,7 +3,6 @@ const pty = require('node-pty');
 const WebSocket = require('ws');
 
 // Get port from arguments
-console.log(`Arguments: ${process.argv}`);
 const port = process.argv[2];
 
 if (!port) {

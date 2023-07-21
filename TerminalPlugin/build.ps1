@@ -2,7 +2,7 @@ Remove-Item build -Recurse
 
 cd .\node-backend
 npm install
-npx ncc build .\src\index.js -o ..\build
+ncc build .\src\index.js -o ..\build
 cd ..
 
 mkdir build\win-x64 -Force
