@@ -42,6 +42,8 @@ import { ProcessDialogComponent } from './components/process-dialog/process-dial
 import { HttpClientModule } from "@angular/common/http";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatChipsModule } from "@angular/material/chips";
+import { ActionsDialogComponent } from './components/actions-dialog/actions-dialog.component';
+import { TerminalComponent } from './terminal/terminal.component';
 
 @NgModule({
   declarations: [
@@ -58,7 +60,9 @@ import { MatChipsModule } from "@angular/material/chips";
     ColorInputComponent,
     FileDialogComponent,
     EllipsisPipe,
-    ProcessDialogComponent
+    ProcessDialogComponent,
+    ActionsDialogComponent,
+    TerminalComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

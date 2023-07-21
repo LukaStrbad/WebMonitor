@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.WebSockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CommandLine;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using WebMonitor;
 using WebMonitor.Native;
 using WebMonitor.Options;
+using WebMonitor.Plugins;
 
 [assembly: InternalsVisibleTo("WebMonitorTests")]
 
@@ -36,12 +38,24 @@ var manager = new Manager(supportedFeatures);
 
 var builder = WebApplication.CreateBuilder(args);
 
+using var loggerFactory = LoggerFactory.Create(loggingBuilder => loggingBuilder
+    .SetMinimumLevel(LogLevel.Trace)
+    .AddConsole());
+
+var pluginLoader = new PluginLoader(loggerFactory.CreateLogger<PluginLoader>());
+pluginLoader.Load();
+supportedFeatures.ReevaluateWithPlugins(pluginLoader);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton(settings);
 builder.Services.AddSingleton(sysInfo);
 builder.Services.AddSingleton(supportedFeatures);
 builder.Services.AddSingleton(manager);
+builder.Services.AddSingleton(pluginLoader);
 
 if (builder.Environment.IsDevelopment())
 {
@@ -98,10 +112,10 @@ else
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
+app.UseWebSockets();
 
 app.MapControllerRoute(
     name: "default",
@@ -111,6 +125,65 @@ app.MapControllerRoute(
 app.MapFallbackToFile("index.html");
 
 app.Lifetime.ApplicationStopping.Register(() => { settings.Save(); });
+
+app.Use(async (context, next) =>
+{
+    // If it's a WebSocket request at /terminal, proxy it to the backend
+    if (context.WebSockets.IsWebSocketRequest && context.Request.Path == "/terminal")
+    {
+        Console.WriteLine("New WebSocket request");
+        using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+
+        var terminalPlugin = pluginLoader.TerminalPlugin;
+        
+        if (terminalPlugin?.Port is null)
+        {
+            var message = "Terminal plugin not loaded or is not running."u8.ToArray();
+            await webSocket.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true,
+                CancellationToken.None);
+            return;
+        }
+        
+        // Client is used to proxy websocket requests
+        var client = new ClientWebSocket();
+        
+        await client.ConnectAsync(new Uri($"ws://localhost:{terminalPlugin.Port}"), CancellationToken.None);
+        
+        var task1 = Task.Run(async () =>
+        {
+            var buffer = new byte[1024 * 4];
+            var receiveResult = await client.ReceiveAsync(
+                new ArraySegment<byte>(buffer), CancellationToken.None);
+        
+            while (!receiveResult.CloseStatus.HasValue)
+            {
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, receiveResult.Count),
+                    WebSocketMessageType.Text, true,
+                    CancellationToken.None);
+        
+                receiveResult = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            }
+        });
+        
+        var buffer = new byte[1024 * 4];
+        var receiveResult = await webSocket.ReceiveAsync(
+            new ArraySegment<byte>(buffer), CancellationToken.None);
+        
+        while (!receiveResult.CloseStatus.HasValue)
+        {
+            await client.SendAsync(new ArraySegment<byte>(buffer, 0, receiveResult.Count), WebSocketMessageType.Text,
+                true, CancellationToken.None);
+        
+            receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+        }
+        
+        await task1;
+    }
+    else
+    {
+        await next(context);
+    }
+});
 
 Console.WriteLine("Starting server...");
 app.Run();

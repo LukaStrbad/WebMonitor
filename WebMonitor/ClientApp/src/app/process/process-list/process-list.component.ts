@@ -93,17 +93,14 @@ export class ProcessListComponent implements AfterViewInit, OnDestroy {
   }
 
   async onProcessClick(process: ProcessInfo) {
-    let dialogRef: MatDialogRef<ProcessDialogComponent> | undefined = undefined;
-
     let data: ProcessDialogData = {
       processInfo: process,
       onKill: async () => {
-        dialogRef?.close();
         await this.manager.killProcess(process.pid);
       }
     }
 
-    dialogRef = this.dialog.open(ProcessDialogComponent, { data });
+    this.dialog.open(ProcessDialogComponent, { data });
   }
 }
 

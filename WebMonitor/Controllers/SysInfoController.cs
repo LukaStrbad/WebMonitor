@@ -40,7 +40,10 @@ public class SysInfoController : ControllerBase
     /// Returns server supported features
     /// </summary>
     [HttpGet("supportedFeatures")]
-    public ActionResult<SupportedFeatures> SupportedFeatures() => _supportedFeatures;
+    public ActionResult<SupportedFeatures> SupportedFeatures()
+    {
+        return _supportedFeatures;
+    }
 
     /// <summary>
     /// Returns the client IP address
