@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMonitor", "WebMonitor\We
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebMonitorTests", "WebMonitorTests\WebMonitorTests.csproj", "{B2FC8B19-E5F2-4949-ACCD-39299D69C572}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerminalPlugin", "TerminalPlugin\TerminalPlugin.csproj", "{F943A178-2853-4EFE-869E-C44FD4766461}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{B2FC8B19-E5F2-4949-ACCD-39299D69C572}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2FC8B19-E5F2-4949-ACCD-39299D69C572}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2FC8B19-E5F2-4949-ACCD-39299D69C572}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F943A178-2853-4EFE-869E-C44FD4766461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F943A178-2853-4EFE-869E-C44FD4766461}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F943A178-2853-4EFE-869E-C44FD4766461}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F943A178-2853-4EFE-869E-C44FD4766461}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

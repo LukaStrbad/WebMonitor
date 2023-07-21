@@ -11,6 +11,7 @@ using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
 using WebMonitor.Options;
+using WebMonitor.Plugins;
 
 namespace WebMonitor;
 
@@ -19,6 +20,8 @@ namespace WebMonitor;
 /// </summary>
 public class SupportedFeatures
 {
+    private PluginLoader? _pluginLoader;
+    
     public bool CpuInfo { get; set; }
     public bool MemoryInfo { get; set; }
     public bool DiskInfo { get; set; }
@@ -38,6 +41,7 @@ public class SupportedFeatures
     public bool ProcessPriority { get; set; }
     public bool ProcessPriorityChange { get; set; }
     public bool ProcessAffinity { get; set; }
+    public bool Terminal => _pluginLoader?.TerminalPlugin?.Port is not null;
 
     public SupportedFeatures()
     {
@@ -162,5 +166,10 @@ public class SupportedFeatures
         {
             return false;
         }
+    }
+
+    public void ReevaluateWithPlugins(PluginLoader pluginLoader)
+    {
+        _pluginLoader = pluginLoader;
     }
 }

@@ -67,6 +67,7 @@ export class SettingsComponent {
           { name: "Process priority", supported: supportedFeatures.processPriority },
           { name: "Process priority change", supported: supportedFeatures.processPriorityChange },
           { name: "Process affinity", supported: supportedFeatures.processAffinity },
+          { name: "Terminal", supported: supportedFeatures.terminal },
         ].map(f => {
           if (f.supported) {
             f.note = "This feature is supported";

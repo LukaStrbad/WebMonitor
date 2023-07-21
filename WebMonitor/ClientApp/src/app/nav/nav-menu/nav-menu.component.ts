@@ -4,6 +4,7 @@ import { Route } from "@angular/router";
 import { SysInfoService } from "../../../services/sys-info.service";
 import { SupportedFeatures } from "../../../model/supported-features";
 import { Component, EventEmitter, Output } from "@angular/core";
+import { NavBarComponent } from "../nav-bar/nav-bar.component";
 
 @Component({
   selector: 'app-nav-menu',
@@ -32,6 +33,8 @@ export class NavMenuComponent {
       return !this.supportedFeatures?.fileBrowser;
     } else if (route.path === "processes") {
       return !this.supportedFeatures?.processes;
+    } else if (route.path === "terminal") {
+      return !this.supportedFeatures?.terminal;
     } else {
       return false;
     }

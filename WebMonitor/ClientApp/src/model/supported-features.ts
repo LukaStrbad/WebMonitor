@@ -18,4 +18,5 @@
   processPriority: boolean;
   processPriorityChange: boolean;
   processAffinity: boolean;
+  terminal: boolean;
 }

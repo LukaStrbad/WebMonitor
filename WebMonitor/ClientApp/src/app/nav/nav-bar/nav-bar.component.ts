@@ -33,6 +33,8 @@ export class NavBarComponent {
       return !this.supportedFeatures?.fileBrowser;
     } else if (route.path === "processes") {
       return !this.supportedFeatures?.processes;
+    } else if (route.path === "terminal") {
+      return !this.supportedFeatures?.terminal;
     } else {
       return false;
     }

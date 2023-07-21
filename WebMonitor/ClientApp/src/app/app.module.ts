@@ -43,6 +43,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatChipsModule } from "@angular/material/chips";
 import { ActionsDialogComponent } from './components/actions-dialog/actions-dialog.component';
+import { TerminalComponent } from './terminal/terminal.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { ActionsDialogComponent } from './components/actions-dialog/actions-dial
     FileDialogComponent,
     EllipsisPipe,
     ProcessDialogComponent,
-    ActionsDialogComponent
+    ActionsDialogComponent,
+    TerminalComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
