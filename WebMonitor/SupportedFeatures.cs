@@ -120,7 +120,7 @@ public class SupportedFeatures
             AmdGpuUsage = false;
             // This is unnecessary on Linux
             NvidiaRefreshSettings = false;
-            ProcessPriority = false;
+            ProcessPriority = true;
             ProcessPriorityChange = false;
         }
         else if (OperatingSystem.IsWindows())

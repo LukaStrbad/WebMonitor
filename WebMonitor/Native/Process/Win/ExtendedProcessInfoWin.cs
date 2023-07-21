@@ -2,8 +2,6 @@
 using System.Management;
 using System.Runtime.Versioning;
 
-using SystemProcess = System.Diagnostics.Process;
-
 namespace WebMonitor.Native.Process.Win;
 
 public class ExtendedProcessInfoWin : ExtendedProcessInfo

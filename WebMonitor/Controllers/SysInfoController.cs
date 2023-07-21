@@ -9,6 +9,7 @@ using WebMonitor.Native.Gpu;
 using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
+using WebMonitor.Native.Process.Linux;
 using WebMonitor.Native.Process.Win;
 using WebMonitor.Options;
 
@@ -164,6 +165,16 @@ public class SysInfoController : ControllerBase
                 var processInfo = new ExtendedProcessInfoWin(pid);
                 return new OkObjectResult(processInfo);
             }
+            else if (OperatingSystem.IsLinux())
+            {
+                var processInfo = new ExtendedProcessInfoLinux(pid);
+                var handleCount = processInfo.HandleCount;
+                return new OkObjectResult(processInfo);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return new UnauthorizedResult();
         }
         catch (Exception e)
         {

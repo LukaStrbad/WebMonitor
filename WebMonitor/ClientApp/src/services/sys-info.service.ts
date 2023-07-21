@@ -252,7 +252,13 @@ export class SysInfoService {
     return await firstValueFrom(
       this.http.get<ExtendedProcessInfo>(`${this.apiUrl}extendedProcessInfo?pid=${pid}`)
         .pipe(catchError((err: HttpErrorResponse) => {
-          this.errorEmitter.emit([SysInfoError.ExtendedProcessInfo, err.error]);
+          if (err.status === 401) {
+            this.errorEmitter.emit([SysInfoError.ExtendedProcessInfo, "Access Denied"]);
+          } else if (err.error) {
+            this.errorEmitter.emit([SysInfoError.ExtendedProcessInfo, err.error]);
+          } else {
+            this.errorEmitter.emit([SysInfoError.ExtendedProcessInfo, err.message]);
+          }
           return throwError(() => err.error);
         }))
     );
