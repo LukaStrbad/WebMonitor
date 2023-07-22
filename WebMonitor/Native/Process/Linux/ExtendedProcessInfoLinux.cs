@@ -18,5 +18,5 @@ public partial class ExtendedProcessInfoLinux : ExtendedProcessInfo
     }
 
     [LibraryImport("libc.so.6", EntryPoint = "getpriority"), SupportedOSPlatform("linux")]
-    private static partial int getpriority(int which, int who);
+    internal static partial int getpriority(int which, int who);
 }

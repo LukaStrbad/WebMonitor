@@ -23,11 +23,13 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
   error?: string;
   supportedFeatures?: SupportedFeatures;
 
-  selectedPriority = ProcessPriorityWin.Normal;
-  allProcessPriorities = [
+  selectedPriorityWin = ProcessPriorityWin.Normal;
+  allProcessPrioritiesWin = [
     ProcessPriorityWin.Realtime, ProcessPriorityWin.High, ProcessPriorityWin.AboveNormal,
     ProcessPriorityWin.Normal, ProcessPriorityWin.BelowNormal, ProcessPriorityWin.Idle
   ];
+
+  selectedPriorityLinux: number | null = null;
 
   numberHelpers = numberHelpers;
 
@@ -45,7 +47,9 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
     this.sysInfo.getExtendedProcessInfo(this.data.processInfo.pid).then(async info => {
       this.extendedInfo = info;
       if (info.priorityWin) {
-        this.selectedPriority = info.priorityWin;
+        this.selectedPriorityWin = info.priorityWin;
+      } else if (info.priorityLinux) {
+        this.selectedPriorityLinux = info.priorityLinux;
       }
 
       const computerInfo = await this.sysInfo.getComputerInfo();
@@ -175,32 +179,44 @@ export class ProcessDialogComponent implements OnDestroy, AfterViewInit {
   /**
    * Function that is called when the priority is changed.
    */
-  async onPriorityChange() {
-    if (this.selectedPriority === ProcessPriorityWin.Realtime) {
+  async onPriorityChangeWin() {
+    if (this.selectedPriorityWin === ProcessPriorityWin.Realtime) {
       let data: ActionsDialogData = {
         title: "Are you sure you want to set the priority to Real time?",
         content: "This will set the process priority to Real time. This could make the system completely unresponsive if the process is using too much CPU.",
-        positiveButton: ["Yes, set to Real time", async () => await this.changePriority()]
+        positiveButton: ["Yes, set to Real time", async () => await this.changePriorityWin()]
       };
       this.dialog.open(ActionsDialogComponent, { data });
     } else {
-      await this.changePriority();
+      await this.changePriorityWin();
     }
   }
 
   /**
    * Change the priority of the process.
    */
-  private async changePriority() {
+  private async changePriorityWin() {
     const response = await this.manager.changeProcessPriority({
       pid: this.data.processInfo.pid,
-      priority: this.selectedPriority
+      priorityWin: this.selectedPriorityWin
     });
 
     if (response) {
-      this.extendedInfo!.priorityWin = this.selectedPriority;
+      this.extendedInfo!.priorityWin = this.selectedPriorityWin;
     }
   }
+
+  async onSetPriorityLinux() {
+    if (!this.selectedPriorityLinux) {
+      return;
+    }
+
+    const response = await this.manager.changeProcessPriority({
+      pid: this.data.processInfo.pid,
+      priorityLinux: this.selectedPriorityLinux
+    });
+  }
+
 }
 
 export interface ProcessDialogData {

@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using WebMonitor.Model;
+using WebMonitor.Native.Process.Linux;
 using SystemProcess = System.Diagnostics.Process;
 
 namespace WebMonitor.Native;
 
-public class Manager
+public partial class Manager
 {
     private readonly SupportedFeatures _supportedFeatures;
 
@@ -22,7 +24,8 @@ public class Manager
         return name;
     }
 
-    public ProcessPriorityClass? ChangePriority(int pid, ProcessPriorityClass priority)
+    [SupportedOSPlatform("windows")]
+    public ProcessPriorityClass? ChangePriorityWin(int pid, ProcessPriorityClass priority)
     {
         if (!_supportedFeatures.ProcessPriorityChange)
             return null;
@@ -31,6 +34,25 @@ public class Manager
         process.PriorityClass = priority;
         return process.PriorityClass;
     }
+
+    [SupportedOSPlatform("linux")]
+    public int? ChangePriorityLinux(int pid, int priority)
+    {
+        if (!_supportedFeatures.ProcessPriorityChange)
+            return null;
+        
+        if (priority is < -20 or > 19)
+            throw new ArgumentOutOfRangeException(nameof(priority), "Priority must be between -20 and 19");
+        
+        var result = setpriority(0, pid, priority);
+        if (result == -1)
+            throw new Exception("Error setting priority");
+        
+        return ExtendedProcessInfoLinux.getpriority(0, pid);
+    }
+    
+    [LibraryImport("libc.so.6", EntryPoint = "setpriority", SetLastError = true), SupportedOSPlatform("linux")]
+    internal static partial int setpriority(int which, int who, int prio);
 
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]

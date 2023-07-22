@@ -10,7 +10,12 @@ public class ChangePriorityRequest
     public int Pid { get; set; }
     
     /// <summary>
-    /// New process priority
+    /// New process priority on Windows
     /// </summary>
-    public ProcessPriorityClass Priority { get; set; }
+    public ProcessPriorityClass? PriorityWin { get; set; }
+    
+    /// <summary>
+    /// New process priority on Linux
+    /// </summary>
+    public int? PriorityLinux { get; set; }
 }

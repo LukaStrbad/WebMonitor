@@ -46,8 +46,19 @@ public class ManagerController
     {
         try
         {
-            var priority = _manager.ChangePriority(request.Pid, request.Priority);
-            return new OkObjectResult(priority);
+            if (OperatingSystem.IsWindows() && request.PriorityWin is not null)
+            {
+                var priority = _manager.ChangePriorityWin(request.Pid, request.PriorityWin.Value);
+                return new OkObjectResult(priority);
+            }
+
+            if (OperatingSystem.IsLinux() && request.PriorityLinux is not null)
+            {
+                var priority = _manager.ChangePriorityLinux(request.Pid, request.PriorityLinux.Value);
+                return new OkObjectResult(priority);
+            }
+
+            return new BadRequestResult();
         }
         catch (Exception e)
         {

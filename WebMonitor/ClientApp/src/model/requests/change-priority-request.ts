@@ -2,5 +2,6 @@
 
 export interface ChangePriorityRequest {
   pid: number;
-  priority: ProcessPriorityWin;
+  priorityWin?: ProcessPriorityWin;
+  priorityLinux?: number;
 }
