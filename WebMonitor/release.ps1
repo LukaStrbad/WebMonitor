@@ -16,3 +16,8 @@ dotnet publish --configuration Release --output "$baseDir\win-x64" --runtime win
 Write-Output "Zipping files"
 Compress-Archive -Path "$baseDir\portable\*" -DestinationPath "$baseDir\WebMonitor-$version-portable.zip" -CompressionLevel Optimal -Update
 Compress-Archive -Path "$baseDir\win-x64\*" -DestinationPath "$baseDir\WebMonitor-$version-win-x64.zip" -CompressionLevel Optimal -Update
+
+# Terminal plugin
+cd ..\TerminalPlugin
+.\build.ps1
+Compress-Archive -Path "build\win-x64\*" -DestinationPath "..\WebMonitor\$baseDir\TerminalPlugin-$version-win-x64.zip" -CompressionLevel Optimal -Update

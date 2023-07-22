@@ -7,25 +7,58 @@ namespace TerminalPlugin;
 
 public class TerminalPlugin : ITerminalPlugin
 {
+    private string _parentDirectory = null!;
+
     private Process? _process;
 
     public Version Version { get; } = new(1, 0);
 
     public string Name => "Terminal Plugin";
-    public int? Port { get; private set; }
+
+    private readonly Dictionary<int, (Process Process, int Port)> _sessions = new();
+    private int _nextSessionId = 0;
 
     public bool Start(string parentDirectory)
     {
+        _parentDirectory = parentDirectory;
+        return true;
+    }
+
+    private static int GetOpenPort()
+    {
         var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
-        Port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
+        return port;
+    }
 
+    public bool Stop()
+    {
+        foreach (var session in _sessions)
+        {
+            try
+            {
+                session.Value.Process.Kill();
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        return true;
+    }
+
+    public int StartNewSession()
+    {
+        var port = GetOpenPort();
         var fileName = OperatingSystem.IsWindows() ? "cmd.exe" : "bash";
-        var indexJs = Path.Combine(parentDirectory, "index.js");
-        var arguments = OperatingSystem.IsWindows() 
-            ? $"/c node {indexJs} {Port}" 
-            : $"""-c "node {indexJs} {Port}" """;
+        var shell = OperatingSystem.IsWindows() ? "powershell.exe" : "bash";
+        var indexJs = Path.Combine(_parentDirectory, "index.js");
+        var arguments = OperatingSystem.IsWindows()
+            ? $"/c node {indexJs} {shell} {port}"
+            : $"""-c "node {indexJs} {shell} {port}" """;
 
         _process = new Process
         {
@@ -34,30 +67,29 @@ public class TerminalPlugin : ITerminalPlugin
                 FileName = fileName,
                 Arguments = arguments,
                 RedirectStandardOutput = true,
+                RedirectStandardInput = true,
                 UseShellExecute = false
             }
         };
         _process.Start();
 
         var output = _process.StandardOutput.ReadLine();
+        var sessionId = _nextSessionId++;
+        
+        if (output == $"Terminal server started on port {port}")
+            _sessions.Add(sessionId, (_process, port));
 
-        var result = output == $"Terminal server started on port {Port}";
-        if (!result) 
-            Port = null;
-
-        return result;
+        return sessionId;
     }
 
-    public bool Stop()
+    public int GetPort(int sessionId)
     {
-        try
-        {
-            _process?.Kill();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        return _sessions[sessionId].Port;
+    }
+
+    public void ChangePtySize(int sessionId, int cols, int rows)
+    {
+        var process = _sessions[sessionId].Process;
+        process.StandardInput.WriteLine($"resize: {cols} {rows}");
     }
 }

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using CommandLine;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -134,49 +135,63 @@ app.Use(async (context, next) =>
         Console.WriteLine("New WebSocket request");
         using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 
+        var idBuffer = new byte[128];
+        var response = await webSocket.ReceiveAsync(new Memory<byte>(idBuffer), CancellationToken.None);
+        int sessionId;
+        if (int.TryParse(Encoding.UTF8.GetString(idBuffer, 0, response.Count), out var parsedSessionId))
+        {
+            sessionId = parsedSessionId;
+        }
+        else
+        {
+            Console.WriteLine("Invalid session id");
+            return;
+        }
+
         var terminalPlugin = pluginLoader.TerminalPlugin;
-        
-        if (terminalPlugin?.Port is null)
+
+        if (terminalPlugin is null)
         {
             var message = "Terminal plugin not loaded or is not running."u8.ToArray();
             await webSocket.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true,
                 CancellationToken.None);
             return;
         }
-        
+
         // Client is used to proxy websocket requests
         var client = new ClientWebSocket();
-        
-        await client.ConnectAsync(new Uri($"ws://localhost:{terminalPlugin.Port}"), CancellationToken.None);
-        
+        var port = terminalPlugin.GetPort(sessionId);
+
+        await client.ConnectAsync(new Uri($"ws://localhost:{port}"), CancellationToken.None);
+
         var task1 = Task.Run(async () =>
         {
             var buffer = new byte[1024 * 4];
             var receiveResult = await client.ReceiveAsync(
                 new ArraySegment<byte>(buffer), CancellationToken.None);
-        
+
             while (!receiveResult.CloseStatus.HasValue)
             {
                 await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, receiveResult.Count),
                     WebSocketMessageType.Text, true,
                     CancellationToken.None);
-        
+
                 receiveResult = await client.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
         });
-        
+
         var buffer = new byte[1024 * 4];
         var receiveResult = await webSocket.ReceiveAsync(
             new ArraySegment<byte>(buffer), CancellationToken.None);
-        
+
         while (!receiveResult.CloseStatus.HasValue)
         {
             await client.SendAsync(new ArraySegment<byte>(buffer, 0, receiveResult.Count), WebSocketMessageType.Text,
                 true, CancellationToken.None);
-        
+
             receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
         }
-        
+
         await task1;
     }
     else

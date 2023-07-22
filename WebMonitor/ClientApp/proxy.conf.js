@@ -8,7 +8,8 @@ const PROXY_CONFIG = [
     context: [
       "/SysInfo",
       "/FileBrowser",
-      "/Manager"
+      "/Manager",
+      "/Terminal"
    ],
     target: target,
     secure: false,

@@ -43,7 +43,7 @@ public class SupportedFeatures
     public bool ProcessPriority { get; set; }
     public bool ProcessPriorityChange { get; set; }
     public bool ProcessAffinity { get; set; }
-    public bool Terminal => _pluginLoader?.TerminalPlugin?.Port is not null;
+    public bool Terminal => _pluginLoader?.TerminalPlugin is not null;
 
     public SupportedFeatures()
     {
