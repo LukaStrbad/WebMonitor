@@ -18,7 +18,7 @@ import { MatDialog, MatDialogRef } from "@angular/material/dialog";
   encapsulation: ViewEncapsulation.None
 })
 export class ProcessListComponent implements AfterViewInit, OnDestroy {
-  headers = ["pid", "name", "cpuUsage", "memoryUsage"];
+  headers = ["pid", "owner", "name", "cpuUsage", "memoryUsage"];
   dataSource = new MatTableDataSource<ProcessInfo>([]);
   filters = [ProcessFilter.PID, ProcessFilter.Name];
   selectedFilter = ProcessFilter.Name;
