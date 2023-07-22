@@ -11,10 +11,10 @@
     <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityWin">
 
       <mat-form-field *ngIf="supportedFeatures?.processPriorityChange; else noPriorityChange" appearance="outline"
-        class="mt-4">
+                      class="mt-4">
         <mat-label>Priority</mat-label>
-        <mat-select [(value)]="selectedPriority" (selectionChange)="onPriorityChange()">
-          <mat-option *ngFor="let priority of allProcessPriorities" [value]="priority">
+        <mat-select [(value)]="selectedPriorityWin" (selectionChange)="onPriorityChangeWin()">
+          <mat-option *ngFor="let priority of allProcessPrioritiesWin" [value]="priority">
             {{ processPriorityName(priority) }}
           </mat-option>
         </mat-select>
@@ -29,9 +29,28 @@
     </ng-container>
 
     <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityLinux !== undefined">
-      <p>
-        Priority: {{ extendedInfo.priorityLinux }}
-      </p>
+      <div *ngIf="supportedFeatures?.processPriorityChange && selectedPriorityLinux !== null; else noPriorityChangeLinux"
+           class="mt-4">
+        <mat-form-field appearance="outline"
+        >
+          <mat-label>Priority</mat-label>
+          <input
+            matInput
+            type="number"
+            min="-20"
+            max="19"
+            [(ngModel)]="selectedPriorityLinux"
+          />
+        </mat-form-field>
+
+        <button mat-raised-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">Set Priority</button>
+      </div>
+
+      <ng-template #noPriorityChangeLinux>
+        <p>
+          Priority: {{ extendedInfo.priorityLinux }}
+        </p>
+      </ng-template>
     </ng-container>
 
     <p>Thread count: {{ extendedInfo.threadCount }}</p>
@@ -71,7 +90,7 @@
 
         <mat-chip-listbox [selectable]="false">
           <mat-chip-option [selected]="allAffinityThreadsSelected()" (click)="enableAllThreads()"
-            matTooltip="Enable all threads">
+                           matTooltip="Enable all threads">
             CPU 0 - {{ affinityThreads.length - 1 }}
           </mat-chip-option>
         </mat-chip-listbox>

@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.IO;
 using Windows.Win32;
 using Windows.Win32.System.Power;
 using LibreHardwareMonitor.Hardware;
@@ -78,6 +79,9 @@ public partial class CpuInfo
             {
                 // File that contains the max frequency without boost
                 var maxFreqFile = Path.Combine(cpuDir.FullName, "cpufreq/scaling_max_freq");
+
+                if (!File.Exists(maxFreqFile))
+                    continue;
 
                 if (uint.TryParse(File.ReadAllText(maxFreqFile), out var freq))
                 {

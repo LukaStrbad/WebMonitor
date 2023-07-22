@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using LibreHardwareMonitor.Hardware;
 using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Controllers;
@@ -10,6 +11,7 @@ using WebMonitor.Native.Disk;
 using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
+using WebMonitor.Native.Process.Linux;
 using WebMonitor.Options;
 using WebMonitor.Plugins;
 
@@ -121,7 +123,14 @@ public class SupportedFeatures
             // This is unnecessary on Linux
             NvidiaRefreshSettings = false;
             ProcessPriority = true;
-            ProcessPriorityChange = false;
+            ProcessPriorityChange = CheckFeature(() =>
+            {
+                var currentProcess = Process.GetCurrentProcess();
+                var priority = ExtendedProcessInfoLinux.getpriority(0, currentProcess.Id);
+                var result = Manager.setpriority(0, currentProcess.Id, priority);
+                if (result == -1)
+                    throw new Exception("Error setting priority");
+            });
         }
         else if (OperatingSystem.IsWindows())
         {

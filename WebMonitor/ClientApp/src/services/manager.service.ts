@@ -42,11 +42,11 @@ export class ManagerService {
 
   async changeProcessPriority(value: ChangePriorityRequest) {
     const response = await firstValueFrom(
-      this.http.post<ProcessPriorityWin>(this.apiUrl + "changeProcessPriority", value, { observe: "response" })
+      this.http.post<ProcessPriorityWin | number>(this.apiUrl + "changeProcessPriority", value, { observe: "response" })
         .pipe(catchError(e => this.handleError(e, `Failed to change priority of process with PID ${value.pid}`)))
     );
 
-    if (response.ok && value.priority == response.body) {
+    if (response.ok && (value.priorityWin === response.body || value.priorityLinux === response.body)) {
       this.okEmitter.emit(`Successfully changed priority of process with PID ${value.pid}`);
     }
 
