@@ -168,6 +168,7 @@ public class SysInfoController : ControllerBase
             else if (OperatingSystem.IsLinux())
             {
                 var processInfo = new ExtendedProcessInfoLinux(pid);
+                // This will throw an exception if the user is not authorized to read the process info
                 var handleCount = processInfo.HandleCount;
                 return new OkObjectResult(processInfo);
             }

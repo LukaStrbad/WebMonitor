@@ -8,6 +8,11 @@ public class ProcessInfo
     public required int Pid { get; init; }
 
     /// <summary>
+    /// Process owner
+    /// </summary>
+    public required string? Owner { get; init; }
+
+    /// <summary>
     /// Process name
     /// </summary>
     public required string Name { get; init; }
