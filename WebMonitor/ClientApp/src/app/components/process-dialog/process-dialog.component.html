@@ -11,7 +11,7 @@
     <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityWin">
 
       <mat-form-field *ngIf="supportedFeatures?.processPriorityChange; else noPriorityChange" appearance="outline"
-                      class="mt-4">
+        class="mt-4">
         <mat-label>Priority</mat-label>
         <mat-select [(value)]="selectedPriority" (selectionChange)="onPriorityChange()">
           <mat-option *ngFor="let priority of allProcessPriorities" [value]="priority">
@@ -27,6 +27,13 @@
       </ng-template>
 
     </ng-container>
+
+    <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityLinux !== undefined">
+      <p>
+        Priority: {{ extendedInfo.priorityLinux }}
+      </p>
+    </ng-container>
+
     <p>Thread count: {{ extendedInfo.threadCount }}</p>
     <p>Handle count: {{ extendedInfo.handleCount }}</p>
     <p>
@@ -64,7 +71,7 @@
 
         <mat-chip-listbox [selectable]="false">
           <mat-chip-option [selected]="allAffinityThreadsSelected()" (click)="enableAllThreads()"
-                           matTooltip="Enable all threads">
+            matTooltip="Enable all threads">
             CPU 0 - {{ affinityThreads.length - 1 }}
           </mat-chip-option>
         </mat-chip-listbox>
@@ -76,12 +83,6 @@
 
 <div mat-dialog-actions>
   <button mat-button mat-dialog-close>Close</button>
-  <button
-    *ngIf="data.onKill"
-    mat-button
-    cdkFocusInitial
-    (click)="data.onKill()"
-    mat-dialog-close
-  >Kill
+  <button *ngIf="data.onKill" mat-button cdkFocusInitial (click)="data.onKill()" mat-dialog-close>Kill
   </button>
 </div>

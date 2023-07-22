@@ -16,4 +16,6 @@ export interface ExtendedProcessInfo {
   handleCount: number;
   // Windows only
   priorityWin?: ProcessPriorityWin;
+  // Linux only
+  priorityLinux?: number;
 }
