@@ -75,21 +75,28 @@ public class TerminalPlugin : ITerminalPlugin
 
         var output = _process.StandardOutput.ReadLine();
         var sessionId = _nextSessionId++;
-        
+
         if (output == $"Terminal server started on port {port}")
             _sessions.Add(sessionId, (_process, port));
+        else
+            throw new Exception($"Failed to start terminal server: {output}");
 
         return sessionId;
     }
 
     public int GetPort(int sessionId)
     {
-        return _sessions[sessionId].Port;
+        var session = _sessions[sessionId];
+        if (session.Process.HasExited)
+            return 0;
+        return session.Port;
     }
 
     public void ChangePtySize(int sessionId, int cols, int rows)
     {
         var process = _sessions[sessionId].Process;
+        if (process.HasExited)
+            throw new Exception("Session has exited");
         process.StandardInput.WriteLine($"resize: {cols} {rows}");
     }
 }

@@ -26,8 +26,22 @@ const ptyProcess = pty.spawn(shell, [], {
     cwd: process.env.HOME
 });
 
+// If shell exits, exit the process
+ptyProcess.onExit(() => {
+    process.exit(0);
+});
+
+/** @type {NodeJS.Timeout | null} */
+let timeout = null;
+
+/** @type {NodeJS.Timer | null} */
+let interval = null;
+
 wss.on('connection', ws => {
+    ws.isAlive = true;
+    // Stop timer on reconnection
     console.log("new session");
+    ws.on('error', console.error);
 
     ws.on('message', command => {
         ptyProcess.write(command);
@@ -37,9 +51,51 @@ wss.on('connection', ws => {
         ws.send(data);
     });
 
-    ws.on('close', () => {
-        process.exit(0);
+    ws.on('pong', () => {
+        ws.isAlive = true
     });
+
+    ws.onclose = () => {
+        console.log("Closed")
+    }
+});
+
+interval = setInterval(() => {
+    wss.clients.forEach(ws => {
+        if (ws.isAlive === false)
+            return ws.terminate();
+
+        ws.isAlive = false;
+        ws.ping();
+    });
+
+    const clientCount = wss.clients.size;
+    let allDisconnected = true;
+    wss.clients.forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN)
+            allDisconnected = false;
+    });
+
+    if ((clientCount === 0 || allDisconnected)) {
+        console.log("No clients connected");
+        if (timeout == null) {
+            console.log("Exiting in 120 seconds");
+            timeout = setTimeout(() => {
+                console.log("Exiting");
+                process.exit(0);
+            }, 120_000);
+        }
+    } else {
+        console.log("At least one client connected");
+        if (timeout !== null) {
+            console.log("Clearing timeout");
+            clearTimeout(timeout);
+        }
+    }
+}, 30_000);
+
+wss.on('close', () => {
+    clearInterval(interval);
 });
 
 const rl = readline.createInterface({

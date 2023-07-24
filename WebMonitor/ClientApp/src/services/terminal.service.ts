@@ -7,6 +7,7 @@ import { firstValueFrom } from "rxjs";
 })
 export class TerminalService {
   private readonly apiUrl: string;
+  sessionId: number | null = null;
 
   constructor(
     private http: HttpClient,
@@ -15,8 +16,13 @@ export class TerminalService {
     this.apiUrl = baseUrl + "Terminal/";
   }
 
+  async isSessionAlive(sessionId: number) {
+    return await firstValueFrom(this.http.get<boolean>(this.apiUrl + "isSessionAlive?sessionId=" + sessionId));
+  }
+
   async startNewSession() {
-    return await firstValueFrom(this.http.get<number>(this.apiUrl + "startNewSession"));
+    this.sessionId = await firstValueFrom(this.http.get<number>(this.apiUrl + "startNewSession"));
+    return this.sessionId;
   }
 
   async changePtySize(sessionId: number, cols: number, rows: number) {

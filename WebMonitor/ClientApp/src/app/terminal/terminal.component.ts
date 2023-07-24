@@ -1,4 +1,12 @@
-import { AfterViewInit, Component, ElementRef, HostListener, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { WebLinksAddon } from 'xterm-addon-web-links';
@@ -12,13 +20,12 @@ import { TerminalService } from "../../services/terminal.service";
   styleUrls: ['./terminal.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class TerminalComponent implements AfterViewInit {
+export class TerminalComponent implements AfterViewInit, OnDestroy {
   @ViewChild("terminal") terminal!: ElementRef<HTMLDivElement>;
   private term!: Terminal;
   private terminalSize = [80, 24];
   private letterSize: [number, number] | null = null;
 
-  CSI = '\x1B[';
   private socket!: WebSocket;
   private fitAddon!: FitAddon;
 
@@ -37,16 +44,28 @@ export class TerminalComponent implements AfterViewInit {
     this.term.loadAddon(this.fitAddon);
     this.term.loadAddon(new WebLinksAddon());
 
-    this.init().then(_ => {});
+    this.init().then(_ => {
+    });
     this.term.resize(this.terminalSize[0], this.terminalSize[1]);
+  }
+
+  ngOnDestroy(): void {
+    this.socket?.close();
   }
 
   async init() {
     const loc = environment.production ? location.host : "localhost:5158";
     const proto = location.protocol === 'https:' ? 'ws' : 'ws';
 
-    const sessionId = await this.terminalService.startNewSession();
-    this.socket = new WebSocket(`${proto}://${loc}/terminal`);
+    let sessionId = this.terminalService.sessionId ?? await this.terminalService.startNewSession();
+
+    const isAlive = await this.terminalService.isSessionAlive(sessionId);
+    if (!isAlive) {
+      this.term.write("\r\nSession has expired. Starting a new session...\r\n");
+      sessionId = await this.terminalService.startNewSession();
+    }
+
+    this.socket = new WebSocket(`${proto}://${loc}/Terminal/session`);
 
     this.term.open(this.terminal.nativeElement);
 
@@ -56,6 +75,17 @@ export class TerminalComponent implements AfterViewInit {
 
       const attachAddon = new AttachAddon(this.socket);
       this.term.loadAddon(attachAddon);
+
+      if (this.term.element) {
+        const top = this.term.element.getBoundingClientRect().top;
+        const margin = "32px";
+        this.term.element.style.height = `calc(100vh - ${top}px - ${margin})`;
+      }
+
+      // Resize on init
+      const xtermRows = this.term.element?.querySelector(".xterm-rows");
+      this.letterSize = [(xtermRows?.clientWidth ?? 0) / this.terminalSize[0], (xtermRows?.clientHeight ?? 0) / this.terminalSize[1]];
+      this.onResize(null);
     }
 
     this.socket.onclose = event => {
@@ -65,22 +95,12 @@ export class TerminalComponent implements AfterViewInit {
     this.term.onResize(async (size) => {
       await this.terminalService.changePtySize(sessionId, size.cols, size.rows);
     });
-
-    if (this.term.element) {
-      const top = this.term.element.getBoundingClientRect().top;
-      const margin = "32px";
-      this.term.element.style.height = `calc(100vh - ${top}px - ${margin})`;
-    }
-    const xtermRows = this.term.element?.querySelector(".xterm-rows");
-    this.letterSize = [(xtermRows?.clientWidth ?? 0) / this.terminalSize[0], (xtermRows?.clientHeight ?? 0) / this.terminalSize[1]];
-    // Resize on init
-    this.onResize(null);
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     const xterm = this.term.element;
-    if (!xterm ||!this.letterSize) {
+    if (!xterm || !this.letterSize) {
       return;
     }
 
