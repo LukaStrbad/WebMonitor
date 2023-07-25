@@ -160,12 +160,13 @@ public class SysInfoController : ControllerBase
     {
         try
         {
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600))
             {
                 var processInfo = new ExtendedProcessInfoWin(pid);
                 return new OkObjectResult(processInfo);
             }
-            else if (OperatingSystem.IsLinux())
+
+            if (OperatingSystem.IsLinux())
             {
                 var processInfo = new ExtendedProcessInfoLinux(pid);
                 // This will throw an exception if the user is not authorized to read the process info

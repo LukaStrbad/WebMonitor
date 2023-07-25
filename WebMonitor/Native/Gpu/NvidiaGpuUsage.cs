@@ -64,7 +64,6 @@ public class NvidiaGpuUsage : IGpuUsage
 
         // If enabled refresh everything
         uint val = 0;
-
         // Refresh memory
         var memory = new nvmlMemory();
         NvmlNativeMethods.nvmlDeviceGetMemoryInfo(_gpu, ref memory);
@@ -111,6 +110,26 @@ public class NvidiaGpuUsage : IGpuUsage
             var device = new nvmlDevice();
             NvmlNativeMethods.nvmlDeviceGetHandleByIndex(i, ref device);
             yield return new NvidiaGpuUsage(device, refreshSetting);
+        }
+    }
+
+    /// <summary>
+    /// Method to check if NVML is supported on this system
+    /// </summary>
+    internal static bool CheckIfSupported()
+    {
+        try
+        {
+            var gpus = GetNvidiaGpus(new NvidiaRefreshSettings());
+            var first = gpus.First();
+            var memory = new nvmlMemory();
+            // Only check one value to avoid long refresh delay if the GPU is not running
+            NvmlNativeMethods.nvmlDeviceGetMemoryInfo(first._gpu, ref memory);
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 

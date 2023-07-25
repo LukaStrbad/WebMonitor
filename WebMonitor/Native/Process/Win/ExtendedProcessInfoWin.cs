@@ -11,10 +11,10 @@ public class ExtendedProcessInfoWin : ExtendedProcessInfo
     public ProcessPriorityClass PriorityWin { get; init; }
 
 
-    [SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows5.1.2600")]
     public ExtendedProcessInfoWin(int pid) : base(pid)
     {
-        Owner = ProcessTracker.GetProcessOwnerWin(pid);
+        Owner = ProcessTracker.GetProcessOwnerWin(Process);
         PriorityWin = Process.PriorityClass;
     }
 }

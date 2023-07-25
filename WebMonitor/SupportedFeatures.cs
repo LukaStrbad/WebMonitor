@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using LibreHardwareMonitor.Hardware;
 using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Controllers;
@@ -12,7 +10,6 @@ using WebMonitor.Native.Memory;
 using WebMonitor.Native.Network;
 using WebMonitor.Native.Process;
 using WebMonitor.Native.Process.Linux;
-using WebMonitor.Options;
 using WebMonitor.Plugins;
 
 namespace WebMonitor;
@@ -23,7 +20,7 @@ namespace WebMonitor;
 public class SupportedFeatures
 {
     private PluginLoader? _pluginLoader;
-    
+
     public bool CpuInfo { get; set; }
     public bool MemoryInfo { get; set; }
     public bool DiskInfo { get; set; }
@@ -51,7 +48,6 @@ public class SupportedFeatures
         var computer = new Computer
         {
             IsCpuEnabled = true,
-            IsGpuEnabled = true,
             IsBatteryEnabled = true
         };
 
@@ -98,23 +94,8 @@ public class SupportedFeatures
         FileDownload = true;
         FileUpload = true;
 
-        // NVML is only supported on x64
-        if (RuntimeInformation.OSArchitecture == Architecture.X64)
-        {
-            NvidiaGpuUsage = CheckFeature(() =>
-            {
-                var nvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.GetNvidiaGpus(new NvidiaRefreshSettings
-                {
-                    RefreshSetting = NvidiaRefreshSetting.Enabled,
-                    NRefreshIntervals = 10
-                }).FirstOrDefault();
-                nvidiaGpuUsage?.Refresh(1000);
-            });
-        }
-        else
-        {
-            NvidiaGpuUsage = false;
-        }
+        // Check if Nvidia GPU usage is supported
+        NvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.CheckIfSupported();
 
         if (OperatingSystem.IsLinux())
         {
@@ -145,7 +126,7 @@ public class SupportedFeatures
                 currentProcess.PriorityClass = ProcessPriorityClass.Normal;
             });
         }
-        
+
         // LibreHardwareMonitor does not support Intel GPUs
         IntelGpuUsage = false;
 

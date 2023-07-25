@@ -7,3 +7,4 @@ SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION
 NtQuerySystemInformation
 DISK_PERFORMANCE
 GlobalMemoryStatus
+OpenProcessToken

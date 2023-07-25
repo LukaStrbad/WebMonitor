@@ -20,8 +20,8 @@ public enum NvidiaRefreshSetting
 /// </summary>
 public class NvidiaRefreshSettings : SettingsBase
 {
-    private NvidiaRefreshSetting _refreshSetting;
-    private int _nRefreshIntervals;
+    private NvidiaRefreshSetting _refreshSetting = NvidiaRefreshSetting.Enabled;
+    private int _nRefreshIntervals = 1;
 
     /// <summary>
     /// Refresh setting

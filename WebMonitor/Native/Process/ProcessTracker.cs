@@ -1,5 +1,8 @@
-using System.Management;
 using System.Runtime.Versioning;
+using System.Security.Principal;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Security;
 using SystemProcess = System.Diagnostics.Process;
 
 namespace WebMonitor.Native.Process;
@@ -57,8 +60,8 @@ internal class ProcessTracker : IRefreshable
     private static ProcessInfo ProcessToProcessInfo(SystemProcess process, int millisSinceRefresh, double workingMillis)
     {
         string? owner = null;
-        if (OperatingSystem.IsWindows())
-            owner = GetProcessOwnerWin(process.Id);
+        if (OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600))
+            owner = GetProcessOwnerWin(process);
         else if (OperatingSystem.IsLinux())
             owner = GetProcessOwnerLinux(process.Id);
 
@@ -73,24 +76,34 @@ internal class ProcessTracker : IRefreshable
         };
     }
 
-    [SupportedOSPlatform("windows")]
-    internal static string? GetProcessOwnerWin(int processId)
+    [SupportedOSPlatform("windows5.1.2600")]
+    internal static string? GetProcessOwnerWin(SystemProcess process)
     {
-        var query = $"Select * From Win32_Process Where ProcessID = {processId}";
-        var searcher = new ManagementObjectSearcher(query);
-        var processList = searcher.Get();
-
-        foreach (var obj in processList)
+        var processHandle = IntPtr.Zero;
+        try
         {
-            if (obj is not ManagementObject managementObject) continue;
+            unsafe
+            {
+                var result = PInvoke.OpenProcessToken((HANDLE)process.Handle, TOKEN_ACCESS_MASK.TOKEN_QUERY, (HANDLE*)processHandle);
+                if (result.Value == 0)
+                    return null;
+            }
 
-            object[] argList = { string.Empty, string.Empty };
-            var returnVal = Convert.ToInt32(managementObject.InvokeMethod("GetOwner", argList));
-            if (returnVal == 0)
-                return (string)argList[0];
+            var wi = new WindowsIdentity(processHandle);
+            var user = wi.Name;
+            return user.Contains('\\') ? user[(user.IndexOf(@"\", StringComparison.Ordinal) + 1)..] : user;
         }
-
-        return null;
+        catch
+        {
+            return null;
+        }
+        finally
+        {
+            if (processHandle != IntPtr.Zero)
+            {
+                PInvoke.CloseHandle((HANDLE)processHandle);
+            }
+        }
     }
 
     [SupportedOSPlatform("linux")]
