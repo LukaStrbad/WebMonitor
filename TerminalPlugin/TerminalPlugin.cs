@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using WebMonitor.Plugins;
 
 namespace TerminalPlugin;
@@ -11,7 +12,16 @@ public class TerminalPlugin : ITerminalPlugin
 
     private Process? _process;
 
-    public Version Version { get; } = new(1, 0);
+    // Get version from AssemblyVersion
+    
+    public Version Version
+    {
+        get
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            return assembly.GetName().Version!;
+        }
+    }
 
     public string Name => "Terminal Plugin";
 

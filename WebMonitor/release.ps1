@@ -20,4 +20,8 @@ Compress-Archive -Path "$baseDir\win-x64\*" -DestinationPath "$baseDir\WebMonito
 # Terminal plugin
 cd ..\TerminalPlugin
 .\build.ps1
-Compress-Archive -Path "build\win-x64\*" -DestinationPath "..\WebMonitor\$baseDir\TerminalPlugin-$version-win-x64.zip" -CompressionLevel Optimal -Update
+# Find TerminalPlugin.csproj
+$terminalPluginCsproj = Get-ChildItem -Path . -Recurse -Filter "TerminalPlugin.csproj" -ErrorAction SilentlyContinue
+# Get assembly version from TerminalPlugin.csproj
+$terminalPluginVersion = (Get-Content $terminalPluginCsproj | Select-String "AssemblyVersion" -Context 0, 1).Context.PostContext[0].Split('>')[1].Split('<')[0]
+Compress-Archive -Path "build\win-x64\*" -DestinationPath "..\WebMonitor\$baseDir\TerminalPlugin-$terminalPluginVersion-win-x64.zip" -CompressionLevel Optimal -Update

@@ -1,4 +1,7 @@
-Remove-Item build -Recurse
+if (Test-Path build)
+{
+    Remove-Item build -Recurse
+}
 
 cd .\node-backend
 npm install
