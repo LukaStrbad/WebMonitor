@@ -4,7 +4,7 @@ import { Route } from "@angular/router";
 import { SysInfoService } from "../../../services/sys-info.service";
 import { SupportedFeatures } from "../../../model/supported-features";
 import { Component, EventEmitter, Output } from "@angular/core";
-import { NavBarComponent } from "../nav-bar/nav-bar.component";
+import { UserService } from "../../../services/user.service";
 
 @Component({
   selector: 'app-nav-menu',

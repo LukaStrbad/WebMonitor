@@ -44,6 +44,7 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatChipsModule } from "@angular/material/chips";
 import { ActionsDialogComponent } from './components/actions-dialog/actions-dialog.component';
 import { TerminalComponent } from './terminal/terminal.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import { TerminalComponent } from './terminal/terminal.component';
     EllipsisPipe,
     ProcessDialogComponent,
     ActionsDialogComponent,
-    TerminalComponent
+    TerminalComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

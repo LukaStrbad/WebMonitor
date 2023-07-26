@@ -5,6 +5,7 @@ import { menuRoutes } from 'src/app/app-routes';
 import { RouteWatcherService } from 'src/services/route-watcher.service';
 import { SysInfoService } from "../../../services/sys-info.service";
 import { SupportedFeatures } from "../../../model/supported-features";
+import { UserService } from "../../../services/user.service";
 
 @Component({
   selector: 'app-nav-bar',
@@ -18,7 +19,8 @@ export class NavBarComponent {
 
   constructor(
     public routeWatcher: RouteWatcherService,
-    sysInfo: SysInfoService
+    sysInfo: SysInfoService,
+    public userService: UserService
   ) {
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);

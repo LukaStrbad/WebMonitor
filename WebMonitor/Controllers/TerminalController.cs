@@ -20,7 +20,7 @@ public class TerminalController : ControllerBase
         _logger = logger;
     }
 
-    [Route("/Terminal/session")]
+    [Route("/Terminal/session"), ApiExplorerSettings(IgnoreApi = true)]
     public async Task Get()
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)
@@ -122,10 +122,10 @@ public class TerminalController : ControllerBase
     public ActionResult<bool> IsSessionAlive([FromQuery] int sessionId)
     {
         var port = _pluginLoader.TerminalPlugin?.GetPort(sessionId);
-        
+
         if (port == null)
             return BadRequest();
-        
+
         return Ok(port != 0);
     }
 
