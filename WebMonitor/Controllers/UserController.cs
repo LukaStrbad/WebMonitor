@@ -152,7 +152,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult<string>> DeleteUser([FromQuery] string username)
     {
         await using var db = new WebMonitorContext();
-        
+
         var user = await db.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user is null)
             return BadRequest("Invalid username");
@@ -173,10 +173,13 @@ public class UserController : ControllerBase
     public async Task<ActionResult> ChangeAllowedFeatures([FromBody] ChangeAllowedFeaturesForm request)
     {
         await using var db = new WebMonitorContext();
-        
+
         var user = await db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
         if (user is null)
             return BadRequest("Invalid username");
+
+        if (user.IsAdmin)
+            return BadRequest("Cannot change allowed features for admin user");
 
         var features = await db.AllowedFeatures.FirstOrDefaultAsync(af => af.Id == user.AllowedFeaturesId);
         if (features is null)
@@ -190,7 +193,16 @@ public class UserController : ControllerBase
         // Update the AllowedFeatures object
         foreach (var feature in request.AllowedFeatures.GetType().GetProperties())
         {
+            if (feature.PropertyType != typeof(bool))
+                continue;
+            
             var featureValue = (bool?)feature.GetValue(request.AllowedFeatures) ?? false;
+
+            if (featureValue && !(bool)feature.GetValue(_supportedFeatures)!)
+            {
+                return BadRequest($"Feature '{feature.Name}' is not supported by the system and cannot be enabled");
+            }
+            
             feature.SetValue(features, featureValue);
         }
 
@@ -229,6 +241,6 @@ public class UserController : ControllerBase
     public record LoginFormUser(string Username, string Password);
 
     public record ChangeAllowedFeaturesForm(string Username, SupportedFeatures AllowedFeatures);
-    
+
     public record UsernameRequest(string Username);
 }

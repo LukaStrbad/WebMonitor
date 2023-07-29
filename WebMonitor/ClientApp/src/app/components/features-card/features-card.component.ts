@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, Input } from '@angular/core';
 import { SysInfoService } from "../../../services/sys-info.service";
-import { SupportedFeatures } from "../../../model/supported-features";
+import { AllowedFeatures, SupportedFeatures } from "../../../model/supported-features";
 
 @Component({
   selector: 'app-features-card',
@@ -28,54 +28,76 @@ export class FeaturesCardComponent implements AfterViewInit {
    * The supported features to display.
    */
   @Input({ required: true }) features!: SupportedFeatures;
-  featuresList: { name: string, supported: boolean, note?: string }[] = [];
+  featuresList: FeatureData[] = [];
 
-  ngAfterViewInit() : void {
-    this.featuresList = [
-      { name: "CPU info", supported: this.features.cpuInfo },
-      { name: "Memory info", supported: this.features.memoryInfo },
-      { name: "Disk info", supported: this.features.diskInfo },
-      { name: "CPU usage", supported: this.features.cpuUsage },
-      { name: "Memory usage", supported: this.features.memoryUsage },
-      { name: "Disk usage", supported: this.features.diskUsage },
-      { name: "Network usage", supported: this.features.networkUsage },
-      { name: "NVIDIA GPU usage", supported: this.features.nvidiaGpuUsage },
-      { name: "AMD GPU usage", supported: this.features.amdGpuUsage },
-      {
-        name: "Intel GPU usage",
-        supported: this.features.intelGpuUsage,
-        note: "This feature is unsupported because the LibreHardwareMonitor library used by this app doesn't support Intel GPUs"
-      },
-      { name: "Processes", supported: this.features.processes },
-      { name: "File browser", supported: this.features.fileBrowser },
-      { name: "File download", supported: this.features.fileDownload },
-      { name: "File upload", supported: this.features.fileUpload },
-      {
-        name: "NVIDIA refresh settings",
-        supported: this.features.nvidiaRefreshSettings,
-        note: "This feature is only supported on Windows because of high CPU usage on Windows on NVIDIA GPUs"
-      },
-      {
-        name: "Battery info",
-        supported: this.features.batteryInfo,
-        note: "This feature is unsupported or the PC doesn't contain a battery"
-      },
-      { name: "Process priority", supported: this.features.processPriority },
-      { name: "Process priority change", supported: this.features.processPriorityChange },
-      { name: "Process affinity", supported: this.features.processAffinity },
-      { name: "Terminal", supported: this.features.terminal },
-    ].map(f => {
-      if (!this.settingsTooltips) {
-        f.note = undefined;
+  ngAfterViewInit(): void {
+    this.featuresList = getFeaturesList(this.features)
+      .map(f => {
+        if (!this.settingsTooltips) {
+          f.note = undefined;
+          return f;
+        }
+
+        if (f.supported) {
+          f.note = "This feature is supported";
+        } else if (!f.note) {
+          f.note = "This feature is unsupported or has been disabled";
+        }
         return f;
-      }
-
-      if (f.supported) {
-        f.note = "This feature is supported";
-      } else if (!f.note) {
-        f.note = "This feature is unsupported or has been disabled";
-      }
-      return f;
-    })
+      })
   }
+}
+
+export interface FeatureData {
+  name: string;
+  supported: boolean;
+  note?: string;
+}
+
+export interface FeatureDataWithFeatureName extends FeatureData {
+  featureName: string;
+}
+
+export function getFeaturesList(features: AllowedFeatures): FeatureDataWithFeatureName[] {
+  return [
+    { name: "CPU info", supported: features.cpuInfo, featureName: "cpuInfo" },
+    { name: "Memory info", supported: features.memoryInfo, featureName: "memoryInfo" },
+    { name: "Disk info", supported: features.diskInfo, featureName: "diskInfo" },
+    { name: "CPU usage", supported: features.cpuUsage, featureName: "cpuUsage" },
+    { name: "Memory usage", supported: features.memoryUsage, featureName: "memoryUsage" },
+    { name: "Disk usage", supported: features.diskUsage, featureName: "diskUsage" },
+    { name: "Network usage", supported: features.networkUsage, featureName: "networkUsage" },
+    { name: "NVIDIA GPU usage", supported: features.nvidiaGpuUsage, featureName: "nvidiaGpuUsage" },
+    { name: "AMD GPU usage", supported: features.amdGpuUsage, featureName: "amdGpuUsage" },
+    {
+      name: "Intel GPU usage",
+      supported: features.intelGpuUsage,
+      note: "This feature is unsupported because the LibreHardwareMonitor library used by this app doesn't support Intel GPUs",
+      featureName: "intelGpuUsage"
+    },
+    { name: "Processes", supported: features.processes, featureName: "processes" },
+    { name: "File browser", supported: features.fileBrowser, featureName: "fileBrowser" },
+    { name: "File download", supported: features.fileDownload, featureName: "fileDownload" },
+    { name: "File upload", supported: features.fileUpload, featureName: "fileUpload" },
+    {
+      name: "NVIDIA refresh settings",
+      supported: features.nvidiaRefreshSettings,
+      note: "This feature is only supported on Windows because of high CPU usage on Windows on NVIDIA GPUs",
+      featureName: "nvidiaRefreshSettings"
+    },
+    {
+      name: "Battery info",
+      supported: features.batteryInfo,
+      note: "This feature is unsupported or the PC doesn't contain a battery",
+      featureName: "batteryInfo"
+    },
+    { name: "Process priority", supported: features.processPriority, featureName: "processPriority" },
+    {
+      name: "Process priority change",
+      supported: features.processPriorityChange,
+      featureName: "processPriorityChange"
+    },
+    { name: "Process affinity", supported: features.processAffinity, featureName: "processAffinity" },
+    { name: "Terminal", supported: features.terminal, featureName: "terminal" },
+  ];
 }

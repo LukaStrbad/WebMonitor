@@ -133,4 +133,12 @@ export class UsersComponent implements AfterViewInit {
       }
     });
   }
+
+  /**
+   * Allowed features can only be changed if the user is not an admin
+   * @param user User to change allowed features for
+   */
+  canChangeAllowedFeatures(user: User) {
+    return !user.isAdmin;
+  }
 }

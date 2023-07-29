@@ -49,6 +49,7 @@ import { UsersComponent } from './users/users.component';
 import { FeaturesCardComponent } from './components/features-card/features-card.component';
 import { AuthInterceptor } from "../interceptors/auth.interceptor";
 import { MatPaginatorModule } from "@angular/material/paginator";
+import { FeaturesChangerComponent } from './components/features-changer/features-changer.component';
 
 @NgModule({
   declarations: [
@@ -70,7 +71,8 @@ import { MatPaginatorModule } from "@angular/material/paginator";
     TerminalComponent,
     LoginComponent,
     UsersComponent,
-    FeaturesCardComponent
+    FeaturesCardComponent,
+    FeaturesChangerComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

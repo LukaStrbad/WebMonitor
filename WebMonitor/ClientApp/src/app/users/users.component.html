@@ -75,9 +75,11 @@
           <div class="user-detail"
                [@detailExpand]="user === expandedUser ? 'expanded' : 'collapsed'">
             <div class="user-detail-content">
-              <app-features-card [settingsTooltips]="false" [features]="user.allowedFeatures"
+              <app-features-card *ngIf="!canChangeAllowedFeatures(user)" [settingsTooltips]="false"
+                                 [features]="user.allowedFeatures"
                                  title="Allowed access to features"
                                  positive="Yes" negative="No"></app-features-card>
+              <app-features-changer *ngIf="canChangeAllowedFeatures(user)" [user]="user"></app-features-changer>
             </div>
           </div>
         </td>
