@@ -50,9 +50,7 @@ export class AppComponent {
     });
 
     effect(async () => {
-      if (userService.authorized()) {
-        await router.navigate(["/"]);
-      } else {
+      if (!userService.authorized()) {
         await router.navigate(["/login"]);
       }
     });

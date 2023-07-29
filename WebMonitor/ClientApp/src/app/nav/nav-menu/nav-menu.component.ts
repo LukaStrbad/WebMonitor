@@ -18,7 +18,8 @@ export class NavMenuComponent {
 
   constructor(
     public routeWatcher: RouteWatcherService,
-    sysInfo: SysInfoService
+    sysInfo: SysInfoService,
+    private userService: UserService
   ) {
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
@@ -28,6 +29,13 @@ export class NavMenuComponent {
     this.onRouteSelected.emit();
   }
 
+  getRouteName(route: Route) {
+    if (route.path == "users" && this.userService.user?.isAdmin === true) {
+      return "User/Admin";
+    }
+    return route.title;
+  }
+
   shouldBeHidden(route: Route): boolean {
     if (route.path === "file-browser") {
       return !this.supportedFeatures?.fileBrowser;
@@ -35,6 +43,8 @@ export class NavMenuComponent {
       return !this.supportedFeatures?.processes;
     } else if (route.path === "terminal") {
       return !this.supportedFeatures?.terminal;
+    } else if (route.path === "admin") {
+      return !this.userService.user?.isAdmin;
     } else {
       return false;
     }

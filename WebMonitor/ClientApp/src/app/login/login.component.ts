@@ -58,6 +58,7 @@ export class LoginComponent implements OnDestroy{
     });
 
     showOkSnackbar(this.snackBar, `Successfully logged in as ${response.user.displayName}`);
+    await this.router.navigate(["/"]);
   }
 
   async register() {
@@ -68,6 +69,7 @@ export class LoginComponent implements OnDestroy{
     });
 
     showOkSnackbar(this.snackBar, `Successfully registered as ${response.user.displayName}`);
+    await this.router.navigate(["/"]);
   }
 
   onSubmit() {

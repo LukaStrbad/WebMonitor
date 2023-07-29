@@ -6,6 +6,7 @@ import { FileBrowserComponent } from "./file-browser/file-browser.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { TerminalComponent } from "./terminal/terminal.component";
 import { LoginComponent } from "./login/login.component";
+import { UsersComponent } from "./users/users.component";
 
 export interface RouteWithIcon extends Route {
   icon?: string;
@@ -42,6 +43,12 @@ export const menuRoutes: RouteWithIcon[] = [
     component: TerminalComponent,
     title: 'Terminal',
     icon: 'terminal'
+  },
+  {
+    path: 'users',
+    component: UsersComponent,
+    title: 'User',
+    icon: 'person'
   }
 ];
 

@@ -17,27 +17,27 @@ public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
     private readonly JwtOptions _jwtOptions;
-    private readonly WebMonitorContext _db;
     private readonly SupportedFeatures _supportedFeatures;
 
     public UserController(IServiceProvider serviceProvider, ILogger<UserController> logger)
     {
         _logger = logger;
         _jwtOptions = serviceProvider.GetRequiredService<JwtOptions>();
-        _db = serviceProvider.GetRequiredService<WebMonitorContext>();
         _supportedFeatures = serviceProvider.GetRequiredService<SupportedFeatures>();
     }
 
     [HttpPost("register")]
     public async Task<ActionResult> Register([FromBody] FormUser formUser)
     {
-        if (await _db.Users.AnyAsync(u => u.Username == formUser.Username))
+        await using var db = new WebMonitorContext();
+
+        if (await db.Users.AnyAsync(u => u.Username == formUser.Username))
             return BadRequest("Username already exists");
 
         var passwordHasher = new PasswordHasher<FormUser>();
         var password = passwordHasher.HashPassword(formUser, formUser.Password);
         // First created user is automatically promoted to admin
-        var isAdmin = !_db.Users.Any();
+        var isAdmin = !db.Users.Any();
         var user = new User
         {
             Username = formUser.Username,
@@ -46,18 +46,18 @@ public class UserController : ControllerBase
             IsAdmin = isAdmin
         };
 
-        if (isAdmin) 
+        if (isAdmin)
             user.AllowedFeatures = _supportedFeatures;
 
-        var createdUser = await _db.Users.AddAsync(user);
-        await _db.SaveChangesAsync();
+        var createdUser = await db.Users.AddAsync(user);
+        await db.SaveChangesAsync();
 
         var stringToken = GetToken(createdUser.Entity);
         _logger.LogInformation("User {Username} registered", createdUser.Entity.Username);
-        
+
         return Ok(new
         {
-            token = stringToken, 
+            token = stringToken,
             user = new
             {
                 user.Username,
@@ -71,7 +71,9 @@ public class UserController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult> Login([FromBody] LoginFormUser formUser)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == formUser.Username);
+        await using var db = new WebMonitorContext();
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == formUser.Username);
         if (user is null)
             return BadRequest("Invalid username or password");
 
@@ -82,7 +84,7 @@ public class UserController : ControllerBase
 
         var stringToken = GetToken(user);
         _logger.LogInformation("User {Username} logged in", user.Username);
-        
+
         return Ok(new
         {
             token = stringToken,
@@ -99,80 +101,101 @@ public class UserController : ControllerBase
     [HttpGet("me"), Authorize]
     public async Task<ActionResult> Me()
     {
+        await using var db = new WebMonitorContext();
+
         if (User.Identity is null)
             return BadRequest("User not logged in");
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
-        if (user is null)
+        var users = await db.Users
+            .Where(u => u.Username == User.Identity.Name)
+            .Include(u => u.AllowedFeatures)
+            .ToListAsync();
+        if (users.Count != 1)
             return BadRequest("Invalid username or password");
+
+        var user = users[0];
 
         return Ok(new { user.Username, user.DisplayName, user.IsAdmin, user.AllowedFeatures });
     }
 
     [HttpPost("promoteToAdmin"), Authorize(Roles = "Admin")]
-    public async Task<ActionResult<string>> PromoteToAdmin([FromBody] string username)
+    public async Task<ActionResult<string>> PromoteToAdmin([FromBody] UsernameRequest request)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
+        await using var db = new WebMonitorContext();
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
         if (user is null)
             return BadRequest("Invalid username");
 
         user.IsAdmin = true;
         // Allow the user to use all features
         user.AllowedFeatures = _supportedFeatures;
-        await _db.SaveChangesAsync();
-        
+        await db.SaveChangesAsync();
+
         _logger.LogInformation("User {Username} promoted to admin", user.Username);
-        
-        return Ok($"User {username} promoted to admin");
+
+        return Ok($"User {request.Username} promoted to admin");
     }
 
     [HttpGet("listUsers"), Authorize(Roles = "Admin")]
-    public ActionResult ListUsers()
+    public async Task<ActionResult<IEnumerable<User>>> ListUsers()
     {
-        var users = _db.Users.Join(_db.SupportedFeatures, u => u.AllowedFeaturesId, sf => sf.Id, (u, sf) => new
-        {
-            u.Username,
-            u.DisplayName,
-            u.IsAdmin,
-            AllowedFeatures = sf
-        });
+        await using var db = new WebMonitorContext();
+
+        var users = await db.Users
+            .Include(u => u.AllowedFeatures)
+            .ToListAsync();
         return Ok(users);
     }
 
-    [HttpDelete("deleteSelf"), Authorize]
-    public async Task<ActionResult<string>> DeleteSelf()
-    {
-        if (User.Identity is null)
-            return BadRequest("User not logged in");
-
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
-        if (user is null)
-            return BadRequest("Invalid username");
-
-        _db.Users.Remove(user);
-        await _db.SaveChangesAsync();
-        
-        _logger.LogInformation("User {Username} deleted", user.Username);
-        
-        return Ok("Account deleted");
-    }
-
     [HttpDelete("deleteUser"), Authorize(Roles = "Admin")]
-    public async Task<ActionResult<string>> DeleteUser([FromBody] string username)
+    public async Task<ActionResult<string>> DeleteUser([FromQuery] string username)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == username);
+        await using var db = new WebMonitorContext();
+        
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user is null)
             return BadRequest("Invalid username");
 
-        if (user.IsAdmin)
+        // Stop the admin user from deleting another admin user but allow self-deletion
+        if (user.IsAdmin && User.Identity?.Name != username)
             return BadRequest("Cannot delete admin user");
 
-        _db.Users.Remove(user);
-        await _db.SaveChangesAsync();
-        
+        db.Users.Remove(user);
+        await db.SaveChangesAsync();
+
         _logger.LogInformation("User {Username} deleted", user.Username);
-        
+
         return Ok($"User {username} deleted");
+    }
+
+    [HttpPost("changeAllowedFeatures"), Authorize(Roles = "Admin")]
+    public async Task<ActionResult> ChangeAllowedFeatures([FromBody] ChangeAllowedFeaturesForm request)
+    {
+        await using var db = new WebMonitorContext();
+        
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+        if (user is null)
+            return BadRequest("Invalid username");
+
+        var features = await db.AllowedFeatures.FirstOrDefaultAsync(af => af.Id == user.AllowedFeaturesId);
+        if (features is null)
+        {
+            // IF the user has no allowed features, create a new AllowedFeatures object
+            user.AllowedFeatures = request.AllowedFeatures;
+            await db.SaveChangesAsync();
+            return Ok();
+        }
+
+        // Update the AllowedFeatures object
+        foreach (var feature in request.AllowedFeatures.GetType().GetProperties())
+        {
+            var featureValue = (bool?)feature.GetValue(request.AllowedFeatures) ?? false;
+            feature.SetValue(features, featureValue);
+        }
+
+        await db.SaveChangesAsync();
+        return Ok();
     }
 
     private string GetToken(User user)
@@ -204,4 +227,8 @@ public class UserController : ControllerBase
     public record FormUser(string Username, string DisplayName, string Password);
 
     public record LoginFormUser(string Username, string Password);
+
+    public record ChangeAllowedFeaturesForm(string Username, SupportedFeatures AllowedFeatures);
+    
+    public record UsernameRequest(string Username);
 }

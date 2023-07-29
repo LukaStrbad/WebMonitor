@@ -20,3 +20,5 @@
   processAffinity: boolean;
   terminal: boolean;
 }
+
+export type AllowedFeatures = SupportedFeatures;

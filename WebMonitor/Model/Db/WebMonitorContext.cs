@@ -6,7 +6,7 @@ namespace WebMonitor;
 public class WebMonitorContext : DbContext
 {
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<SupportedFeatures> SupportedFeatures { get; set; } = null!;
+    public DbSet<SupportedFeatures> AllowedFeatures { get; set; } = null!;
 
     public string DbPath { get; }
 

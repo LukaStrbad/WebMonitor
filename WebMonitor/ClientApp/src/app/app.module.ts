@@ -39,12 +39,16 @@ import { EllipsisPipe } from '../pipes/ellipsis.pipe';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from "@angular/material/list";
 import { ProcessDialogComponent } from './components/process-dialog/process-dialog.component';
-import { HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatChipsModule } from "@angular/material/chips";
 import { ActionsDialogComponent } from './components/actions-dialog/actions-dialog.component';
 import { TerminalComponent } from './terminal/terminal.component';
 import { LoginComponent } from './login/login.component';
+import { UsersComponent } from './users/users.component';
+import { FeaturesCardComponent } from './components/features-card/features-card.component';
+import { AuthInterceptor } from "../interceptors/auth.interceptor";
+import { MatPaginatorModule } from "@angular/material/paginator";
 
 @NgModule({
   declarations: [
@@ -64,7 +68,9 @@ import { LoginComponent } from './login/login.component';
     ProcessDialogComponent,
     ActionsDialogComponent,
     TerminalComponent,
-    LoginComponent
+    LoginComponent,
+    UsersComponent,
+    FeaturesCardComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -91,9 +97,13 @@ import { LoginComponent } from './login/login.component';
     MatSelectModule,
     MatListModule,
     MatProgressSpinnerModule,
-    MatChipsModule
+    MatChipsModule,
+    MatPaginatorModule
   ],
-  providers: [{ provide: LOCALE_ID, useValue: "hr-HR" }],
+  providers: [
+    { provide: LOCALE_ID, useValue: "hr-HR" },
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

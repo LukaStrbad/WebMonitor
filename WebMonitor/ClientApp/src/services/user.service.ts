@@ -1,9 +1,10 @@
 import { Inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import { catchError, firstValueFrom, Subject, throwError } from "rxjs";
 import { User } from "../model/user";
 import { LoginResponse } from "../model/responses/login-response";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { AllowedFeatures } from "../model/supported-features";
 
 @Injectable({
   providedIn: 'root'
@@ -45,19 +46,24 @@ export class UserService {
     this.authorized.set(false);
   }
 
+  handleError(err: HttpErrorResponse) {
+    if (err.error) {
+      this.errorEmitter.next(err.error);
+      return throwError(() => err.error);
+    } else if (err.message) {
+      this.errorEmitter.next(err.message);
+    }
+
+    return throwError(() => err.message);
+  }
+
   /**
    * Register a new user
    * @param user Data of the new user
    */
   async register(user: { username: string, displayName: string, password: string }) {
     const response = await firstValueFrom(this.http.post<LoginResponse>(this.apiUrl + "register", user)
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
-
-        return throwError(() => err.error);
-      }))
+      .pipe(catchError(err => this.handleError(err)))
     );
 
     this.onSuccess(response);
@@ -71,13 +77,7 @@ export class UserService {
    */
   async login(user: { username: string, password: string }) {
     const response = await firstValueFrom(this.http.post<LoginResponse>(this.apiUrl + "login", user)
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
-
-        return throwError(() => err.error);
-      }))
+      .pipe(catchError(err => this.handleError(err)))
     );
 
     this.onSuccess(response);
@@ -90,13 +90,7 @@ export class UserService {
    */
   async me() {
     return await firstValueFrom(this.http.get<User>(this.apiUrl + "me")
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
-
-        return throwError(() => err.error);
-      }))
+      .pipe(catchError(err => this.handleError(err)))
     );
   }
 
@@ -106,13 +100,7 @@ export class UserService {
    */
   async promoteToAdmin(username: string) {
     return await firstValueFrom(this.http.post<string>(this.apiUrl + "promoteToAdmin", { username })
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
-
-        return throwError(() => err.error);
-      }))
+      .pipe(catchError(err => this.handleError(err)))
     );
   }
 
@@ -121,32 +109,8 @@ export class UserService {
    */
   async listUsers() {
     return await firstValueFrom(this.http.get<User[]>(this.apiUrl + "listUsers")
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
-
-        return throwError(() => err.error);
-      }))
+      .pipe(catchError(err => this.handleError(err)))
     );
-  }
-
-  /**
-   * Delete current user
-   */
-  async deleteSelf() {
-    const response = await firstValueFrom(this.http.delete<string>(this.apiUrl + "deleteSelf")
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
-
-        return throwError(() => err.error);
-      }))
-    );
-
-    this.logout();
-    return response;
   }
 
   /**
@@ -154,14 +118,26 @@ export class UserService {
    * @param username Username of the user to delete
    */
   async deleteUser(username: string) {
-    return await firstValueFrom(this.http.delete<string>(this.apiUrl + "deleteUser/" + username)
-      .pipe(catchError((err: HttpErrorResponse) => {
-        if (err.error) {
-          this.errorEmitter.next(err.error);
-        }
+    const deleteSelf = username === this.user?.username;
+    const response = await firstValueFrom(this.http.delete<string>(`${this.apiUrl}deleteUser?username=${username}`)
+        .pipe(catchError(err => this.handleError(err)))
+    );
 
-        return throwError(() => err.error);
-      }))
+    // If the current user was deleted, log out
+    if (deleteSelf) {
+      this.logout();
+    }
+
+    return response;
+  }
+
+  /**
+   * Changes the allowed features of a user (admin only)
+   * @param request Username and allowed features
+   */
+  async changeAllowedFeatures(request: { username: string, allowedFeatures: AllowedFeatures }) {
+    return await firstValueFrom(this.http.post(this.apiUrl + "changeAllowedFeatures", request)
+      .pipe(catchError(err => this.handleError(err)))
     );
   }
 }

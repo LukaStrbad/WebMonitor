@@ -5,7 +5,8 @@
 </div>
 
 <div mat-dialog-actions>
-  <button mat-button mat-dialog-close>Close</button>
+  <button *ngIf="data.negativeButton" mat-button mat-dialog-close
+          (click)="data.negativeButton[1]()">{{ data.negativeButton[0] }}</button>
   <button *ngIf="data.positiveButton" mat-button mat-dialog-close cdkFocusInitial (click)="data.positiveButton[1]()">
     {{ data.positiveButton[0] }}
   </button>

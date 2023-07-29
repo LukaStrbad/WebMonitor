@@ -1,0 +1,23 @@
+mat-icon {
+  vertical-align: middle;
+}
+
+mat-card {
+  margin-bottom: 16pt;
+}
+
+.user-detail {
+  overflow: hidden;
+}
+
+.user-detail-content {
+  padding: 16pt 0;
+}
+
+.user-element-row{
+  height: 0 !important;
+}
+
+.user-element-row td {
+  border-bottom-width: 0;
+}

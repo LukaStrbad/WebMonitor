@@ -87,7 +87,7 @@ foreach (var user in db.Users)
         continue;
     }
 
-    var userSupportedFeatures = db.SupportedFeatures.FirstOrDefault(f => f.Id == user.AllowedFeaturesId) ??
+    var userSupportedFeatures = db.AllowedFeatures.FirstOrDefault(f => f.Id == user.AllowedFeaturesId) ??
                                 new SupportedFeatures();
     foreach (var property in typeof(SupportedFeatures).GetProperties())
     {
@@ -125,7 +125,8 @@ builder.Services.AddSingleton(manager);
 builder.Services.AddSingleton(pluginLoader);
 builder.Services.AddSingleton(cmdOptions);
 builder.Services.AddSingleton(jwtOptions);
-builder.Services.AddSingleton(db);
+// Transient services are used to avoid concurrency issues with the database
+builder.Services.AddTransient<WebMonitorContext>();
 
 builder.Services.AddAuthentication(options =>
 {

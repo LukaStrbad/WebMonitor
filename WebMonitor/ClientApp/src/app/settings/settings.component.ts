@@ -22,7 +22,6 @@ export class SettingsComponent {
     .filter(n => typeof n === "number") as NvidiaRefreshSetting[];
   selectedNvidiaRefreshSetting = NvidiaRefreshSetting.Enabled;
   supportedFeatures?: SupportedFeatures;
-  supportedFeaturesList: { name: string, supported: boolean, note?: string }[] = [];
 
   constructor(
     public appSettings: AppSettingsService,
@@ -35,47 +34,6 @@ export class SettingsComponent {
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => {
         this.supportedFeatures = supportedFeatures;
-        this.supportedFeaturesList = [
-          { name: "CPU info", supported: supportedFeatures.cpuInfo },
-          { name: "Memory info", supported: supportedFeatures.memoryInfo },
-          { name: "Disk info", supported: supportedFeatures.diskInfo },
-          { name: "CPU usage", supported: supportedFeatures.cpuUsage },
-          { name: "Memory usage", supported: supportedFeatures.memoryUsage },
-          { name: "Disk usage", supported: supportedFeatures.diskUsage },
-          { name: "Network usage", supported: supportedFeatures.networkUsage },
-          { name: "NVIDIA GPU usage", supported: supportedFeatures.nvidiaGpuUsage },
-          { name: "AMD GPU usage", supported: supportedFeatures.amdGpuUsage },
-          {
-            name: "Intel GPU usage",
-            supported: supportedFeatures.intelGpuUsage,
-            note: "This feature is unsupported because the LibreHardwareMonitor library used by this app doesn't support Intel GPUs"
-          },
-          { name: "Processes", supported: supportedFeatures.processes },
-          { name: "File browser", supported: supportedFeatures.fileBrowser },
-          { name: "File download", supported: supportedFeatures.fileDownload },
-          { name: "File upload", supported: supportedFeatures.fileUpload },
-          {
-            name: "NVIDIA refresh settings",
-            supported: supportedFeatures.nvidiaRefreshSettings,
-            note: "This feature is only supported on Windows because of high CPU usage on Windows on NVIDIA GPUs"
-          },
-          {
-            name: "Battery info",
-            supported: supportedFeatures.batteryInfo,
-            note: "This feature is unsupported or the PC doesn't contain a battery"
-          },
-          { name: "Process priority", supported: supportedFeatures.processPriority },
-          { name: "Process priority change", supported: supportedFeatures.processPriorityChange },
-          { name: "Process affinity", supported: supportedFeatures.processAffinity },
-          { name: "Terminal", supported: supportedFeatures.terminal },
-        ].map(f => {
-          if (f.supported) {
-            f.note = "This feature is supported";
-          } else if (!f.note) {
-            f.note = "This feature is unsupported or has been disabled";
-          }
-          return f;
-        })
       });
 
     this.graphColorSettings = [
