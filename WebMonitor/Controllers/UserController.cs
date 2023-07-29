@@ -137,6 +137,30 @@ public class UserController : ControllerBase
         return Ok($"User {request.Username} promoted to admin");
     }
 
+    [HttpPost("leaveAdminRole"), Authorize(Roles = "Admin")]
+    public async Task<ActionResult<string>> LeaveAdminRole()
+    {
+        await using var db = new WebMonitorContext();
+        
+        if (User.Identity is null)
+            return BadRequest("User not logged in");
+        
+        var adminCount = await db.Users.CountAsync(u => u.IsAdmin);
+        if (adminCount == 1)
+            return BadRequest("Cannot leave admin role when you are the only admin");
+        
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+        if (user is null)
+            return BadRequest("Invalid username");
+        
+        user.IsAdmin = false;
+        await db.SaveChangesAsync();
+        
+        _logger.LogInformation("User {Username} demoted from admin", user.Username);
+        
+        return Ok($"User {user.Username} demoted from admin");
+    }
+
     [HttpGet("listUsers"), Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<User>>> ListUsers()
     {

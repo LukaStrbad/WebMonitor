@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { UserService } from "../../services/user.service";
 import { User } from "../../model/user";
 import { showErrorSnackbar, showOkSnackbar } from "../../helpers/snackbar-helpers";
@@ -10,6 +10,7 @@ import { ActionsDialogComponent, ActionsDialogData } from "../components/actions
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { animate, state, style, transition, trigger } from "@angular/animations";
+import { SysInfoService } from "../../services/sys-info.service";
 
 @Component({
   selector: 'app-admin',
@@ -40,7 +41,8 @@ export class UsersComponent implements AfterViewInit {
   constructor(
     public userService: UserService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private sysInfo: SysInfoService
   ) {
   }
 
@@ -121,14 +123,34 @@ export class UsersComponent implements AfterViewInit {
         content: `Are you sure you want to promote ${user.displayName} to admin?`,
         positiveButton: ["Promote", () => {
           this.userService.promoteToAdmin(user.username)
-            .then(() => {
+            .then(async () => {
                 user.isAdmin = true;
                 // Check the checkbox after the user has been promoted
                 target.checked = true;
+                // Update the allowed features to reflect the new admin status
+                user.allowedFeatures = await this.sysInfo.getSupportedFeatures();
                 showOkSnackbar(this.snackBar, `Successfully promoted ${user.displayName} to admin`);
               },
               err => showErrorSnackbar(this.snackBar, `Failed to promote ${user.displayName} to admin: ${err}`)
             );
+        }]
+      }
+    });
+  }
+
+  leaveAdminRole() {
+    this.dialog.open(ActionsDialogComponent, {
+      data: <ActionsDialogData>{
+        title: "Leave admin role?",
+        content: "Are you sure you want to leave the admin role?",
+        positiveButton: ["Leave", () => {
+          this.userService.leaveAdminRole()
+            .then(() => {
+              showOkSnackbar(this.snackBar, "Successfully left admin role");
+              this.me!.isAdmin = false;
+            }, err => showErrorSnackbar(this.snackBar, `Failed to leave admin role: ${err}`));
+        }],
+        negativeButton: ["Cancel", () => {
         }]
       }
     });

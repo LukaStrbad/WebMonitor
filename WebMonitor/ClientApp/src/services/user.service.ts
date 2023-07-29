@@ -105,6 +105,15 @@ export class UserService {
   }
 
   /**
+   * Demotes the current user from admin (admin only)
+   */
+  async leaveAdminRole() {
+    return await firstValueFrom(this.http.post<string>(this.apiUrl + "leaveAdminRole", {})
+      .pipe(catchError(err => this.handleError(err)))
+    );
+  }
+
+  /**
    * Lists all users (admin only)
    */
   async listUsers() {
@@ -120,7 +129,7 @@ export class UserService {
   async deleteUser(username: string) {
     const deleteSelf = username === this.user?.username;
     const response = await firstValueFrom(this.http.delete<string>(`${this.apiUrl}deleteUser?username=${username}`)
-        .pipe(catchError(err => this.handleError(err)))
+      .pipe(catchError(err => this.handleError(err)))
     );
 
     // If the current user was deleted, log out
