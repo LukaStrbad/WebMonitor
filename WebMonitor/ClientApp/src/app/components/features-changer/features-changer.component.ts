@@ -58,7 +58,7 @@ export class FeaturesChangerComponent implements AfterViewInit {
       return true;
     }
 
-    const featureName = feature.featureName as keyof SupportedFeatures;
+    const featureName = feature.featureName;
     return !this.systemFeatures[featureName];
   }
 
@@ -71,7 +71,7 @@ export class FeaturesChangerComponent implements AfterViewInit {
     }
 
     const features = this.user.allowedFeatures;
-    const featureName = feature.featureName as keyof AllowedFeatures;
+    const featureName = feature.featureName;
     // If the feature name is wrong, return
     if (features[featureName] === undefined) {
       return;

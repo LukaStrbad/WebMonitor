@@ -14,7 +14,8 @@
 
     <app-features-card *ngIf="me.allowedFeatures" [settingsTooltips]="false" [features]="me.allowedFeatures"
                        title="Allowed access to features"
-                       positive="Yes" negative="No"></app-features-card>
+                       positive="Yes" negative="No" [showUnsupported]="true"
+                       [supportedFeatures]="supportedFeatures"></app-features-card>
   </mat-card-content>
 
   <mat-card-actions>

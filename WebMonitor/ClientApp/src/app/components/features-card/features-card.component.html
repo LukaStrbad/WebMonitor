@@ -10,8 +10,11 @@
               [matTooltip]="feature.note ?? ''"
               [matTooltipDisabled]="feature.note == undefined"
               matTooltipPosition="below">
-            {{ feature.name }}: <span
-              [class]="feature.supported ? 'primary-color' : 'warn-color'">{{ feature.supported ? positive : negative }}</span></span>
+            {{ feature.name }}: <span>
+              <span *ngIf="feature.unsupported !== true"
+                    [class]="feature.supported ? 'primary-color' : 'warn-color'">{{ feature.supported ? positive : negative }}</span>
+              <span *ngIf="feature.unsupported === true" class="accent-color">Unsupported</span>
+            </span></span>
       </div>
     </div>
   </mat-card-content>

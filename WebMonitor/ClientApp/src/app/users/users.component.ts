@@ -11,6 +11,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { animate, state, style, transition, trigger } from "@angular/animations";
 import { SysInfoService } from "../../services/sys-info.service";
+import { SupportedFeatures } from "../../model/supported-features";
 
 @Component({
   selector: 'app-admin',
@@ -34,6 +35,7 @@ export class UsersComponent implements AfterViewInit {
   dataSource = new MatTableDataSource(new Array<User>());
   displayedColumns: string[] = ['displayName', 'username', 'isAdmin', 'delete', 'expand'];
   expandedUser: User | null = null;
+  supportedFeatures?: SupportedFeatures;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -44,6 +46,7 @@ export class UsersComponent implements AfterViewInit {
     private dialog: MatDialog,
     private sysInfo: SysInfoService
   ) {
+    sysInfo.getSupportedFeatures().then(f => this.supportedFeatures = f);
   }
 
   ngAfterViewInit(): void {

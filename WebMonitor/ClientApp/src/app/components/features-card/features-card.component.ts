@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { SysInfoService } from "../../../services/sys-info.service";
 import { AllowedFeatures, SupportedFeatures } from "../../../model/supported-features";
 
@@ -7,7 +7,7 @@ import { AllowedFeatures, SupportedFeatures } from "../../../model/supported-fea
   templateUrl: './features-card.component.html',
   styleUrls: ['./features-card.component.css']
 })
-export class FeaturesCardComponent implements AfterViewInit {
+export class FeaturesCardComponent implements AfterViewInit, OnChanges {
   /**
    * The title of the card.
    */
@@ -28,11 +28,21 @@ export class FeaturesCardComponent implements AfterViewInit {
    * The supported features to display.
    */
   @Input({ required: true }) features!: SupportedFeatures;
-  featuresList: FeatureData[] = [];
+
+  /**
+   * Whether to compare features against the supported features.
+   */
+  @Input() showUnsupported = false;
+  /**
+   * The supported features to compare against.
+   * This should contain only the features that are supported by the system.
+   */
+  @Input() supportedFeatures?: SupportedFeatures;
+
+  featuresList: FeatureDataWithUnsupported[] = [];
 
   ngAfterViewInit(): void {
-    this.featuresList = getFeaturesList(this.features)
-      .map(f => {
+    const featuresList = getFeaturesList(this.features).map(f => {
         if (!this.settingsTooltips) {
           f.note = undefined;
           return f;
@@ -44,7 +54,28 @@ export class FeaturesCardComponent implements AfterViewInit {
           f.note = "This feature is unsupported or has been disabled";
         }
         return f;
-      })
+      }
+    );
+
+    if (this.showUnsupported && this.supportedFeatures) {
+      this.featuresList = featuresList.map(f => {
+        const supported = this.supportedFeatures![f.featureName];
+        return <FeatureDataWithUnsupported>{
+          ...f,
+          unsupported: !supported
+        }
+      });
+      console.log(this.featuresList);
+    } else {
+      this.featuresList = featuresList;
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // If the supported features have changed, re-render the view
+    if (changes.showUnsupported || changes.supportedFeatures) {
+      this.ngAfterViewInit();
+    }
   }
 }
 
@@ -55,7 +86,14 @@ export interface FeatureData {
 }
 
 export interface FeatureDataWithFeatureName extends FeatureData {
-  featureName: string;
+  featureName: keyof SupportedFeatures;
+}
+
+/**
+ * An interface that allows for a third state of "unsupported" when the system does not support a feature.
+ */
+interface FeatureDataWithUnsupported extends FeatureData {
+  unsupported?: boolean;
 }
 
 export function getFeaturesList(features: AllowedFeatures): FeatureDataWithFeatureName[] {
