@@ -6,9 +6,7 @@
   <mat-card-content>
     <div>
       <div class="mat-body-2 mb-0" *ngFor="let feature of featuresList">
-        <mat-checkbox [matTooltip]="feature.note ?? ''" [matTooltipDisabled]="feature.note == undefined"
-                      [disabled]="shouldFeatureCheckboxBeDisabled(feature)"
-                      matTooltipPosition="below" [checked]="feature.supported"
+        <mat-checkbox [checked]="feature.allowed"
                       (click)="changeFeatures($event, feature)">
           {{ feature.name }}
         </mat-checkbox>

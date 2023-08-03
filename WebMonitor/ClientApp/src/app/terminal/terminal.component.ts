@@ -13,6 +13,9 @@ import { WebLinksAddon } from 'xterm-addon-web-links';
 import { AttachAddon } from 'xterm-addon-attach';
 import { environment } from "../../environments/environment";
 import { TerminalService } from "../../services/terminal.service";
+import { UserService } from "../../services/user.service";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { showErrorSnackbar, showOkSnackbar } from "../../helpers/snackbar-helpers";
 
 @Component({
   selector: 'app-terminal',
@@ -29,10 +32,29 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
   private socket!: WebSocket;
   private fitAddon!: FitAddon;
 
-  constructor(private terminalService: TerminalService) {
+  constructor(
+    private terminalService: TerminalService,
+    private userService: UserService,
+    private snackBar: MatSnackBar
+  ) {
   }
 
   ngAfterViewInit(): void {
+    this.init().then(_ => {
+    });
+    this.term.resize(this.terminalSize[0], this.terminalSize[1]);
+  }
+
+  ngOnDestroy(): void {
+    this.socket?.close();
+  }
+
+  async init() {
+    const user = await this.userService.requireUser();
+    if (!user.allowedFeatures.terminal) {
+      showErrorSnackbar(this.snackBar, `You are not allowed to use the terminal.`);
+      return;
+    }
     this.term = new Terminal({
       fontSize: 12,
       lineHeight: 1.2,
@@ -44,16 +66,6 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
     this.term.loadAddon(this.fitAddon);
     this.term.loadAddon(new WebLinksAddon());
 
-    this.init().then(_ => {
-    });
-    this.term.resize(this.terminalSize[0], this.terminalSize[1]);
-  }
-
-  ngOnDestroy(): void {
-    this.socket?.close();
-  }
-
-  async init() {
     const loc = environment.production ? location.host : "localhost:5158";
     const proto = location.protocol === 'https:' ? 'ws' : 'ws';
 
@@ -70,6 +82,8 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
     this.term.open(this.terminal.nativeElement);
 
     this.socket.onopen = (e) => {
+      // Send the token to the server.
+      this.socket.send(`${this.userService.token}`);
       // Send the session ID to the server.
       this.socket.send(`${sessionId}\n`);
 
@@ -88,8 +102,12 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
       this.onResize(null);
     }
 
+    this.socket.onerror = event => {
+      showErrorSnackbar(this.snackBar, `An error occurred while connecting to the server.`)
+    }
+
     this.socket.onclose = event => {
-      this.term.write("\r\nConnection closed.\r\n");
+      this.term.write(`\r\nConnection closed with code ${event.code}.\r\n`);
     };
 
     this.term.onResize(async (size) => {

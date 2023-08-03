@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebMonitor;
+using WebMonitor.Attributes;
+using WebMonitor.Middleware;
+using WebMonitor.Model;
 using WebMonitor.Native;
 using WebMonitor.Options;
 using WebMonitor.Plugins;
@@ -77,34 +80,15 @@ else
     programLogger.LogInformation("No user to promote to admin");
 }
 
-// Check if supported features have changed
+
 foreach (var user in db.Users)
 {
+    // If the user is an admin, give them all permissions
     if (user.IsAdmin)
     {
-        user.AllowedFeatures = supportedFeatures;
+        user.AllowedFeatures = AllowedFeatures.All;
         db.SaveChanges();
-        continue;
     }
-
-    var userSupportedFeatures = db.AllowedFeatures.FirstOrDefault(f => f.Id == user.AllowedFeaturesId) ??
-                                new SupportedFeatures();
-    foreach (var property in typeof(SupportedFeatures).GetProperties())
-    {
-        if (Attribute.IsDefined(property, typeof(JsonIgnoreAttribute)) || property.PropertyType != typeof(bool))
-            continue;
-
-        var userValue = property.GetValue(userSupportedFeatures) as bool?;
-        var value = property.GetValue(supportedFeatures) as bool?;
-
-        if (userValue is true && value is false)
-        {
-            property.SetValue(userSupportedFeatures, false);
-        }
-    }
-
-    user.AllowedFeatures = userSupportedFeatures;
-    db.SaveChanges();
 }
 
 builder.Logging.ClearProviders();
@@ -237,6 +221,7 @@ app.UseRouting();
 app.UseWebSockets();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseAllowedFeatureMiddleware();
 
 app.MapControllerRoute(
     name: "default",

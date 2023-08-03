@@ -1,4 +1,4 @@
-﻿import { AllowedFeatures } from "./supported-features";
+﻿import { AllowedFeatures } from "./allowed-features";
 
 export interface User {
   username: string;

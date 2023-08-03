@@ -12,10 +12,7 @@
     <div class="mat-body-1">Name: {{ me.displayName }}</div>
     <div class="mat-body-1">Username: {{ me.username }}</div>
 
-    <app-features-card *ngIf="me.allowedFeatures" [settingsTooltips]="false" [features]="me.allowedFeatures"
-                       title="Allowed access to features"
-                       positive="Yes" negative="No" [showUnsupported]="true"
-                       [supportedFeatures]="supportedFeatures"></app-features-card>
+    <app-allowed-features-card *ngIf="me.allowedFeatures" [allowedFeatures]="me.allowedFeatures"></app-allowed-features-card>
   </mat-card-content>
 
   <mat-card-actions>
@@ -77,10 +74,7 @@
           <div class="user-detail"
                [@detailExpand]="user === expandedUser ? 'expanded' : 'collapsed'">
             <div class="user-detail-content">
-              <app-features-card *ngIf="!canChangeAllowedFeatures(user)" [settingsTooltips]="false"
-                                 [features]="user.allowedFeatures"
-                                 title="Allowed access to features"
-                                 positive="Yes" negative="No"></app-features-card>
+              <app-allowed-features-card *ngIf="!canChangeAllowedFeatures(user)" [allowedFeatures]="user.allowedFeatures"></app-allowed-features-card>
               <app-features-changer *ngIf="canChangeAllowedFeatures(user)" [user]="user"></app-features-changer>
             </div>
           </div>

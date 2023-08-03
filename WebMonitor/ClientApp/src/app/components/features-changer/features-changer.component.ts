@@ -1,12 +1,10 @@
 import { AfterViewInit, Component, Input } from '@angular/core';
-import { FeatureDataWithFeatureName, getFeaturesList } from "../features-card/features-card.component";
 import { User } from "../../../model/user";
 import { MatCheckbox } from "@angular/material/checkbox";
-import { AllowedFeatures, SupportedFeatures } from "../../../model/supported-features";
 import { UserService } from "../../../services/user.service";
 import { showErrorSnackbar, showOkSnackbar } from "../../../helpers/snackbar-helpers";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { SysInfoService } from "../../../services/sys-info.service";
+import { AllowedFeatureData, getAllowedFeaturesList } from '../allowed-features-card/allowed-features-card.component';
 
 @Component({
   selector: 'app-features-changer',
@@ -16,15 +14,12 @@ import { SysInfoService } from "../../../services/sys-info.service";
 export class FeaturesChangerComponent implements AfterViewInit {
   @Input({ required: true }) user!: User;
 
-  featuresList: FeatureDataWithFeatureName[] = [];
-  systemFeatures?: SupportedFeatures;
+  featuresList: AllowedFeatureData[] = [];
 
   constructor(
     private userService: UserService,
-    private snackBar: MatSnackBar,
-    private sysInfo: SysInfoService
+    private snackBar: MatSnackBar
   ) {
-    sysInfo.getSupportedFeatures().then(f => this.systemFeatures = f);
   }
 
   ngAfterViewInit(): void {
@@ -32,16 +27,7 @@ export class FeaturesChangerComponent implements AfterViewInit {
   }
 
   refreshFeaturesList() {
-    const featuresList = getFeaturesList(this.user.allowedFeatures)
-      .map(f => {
-          if (f.supported) {
-            f.note = "This feature is enabled for this user";
-          } else {
-            f.note = "This feature is disabled for this user";
-          }
-          return f;
-        }
-      );
+    const featuresList = getAllowedFeaturesList(this.user.allowedFeatures);
 
     if (this.featuresList.length === 0) {
       this.featuresList = featuresList;
@@ -49,20 +35,11 @@ export class FeaturesChangerComponent implements AfterViewInit {
     }
 
     for (let i = 0; i < this.featuresList.length; i++) {
-      this.featuresList[i].supported = featuresList[i].supported;
+      this.featuresList[i].allowed = featuresList[i].allowed;
     }
   }
 
-  shouldFeatureCheckboxBeDisabled(feature: FeatureDataWithFeatureName) {
-    if (!this.systemFeatures) {
-      return true;
-    }
-
-    const featureName = feature.featureName;
-    return !this.systemFeatures[featureName];
-  }
-
-  async changeFeatures(e: Event, feature: FeatureDataWithFeatureName) {
+  async changeFeatures(e: Event, feature: AllowedFeatureData) {
     const target = e.target as MatCheckbox | null;
 
     e.preventDefault();

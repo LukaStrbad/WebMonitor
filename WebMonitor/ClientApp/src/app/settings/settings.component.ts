@@ -3,6 +3,8 @@ import { NvidiaRefreshSetting } from 'src/model/nvidia-refresh-setting';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 import { SysInfoService } from 'src/services/sys-info.service';
 import { SupportedFeatures } from "../../model/supported-features";
+import { UserService } from 'src/services/user.service';
+import { AllowedFeatures } from 'src/model/allowed-features';
 
 @Component({
   selector: 'app-settings',
@@ -22,12 +24,17 @@ export class SettingsComponent {
     .filter(n => typeof n === "number") as NvidiaRefreshSetting[];
   selectedNvidiaRefreshSetting = NvidiaRefreshSetting.Enabled;
   supportedFeatures?: SupportedFeatures;
+  allowedFeatures?: AllowedFeatures;
 
   constructor(
     public appSettings: AppSettingsService,
-    public sysInfo: SysInfoService
+    public sysInfo: SysInfoService,
+    userService: UserService
   ) {
-    effect(() => this.selectedNvidiaRefreshSetting = sysInfo.nvidiaRefreshSettings().refreshSetting);
+    effect(() => {
+      this.selectedNvidiaRefreshSetting = sysInfo.nvidiaRefreshSettings().refreshSetting;
+      sysInfo.updateNvidiaRefreshSettings();
+    });
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
     this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
 
@@ -35,6 +42,9 @@ export class SettingsComponent {
       .then(supportedFeatures => {
         this.supportedFeatures = supportedFeatures;
       });
+
+    userService.requireUser()
+      .then(user => this.allowedFeatures = user.allowedFeatures);
 
     this.graphColorSettings = [
       {

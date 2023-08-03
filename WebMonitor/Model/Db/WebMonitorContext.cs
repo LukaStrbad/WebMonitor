@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WebMonitor.Model;
 using WebMonitor.Model.Db;
 
 namespace WebMonitor;
@@ -6,7 +7,7 @@ namespace WebMonitor;
 public class WebMonitorContext : DbContext
 {
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<SupportedFeatures> AllowedFeatures { get; set; } = null!;
+    public DbSet<AllowedFeatures> AllowedFeatures { get; set; } = null!;
 
     public string DbPath { get; }
 

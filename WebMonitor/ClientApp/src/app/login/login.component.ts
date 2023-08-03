@@ -4,13 +4,15 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { Subscription } from "rxjs";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { showOkSnackbar } from "../../helpers/snackbar-helpers";
+import { LoginResponse } from 'src/model/responses/login-response';
+import { SysInfoService } from 'src/services/sys-info.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnDestroy{
+export class LoginComponent implements OnDestroy {
   isRegister = false;
   submitted = false;
   error?: string;
@@ -27,7 +29,8 @@ export class LoginComponent implements OnDestroy{
   constructor(
     public userService: UserService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private sysInfo: SysInfoService
   ) {
     this.isRegister = this.router.url.includes("register");
 
@@ -52,13 +55,12 @@ export class LoginComponent implements OnDestroy{
   }
 
   async login() {
-     const response = await this.userService.login({
+    const response = await this.userService.login({
       username: this.username,
       password: this.loginPassword
     });
 
-    showOkSnackbar(this.snackBar, `Successfully logged in as ${response.user.displayName}`);
-    await this.router.navigate(["/"]);
+    await this.onLoginSuccess(response);
   }
 
   async register() {
@@ -68,7 +70,12 @@ export class LoginComponent implements OnDestroy{
       displayName: this.displayName
     });
 
-    showOkSnackbar(this.snackBar, `Successfully registered as ${response.user.displayName}`);
+    this.onLoginSuccess(response);
+  }
+
+  async onLoginSuccess(response: LoginResponse) {
+    this.sysInfo.startService();
+    showOkSnackbar(this.snackBar, `Successfully logged in as ${response.user.displayName}`);
     await this.router.navigate(["/"]);
   }
 

@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { FeaturesCardComponent } from './features-card.component';
+import { SupportedFeaturesCard } from './supported-features-card.component';
 
 describe('FeaturesCardComponent', () => {
-  let component: FeaturesCardComponent;
-  let fixture: ComponentFixture<FeaturesCardComponent>;
+  let component: SupportedFeaturesCard;
+  let fixture: ComponentFixture<SupportedFeaturesCard>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [FeaturesCardComponent]
+      declarations: [SupportedFeaturesCard]
     });
-    fixture = TestBed.createComponent(FeaturesCardComponent);
+    fixture = TestBed.createComponent(SupportedFeaturesCard);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -52,6 +52,7 @@ export class AppComponent {
     effect(async () => {
       if (!userService.authorized()) {
         await router.navigate(["/login"]);
+        sysInfo.stopService();
       }
     });
   }

@@ -76,7 +76,7 @@ public sealed class Settings : SettingsBase
         {
             Console.WriteLine("Unknown error loading settings.");
         }
-        
+
         Console.WriteLine("Using default settings.");
 
         return new Settings();

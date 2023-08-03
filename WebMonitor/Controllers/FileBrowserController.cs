@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using WebMonitor.Attributes;
 using WebMonitor.Model;
 
 namespace WebMonitor.Controllers;
@@ -20,6 +22,8 @@ public class FileBrowserController : ControllerBase
     };
 
     [HttpGet("dir")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.FileBrowser))]
     public ActionResult<List<FileOrDir>> Dir(string? requestedDirectory = null)
     {
         if (requestedDirectory is null)
@@ -69,6 +73,8 @@ public class FileBrowserController : ControllerBase
     }
 
     [HttpGet("file-info")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.FileBrowser))]
     public ActionResult<FileInformation> FileInformation(string path)
     {
         var fileInfo = new FileInfo(path);
@@ -83,6 +89,8 @@ public class FileBrowserController : ControllerBase
     }
 
     [HttpGet("download-file")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.FileDownload))]
     public FileResult DownloadFile(string path)
     {
         new FileExtensionContentTypeProvider().TryGetContentType(path, out var contentType);
@@ -92,6 +100,8 @@ public class FileBrowserController : ControllerBase
     }
 
     [HttpPost("upload-file")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.FileUpload))]
     public async Task<IActionResult> UploadFile(string path)
     {
         var outputDir = new DirectoryInfo(path);

@@ -46,10 +46,11 @@ import { ActionsDialogComponent } from './components/actions-dialog/actions-dial
 import { TerminalComponent } from './terminal/terminal.component';
 import { LoginComponent } from './login/login.component';
 import { UsersComponent } from './users/users.component';
-import { FeaturesCardComponent } from './components/features-card/features-card.component';
+import { SupportedFeaturesCardComponent } from './components/supported-features-card/supported-features-card.component';
 import { AuthInterceptor } from "../interceptors/auth.interceptor";
 import { MatPaginatorModule } from "@angular/material/paginator";
 import { FeaturesChangerComponent } from './components/features-changer/features-changer.component';
+import { AllowedFeaturesCardComponent } from './components/allowed-features-card/allowed-features-card.component';
 
 @NgModule({
   declarations: [
@@ -71,8 +72,9 @@ import { FeaturesChangerComponent } from './components/features-changer/features
     TerminalComponent,
     LoginComponent,
     UsersComponent,
-    FeaturesCardComponent,
-    FeaturesChangerComponent
+    SupportedFeaturesCardComponent,
+    FeaturesChangerComponent,
+    AllowedFeaturesCardComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

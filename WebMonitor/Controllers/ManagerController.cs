@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebMonitor.Attributes;
 using WebMonitor.Model;
 using WebMonitor.Native;
 
@@ -23,6 +25,8 @@ public class ManagerController
     /// <param name="pid">Process identifier</param>
     /// <returns>Name of the killed process</returns>
     [HttpPost("killProcess")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.Processes))]
     public ActionResult<string> KillProcess([FromBody] int pid)
     {
         try
@@ -42,6 +46,8 @@ public class ManagerController
     /// <param name="request">Object containing process ID and new priority</param>
     /// <returns>The set priority or null if not supported</returns>
     [HttpPost("changeProcessPriority")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.ProcessPriorityChange))]
     public ActionResult<ProcessPriorityClass?> ChangeProcessPriority([FromBody] ChangePriorityRequest request)
     {
         try
@@ -72,6 +78,8 @@ public class ManagerController
     /// <param name="request">Object containing process ID nad thread indices and if the threads should be on or off</param>
     /// <returns>The set affinity of the process</returns>
     [HttpPost("changeProcessAffinity")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.ProcessAffinityChange))]
     public ActionResult<ulong> ChangeProcessAffinity([FromBody] ChangeAffinityRequest request)
     {
         if (!OperatingSystem.IsWindows() && !OperatingSystem.IsLinux())

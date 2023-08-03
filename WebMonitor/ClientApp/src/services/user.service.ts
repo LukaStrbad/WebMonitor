@@ -3,8 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http
 import { catchError, firstValueFrom, Subject, throwError } from "rxjs";
 import { User } from "../model/user";
 import { LoginResponse } from "../model/responses/login-response";
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { AllowedFeatures } from "../model/supported-features";
+import { AllowedFeatures } from "../model/allowed-features";
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +12,7 @@ export class UserService {
   private readonly apiUrl: string;
   errorEmitter = new Subject<string>();
   authorized = signal(false);
+  onLogout = new Subject<void>();
 
   constructor(
     private http: HttpClient,
@@ -30,19 +30,48 @@ export class UserService {
     return JSON.parse(user);
   }
 
+  private set user(user: User | null) {
+    if (user === null) {
+      localStorage.removeItem("user");
+    } else {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  }
+
+  async requireUser(): Promise<User> {
+    if (this.user) {
+      return this.user;
+    }
+    if (this.token) {
+      this.user = await this.me();
+      return this.user;
+    }
+
+    throw new Error("User is not logged in");
+  }
+
   get token(): string | null {
     return localStorage.getItem("token");
   }
 
+  private set token(token: string | null) {
+    if (token === null) {
+      localStorage.removeItem("token");
+    } else {
+      localStorage.setItem("token", token);
+    }
+  }
+
   private onSuccess(loginResponse: LoginResponse) {
-    localStorage.setItem("user", JSON.stringify(loginResponse.user));
-    localStorage.setItem("token", loginResponse.token);
+    this.user = loginResponse.user;
+    this.token = loginResponse.token;
     this.authorized.set(true);
   }
 
   logout() {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    this.onLogout.next();
     this.authorized.set(false);
   }
 

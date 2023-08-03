@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using WebMonitor.Model;
 using WebMonitor.Model.Db;
 
 namespace WebMonitor.Controllers;
@@ -47,7 +48,7 @@ public class UserController : ControllerBase
         };
 
         if (isAdmin)
-            user.AllowedFeatures = _supportedFeatures;
+            user.AllowedFeatures = AllowedFeatures.All;
 
         var createdUser = await db.Users.AddAsync(user);
         await db.SaveChangesAsync();
@@ -73,7 +74,11 @@ public class UserController : ControllerBase
     {
         await using var db = new WebMonitorContext();
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == formUser.Username);
+        var users = await db.Users
+                    .Where(u => u.Username == formUser.Username)
+                    .Include(u => u.AllowedFeatures)
+                    .ToListAsync();
+        var user = users.FirstOrDefault();
         if (user is null)
             return BadRequest("Invalid username or password");
 
@@ -129,7 +134,7 @@ public class UserController : ControllerBase
 
         user.IsAdmin = true;
         // Allow the user to use all features
-        user.AllowedFeatures = _supportedFeatures;
+        user.AllowedFeatures = AllowedFeatures.All;
         await db.SaveChangesAsync();
 
         _logger.LogInformation("User {Username} promoted to admin", user.Username);
@@ -141,23 +146,23 @@ public class UserController : ControllerBase
     public async Task<ActionResult<string>> LeaveAdminRole()
     {
         await using var db = new WebMonitorContext();
-        
+
         if (User.Identity is null)
             return BadRequest("User not logged in");
-        
+
         var adminCount = await db.Users.CountAsync(u => u.IsAdmin);
         if (adminCount == 1)
             return BadRequest("Cannot leave admin role when you are the only admin");
-        
+
         var user = await db.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
         if (user is null)
             return BadRequest("Invalid username");
-        
+
         user.IsAdmin = false;
         await db.SaveChangesAsync();
-        
+
         _logger.LogInformation("User {Username} demoted from admin", user.Username);
-        
+
         return Ok($"User {user.Username} demoted from admin");
     }
 
@@ -219,14 +224,9 @@ public class UserController : ControllerBase
         {
             if (feature.PropertyType != typeof(bool))
                 continue;
-            
+
             var featureValue = (bool?)feature.GetValue(request.AllowedFeatures) ?? false;
 
-            if (featureValue && !(bool)feature.GetValue(_supportedFeatures)!)
-            {
-                return BadRequest($"Feature '{feature.Name}' is not supported by the system and cannot be enabled");
-            }
-            
             feature.SetValue(features, featureValue);
         }
 
@@ -264,7 +264,7 @@ public class UserController : ControllerBase
 
     public record LoginFormUser(string Username, string Password);
 
-    public record ChangeAllowedFeaturesForm(string Username, SupportedFeatures AllowedFeatures);
+    public record ChangeAllowedFeaturesForm(string Username, AllowedFeatures AllowedFeatures);
 
     public record UsernameRequest(string Username);
 }

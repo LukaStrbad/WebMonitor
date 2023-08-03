@@ -10,14 +10,73 @@ using WebMonitor;
 namespace WebMonitor.Migrations
 {
     [DbContext(typeof(WebMonitorContext))]
-    [Migration("20230728100853_RenameSupportedFeatures")]
-    partial class RenameSupportedFeatures
+    [Migration("20230801170032_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
+
+            modelBuilder.Entity("WebMonitor.Model.AllowedFeatures", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BatteryInfo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ComputerInfo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("CpuUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("DiskUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ExtendedProcessInfo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("FileBrowser")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("FileDownload")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("FileUpload")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("GpuUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("MemoryUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NetworkUsage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NvidiaRefreshSettings")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ProcessAffinityChange")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ProcessPriorityChange")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Processes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Terminal")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AllowedFeatures");
+                });
 
             modelBuilder.Entity("WebMonitor.Model.Db.User", b =>
                 {
@@ -50,80 +109,9 @@ namespace WebMonitor.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("WebMonitor.SupportedFeatures", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("AmdGpuUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("BatteryInfo")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CpuInfo")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("CpuUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("DiskInfo")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("DiskUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("FileBrowser")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("FileDownload")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("FileUpload")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IntelGpuUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("MemoryInfo")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("MemoryUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("NetworkUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("NvidiaGpuUsage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("NvidiaRefreshSettings")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ProcessAffinity")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ProcessPriority")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("ProcessPriorityChange")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Processes")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Terminal")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AllowedFeatures");
-                });
-
             modelBuilder.Entity("WebMonitor.Model.Db.User", b =>
                 {
-                    b.HasOne("WebMonitor.SupportedFeatures", "AllowedFeatures")
+                    b.HasOne("WebMonitor.Model.AllowedFeatures", "AllowedFeatures")
                         .WithMany()
                         .HasForeignKey("AllowedFeaturesId")
                         .OnDelete(DeleteBehavior.Cascade)

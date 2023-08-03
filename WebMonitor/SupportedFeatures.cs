@@ -21,12 +21,6 @@ namespace WebMonitor;
 /// </summary>
 public class SupportedFeatures
 {
-    /// <summary>
-    /// The ID of the supported features object for the database.
-    /// </summary>
-    [JsonIgnore]
-    public int Id { get; set; }
-
     public bool CpuInfo { get; set; }
     public bool MemoryInfo { get; set; }
     public bool DiskInfo { get; set; }
@@ -47,17 +41,6 @@ public class SupportedFeatures
     public bool ProcessPriorityChange { get; set; }
     public bool ProcessAffinity { get; set; }
     public bool Terminal { get; set; }
-
-    public static SupportedFeatures AllTrue
-    {
-        get
-        {
-            var supportedFeatures = new SupportedFeatures();
-            foreach (var property in typeof(SupportedFeatures).GetProperties())
-                property.SetValue(supportedFeatures, true);
-            return supportedFeatures;
-        }
-    }
 
     public static SupportedFeatures Detect()
     {

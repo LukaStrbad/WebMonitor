@@ -11,35 +11,31 @@ namespace WebMonitor.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "SupportedFeatures",
+                name: "AllowedFeatures",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CpuInfo = table.Column<bool>(type: "INTEGER", nullable: false),
-                    MemoryInfo = table.Column<bool>(type: "INTEGER", nullable: false),
-                    DiskInfo = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ComputerInfo = table.Column<bool>(type: "INTEGER", nullable: false),
                     CpuUsage = table.Column<bool>(type: "INTEGER", nullable: false),
                     MemoryUsage = table.Column<bool>(type: "INTEGER", nullable: false),
                     DiskUsage = table.Column<bool>(type: "INTEGER", nullable: false),
                     NetworkUsage = table.Column<bool>(type: "INTEGER", nullable: false),
-                    NvidiaGpuUsage = table.Column<bool>(type: "INTEGER", nullable: false),
-                    AmdGpuUsage = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IntelGpuUsage = table.Column<bool>(type: "INTEGER", nullable: false),
+                    GpuUsage = table.Column<bool>(type: "INTEGER", nullable: false),
+                    NvidiaRefreshSettings = table.Column<bool>(type: "INTEGER", nullable: false),
                     Processes = table.Column<bool>(type: "INTEGER", nullable: false),
                     FileBrowser = table.Column<bool>(type: "INTEGER", nullable: false),
                     FileDownload = table.Column<bool>(type: "INTEGER", nullable: false),
                     FileUpload = table.Column<bool>(type: "INTEGER", nullable: false),
-                    NvidiaRefreshSettings = table.Column<bool>(type: "INTEGER", nullable: false),
-                    BatteryInfo = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ProcessPriority = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ExtendedProcessInfo = table.Column<bool>(type: "INTEGER", nullable: false),
                     ProcessPriorityChange = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ProcessAffinity = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Terminal = table.Column<bool>(type: "INTEGER", nullable: false)
+                    ProcessAffinityChange = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Terminal = table.Column<bool>(type: "INTEGER", nullable: false),
+                    BatteryInfo = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SupportedFeatures", x => x.Id);
+                    table.PrimaryKey("PK_AllowedFeatures", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -58,9 +54,9 @@ namespace WebMonitor.Migrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_SupportedFeatures_AllowedFeaturesId",
+                        name: "FK_Users_AllowedFeatures_AllowedFeaturesId",
                         column: x => x.AllowedFeaturesId,
-                        principalTable: "SupportedFeatures",
+                        principalTable: "AllowedFeatures",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -78,7 +74,7 @@ namespace WebMonitor.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "SupportedFeatures");
+                name: "AllowedFeatures");
         }
     }
 }

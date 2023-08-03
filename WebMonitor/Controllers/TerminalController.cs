@@ -1,6 +1,9 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebMonitor.Attributes;
 using WebMonitor.Model;
 using WebMonitor.Plugins;
 
@@ -20,7 +23,8 @@ public class TerminalController : ControllerBase
         _logger = logger;
     }
 
-    [Route("/Terminal/session"), ApiExplorerSettings(IgnoreApi = true)]
+    [Route("/Terminal/session")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public async Task Get()
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)
@@ -37,10 +41,24 @@ public class TerminalController : ControllerBase
 
     private async Task Echo(WebSocket webSocket)
     {
-        var idBuffer = new byte[128];
-        var response = await webSocket.ReceiveAsync(new Memory<byte>(idBuffer), CancellationToken.None);
+        var initBuffer = new byte[1024 * 4];
+        var response = await webSocket.ReceiveAsync(new Memory<byte>(initBuffer), CancellationToken.None);
+        var token = Encoding.UTF8.GetString(initBuffer, 0, response.Count);
+        // Validate JWT token
+        HttpContext.Request.Headers["Authorization"] = $"Bearer {token}";
+        await HttpContext.AuthenticateAsync();
+        // if (!HttpContext.User.Identity!.IsAuthenticated)
+        // {
+        //     _logger.LogDebug("Invalid token");
+        //     var message = "Invalid token"u8.ToArray();
+        //     await webSocket.SendAsync(new ArraySegment<byte>(message), WebSocketMessageType.Text, true,
+        //         CancellationToken.None);
+        //     return;
+        // }
+
+        response = await webSocket.ReceiveAsync(new Memory<byte>(initBuffer), CancellationToken.None);
         int sessionId;
-        if (int.TryParse(Encoding.UTF8.GetString(idBuffer, 0, response.Count), out var parsedSessionId))
+        if (int.TryParse(Encoding.UTF8.GetString(initBuffer, 0, response.Count), out var parsedSessionId))
         {
             sessionId = parsedSessionId;
         }
@@ -119,6 +137,8 @@ public class TerminalController : ControllerBase
     }
 
     [HttpGet("isSessionAlive")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.Terminal))]
     public ActionResult<bool> IsSessionAlive([FromQuery] int sessionId)
     {
         var port = _pluginLoader.TerminalPlugin?.GetPort(sessionId);
@@ -130,6 +150,8 @@ public class TerminalController : ControllerBase
     }
 
     [HttpGet("startNewSession")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.Terminal))]
     public ActionResult<int> StartNewSession()
     {
         var terminalPlugin = _pluginLoader.TerminalPlugin;
@@ -141,6 +163,8 @@ public class TerminalController : ControllerBase
     }
 
     [HttpPost("changePtySize")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.Terminal))]
     public ActionResult ChangePtySize([FromBody] ChangePtySizeRequest request)
     {
         var terminalPlugin = _pluginLoader.TerminalPlugin;
