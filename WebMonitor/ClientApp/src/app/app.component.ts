@@ -2,6 +2,8 @@ import { Component, Signal, ViewEncapsulation, computed, effect } from '@angular
 import { SysInfoService } from 'src/services/sys-info.service';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 import { OverlayContainer } from '@angular/cdk/overlay';
+import { UserService } from "../services/user.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-root',
@@ -25,7 +27,9 @@ export class AppComponent {
   constructor(
     public sysInfo: SysInfoService,
     private appSettings: AppSettingsService,
-    overlayContainer: OverlayContainer
+    overlayContainer: OverlayContainer,
+    userService: UserService,
+    router: Router
   ) {
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
     this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
@@ -43,6 +47,13 @@ export class AppComponent {
 
       // Add the appropriate theme class
       overlayContainerClasses.add(this.isDarkTheme() ? 'dark-theme' : 'light-theme');
-    })
+    });
+
+    effect(async () => {
+      if (!userService.authorized()) {
+        await router.navigate(["/login"]);
+        sysInfo.stopService();
+      }
+    });
   }
 }

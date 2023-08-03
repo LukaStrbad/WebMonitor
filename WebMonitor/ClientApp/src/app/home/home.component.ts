@@ -4,6 +4,8 @@ import * as arrayHelpers from "../../helpers/array-helpers";
 import * as numberHelpers from "../../helpers/number-helpers";
 import { ComputerInfo } from 'src/model/computer-info';
 import { SupportedFeatures } from "../../model/supported-features";
+import { UserService } from 'src/services/user.service';
+import { AllowedFeatures } from 'src/model/allowed-features';
 
 @Component({
   selector: 'app-home',
@@ -15,13 +17,20 @@ export class HomeComponent {
   numberHelpers = numberHelpers;
   computerInfo?: ComputerInfo;
   supportedFeatures?: SupportedFeatures;
+  allowedFeatures?: AllowedFeatures;
 
-  constructor(public sysInfo: SysInfoService) {
+  constructor(
+    public sysInfo: SysInfoService,
+    userService: UserService
+  ) {
     sysInfo.getComputerInfo()
       .then(computerInfo => this.computerInfo = computerInfo);
 
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
+
+    userService.requireUser()
+      .then(user => this.allowedFeatures = user.allowedFeatures);
   }
 
   get osBuild(): string {

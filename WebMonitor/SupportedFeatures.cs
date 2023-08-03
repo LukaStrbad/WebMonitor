@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Text.Json.Serialization;
 using LibreHardwareMonitor.Hardware;
 using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Controllers;
@@ -19,8 +21,6 @@ namespace WebMonitor;
 /// </summary>
 public class SupportedFeatures
 {
-    private PluginLoader? _pluginLoader;
-
     public bool CpuInfo { get; set; }
     public bool MemoryInfo { get; set; }
     public bool DiskInfo { get; set; }
@@ -40,10 +40,11 @@ public class SupportedFeatures
     public bool ProcessPriority { get; set; }
     public bool ProcessPriorityChange { get; set; }
     public bool ProcessAffinity { get; set; }
-    public bool Terminal => _pluginLoader?.TerminalPlugin is not null;
+    public bool Terminal { get; set; }
 
-    public SupportedFeatures()
+    public static SupportedFeatures Detect()
     {
+        var supportedFeatures = new SupportedFeatures();
         var updateVisitor = new UpdateVisitor();
         var computer = new Computer
         {
@@ -54,57 +55,57 @@ public class SupportedFeatures
         computer.Open();
         computer.Accept(updateVisitor);
 
-        CpuInfo = CheckFeature(() => new CpuInfo(computer));
-        MemoryInfo = CheckFeature(() => new MemoryInfo());
-        DiskInfo = CheckFeature(() => Native.Disk.DiskInfo.GetDiskInfos());
-        CpuUsage = CheckFeature(() =>
+        supportedFeatures.CpuInfo = CheckFeature(() => new CpuInfo(computer));
+        supportedFeatures.MemoryInfo = CheckFeature(() => new MemoryInfo());
+        supportedFeatures.DiskInfo = CheckFeature(() => Native.Disk.DiskInfo.GetDiskInfos());
+        supportedFeatures.CpuUsage = CheckFeature(() =>
         {
             var cpuUsage = new CpuUsage();
             cpuUsage.Refresh(1000);
         });
-        MemoryUsage = CheckFeature(() =>
+        supportedFeatures.MemoryUsage = CheckFeature(() =>
         {
             var memoryUsage = new MemoryUsage();
             memoryUsage.Refresh(1000);
         });
-        DiskUsage = CheckFeature(() =>
+        supportedFeatures.DiskUsage = CheckFeature(() =>
         {
             var diskUsage = new DiskUsageTracker();
             diskUsage.Refresh(1000);
         });
-        NetworkUsage = CheckFeature(() =>
+        supportedFeatures.NetworkUsage = CheckFeature(() =>
         {
             var networkUsage = new NetworkUsageTracker();
             networkUsage.Refresh(1000);
         });
-        Processes = CheckFeature(() =>
+        supportedFeatures.Processes = CheckFeature(() =>
         {
             var processTracker = new ProcessTracker();
             processTracker.Refresh(1000);
         });
 
         var fileBrowserController = new FileBrowserController();
-        FileBrowser = CheckFeature(() =>
+        supportedFeatures.FileBrowser = CheckFeature(() =>
         {
             // Check if root directories can be listed
             var result = fileBrowserController.Dir();
             if (result.Result is not JsonResult)
                 throw new Exception();
         });
-        FileDownload = true;
-        FileUpload = true;
+        supportedFeatures.FileDownload = true;
+        supportedFeatures.FileUpload = true;
 
         // Check if Nvidia GPU usage is supported
-        NvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.CheckIfSupported();
+        supportedFeatures.NvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.CheckIfSupported();
 
         if (OperatingSystem.IsLinux())
         {
             // AMD GPU usage is not yet supported on Linux
-            AmdGpuUsage = false;
+            supportedFeatures.AmdGpuUsage = false;
             // This is unnecessary on Linux
-            NvidiaRefreshSettings = false;
-            ProcessPriority = true;
-            ProcessPriorityChange = CheckFeature(() =>
+            supportedFeatures.NvidiaRefreshSettings = false;
+            supportedFeatures.ProcessPriority = true;
+            supportedFeatures.ProcessPriorityChange = CheckFeature(() =>
             {
                 var currentProcess = Process.GetCurrentProcess();
                 var priority = ExtendedProcessInfoLinux.getpriority(0, currentProcess.Id);
@@ -115,11 +116,11 @@ public class SupportedFeatures
         }
         else if (OperatingSystem.IsWindows())
         {
-            AmdGpuUsage = true;
-            IntelGpuUsage = false;
-            NvidiaRefreshSettings = NvidiaGpuUsage;
-            ProcessPriority = true;
-            ProcessPriorityChange = CheckFeature(() =>
+            supportedFeatures.AmdGpuUsage = true;
+            supportedFeatures.IntelGpuUsage = false;
+            supportedFeatures.NvidiaRefreshSettings = supportedFeatures.NvidiaGpuUsage;
+            supportedFeatures.ProcessPriority = true;
+            supportedFeatures.ProcessPriorityChange = CheckFeature(() =>
             {
                 var currentProcess = Process.GetCurrentProcess();
                 currentProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
@@ -128,9 +129,9 @@ public class SupportedFeatures
         }
 
         // LibreHardwareMonitor does not support Intel GPUs
-        IntelGpuUsage = false;
+        supportedFeatures.IntelGpuUsage = false;
 
-        BatteryInfo = CheckFeature(() =>
+        supportedFeatures.BatteryInfo = CheckFeature(() =>
         {
             var batteryInfo =
                 new BatteryInfo(computer.Hardware.First(hardware => hardware.HardwareType == HardwareType.Battery))
@@ -140,7 +141,9 @@ public class SupportedFeatures
             batteryInfo.Refresh(1000);
         });
 
-        ProcessAffinity = OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
+        supportedFeatures.ProcessAffinity = OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
+
+        return supportedFeatures;
     }
 
     private static bool CheckFeature(Action action)
@@ -160,6 +163,6 @@ public class SupportedFeatures
 
     public void ReevaluateWithPlugins(PluginLoader pluginLoader)
     {
-        _pluginLoader = pluginLoader;
+        Terminal = pluginLoader.TerminalPlugin is not null;
     }
 }

@@ -2,7 +2,7 @@
 
 <mat-accordion>
   <!-- CPU panel -->
-  <mat-expansion-panel *ngIf="supportedFeatures?.cpuUsage">
+  <mat-expansion-panel *ngIf="showCpuUsage()">
     <!-- Panel header -->
     <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
@@ -24,7 +24,7 @@
   </mat-expansion-panel>
 
   <!-- Memory panel -->
-  <mat-expansion-panel *ngIf="supportedFeatures?.memoryUsage">
+  <mat-expansion-panel *ngIf="showMemoryUsage()">
     <!-- Panel header -->
     <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
@@ -62,7 +62,7 @@
   </mat-expansion-panel>
 
   <!-- Disk panels -->
-  <ng-container *ngIf="supportedFeatures?.diskUsage">
+  <ng-container *ngIf="showDiskUsage()">
     <mat-expansion-panel *ngFor="let diskUsage of diskUsages">
       <!-- Panel header -->
       <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
@@ -94,7 +94,7 @@
   </ng-container>
 
   <!-- Network panels -->
-  <ng-container *ngIf="supportedFeatures?.networkUsage">
+  <ng-container *ngIf="showNetworkUsage()">
     <mat-expansion-panel *ngFor="let networkUsage of networkUsages">
       <!-- Panel header -->
       <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
@@ -139,7 +139,7 @@
 
   <!-- GPU panels -->
   <ng-container
-    *ngIf="supportedFeatures?.nvidiaGpuUsage || supportedFeatures?.amdGpuUsage ||supportedFeatures?.intelGpuUsage">
+    *ngIf="showGpuUsage()">
     <mat-expansion-panel *ngFor="let gpuUsage of gpuUsages">
       <!-- Panel header -->
       <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">

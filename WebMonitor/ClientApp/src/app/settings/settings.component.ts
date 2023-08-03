@@ -3,6 +3,8 @@ import { NvidiaRefreshSetting } from 'src/model/nvidia-refresh-setting';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 import { SysInfoService } from 'src/services/sys-info.service';
 import { SupportedFeatures } from "../../model/supported-features";
+import { UserService } from 'src/services/user.service';
+import { AllowedFeatures } from 'src/model/allowed-features';
 
 @Component({
   selector: 'app-settings',
@@ -22,61 +24,27 @@ export class SettingsComponent {
     .filter(n => typeof n === "number") as NvidiaRefreshSetting[];
   selectedNvidiaRefreshSetting = NvidiaRefreshSetting.Enabled;
   supportedFeatures?: SupportedFeatures;
-  supportedFeaturesList: { name: string, supported: boolean, note?: string }[] = [];
+  allowedFeatures?: AllowedFeatures;
 
   constructor(
     public appSettings: AppSettingsService,
-    public sysInfo: SysInfoService
+    public sysInfo: SysInfoService,
+    userService: UserService
   ) {
-    effect(() => this.selectedNvidiaRefreshSetting = sysInfo.nvidiaRefreshSettings().refreshSetting);
+    effect(() => {
+      this.selectedNvidiaRefreshSetting = sysInfo.nvidiaRefreshSettings().refreshSetting;
+      sysInfo.updateNvidiaRefreshSettings();
+    });
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
     this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
 
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => {
         this.supportedFeatures = supportedFeatures;
-        this.supportedFeaturesList = [
-          { name: "CPU info", supported: supportedFeatures.cpuInfo },
-          { name: "Memory info", supported: supportedFeatures.memoryInfo },
-          { name: "Disk info", supported: supportedFeatures.diskInfo },
-          { name: "CPU usage", supported: supportedFeatures.cpuUsage },
-          { name: "Memory usage", supported: supportedFeatures.memoryUsage },
-          { name: "Disk usage", supported: supportedFeatures.diskUsage },
-          { name: "Network usage", supported: supportedFeatures.networkUsage },
-          { name: "NVIDIA GPU usage", supported: supportedFeatures.nvidiaGpuUsage },
-          { name: "AMD GPU usage", supported: supportedFeatures.amdGpuUsage },
-          {
-            name: "Intel GPU usage",
-            supported: supportedFeatures.intelGpuUsage,
-            note: "This feature is unsupported because the LibreHardwareMonitor library used by this app doesn't support Intel GPUs"
-          },
-          { name: "Processes", supported: supportedFeatures.processes },
-          { name: "File browser", supported: supportedFeatures.fileBrowser },
-          { name: "File download", supported: supportedFeatures.fileDownload },
-          { name: "File upload", supported: supportedFeatures.fileUpload },
-          {
-            name: "NVIDIA refresh settings",
-            supported: supportedFeatures.nvidiaRefreshSettings,
-            note: "This feature is only supported on Windows because of high CPU usage on Windows on NVIDIA GPUs"
-          },
-          {
-            name: "Battery info",
-            supported: supportedFeatures.batteryInfo,
-            note: "This feature is unsupported or the PC doesn't contain a battery"
-          },
-          { name: "Process priority", supported: supportedFeatures.processPriority },
-          { name: "Process priority change", supported: supportedFeatures.processPriorityChange },
-          { name: "Process affinity", supported: supportedFeatures.processAffinity },
-          { name: "Terminal", supported: supportedFeatures.terminal },
-        ].map(f => {
-          if (f.supported) {
-            f.note = "This feature is supported";
-          } else if (!f.note) {
-            f.note = "This feature is unsupported or has been disabled";
-          }
-          return f;
-        })
       });
+
+    userService.requireUser()
+      .then(user => this.allowedFeatures = user.allowedFeatures);
 
     this.graphColorSettings = [
       {

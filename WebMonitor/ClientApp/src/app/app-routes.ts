@@ -5,6 +5,8 @@ import { ProcessListComponent } from "./process/process-list/process-list.compon
 import { FileBrowserComponent } from "./file-browser/file-browser.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { TerminalComponent } from "./terminal/terminal.component";
+import { LoginComponent } from "./login/login.component";
+import { UsersComponent } from "./users/users.component";
 
 export interface RouteWithIcon extends Route {
   icon?: string;
@@ -41,6 +43,12 @@ export const menuRoutes: RouteWithIcon[] = [
     component: TerminalComponent,
     title: 'Terminal',
     icon: 'terminal'
+  },
+  {
+    path: 'users',
+    component: UsersComponent,
+    title: 'User',
+    icon: 'person'
   }
 ];
 
@@ -50,5 +58,15 @@ export const appRoutes: Routes = [
     path: "settings",
     component: SettingsComponent,
     title: 'Settings'
+  },
+  {
+    path: "login",
+    component: LoginComponent,
+    title: 'Login'
+  },
+  {
+    path: "register",
+    component: LoginComponent,
+    title: 'Register'
   }
 ];

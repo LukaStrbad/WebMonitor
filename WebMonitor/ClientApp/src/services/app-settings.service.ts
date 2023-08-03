@@ -1,5 +1,4 @@
-import { Injectable, Signal, WritableSignal, effect, signal } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Injectable, WritableSignal, effect, signal } from '@angular/core';
 import { environment } from 'src/environments/environment';
 
 @Injectable({

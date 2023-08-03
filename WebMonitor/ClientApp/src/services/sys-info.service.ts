@@ -14,6 +14,7 @@ import { NvidiaRefreshSetting, NvidiaRefreshSettings } from 'src/model/nvidia-re
 import { SupportedFeatures } from "../model/supported-features";
 import { BatteryInfo } from "../model/battery-info";
 import { ExtendedProcessInfo } from "../model/extended-process-info";
+import { UserService } from './user.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,21 +30,46 @@ export class SysInfoService {
     refreshSetting: NvidiaRefreshSetting.Enabled,
     nRefreshIntervals: 10
   });
-  private nvidiaInitialized = false;
 
   private readonly apiUrl: string;
   serverVersion: string | null = null;
   refreshDelay: number = 0;
   lastSettingsUpdate = 0n;
   private supportedFeatures: SupportedFeatures | null = null;
+  private stopRefresh = false;
+  private refreshTimeout: any;
 
   errorEmitter = new EventEmitter<[SysInfoError, string]>();
 
   constructor(
     private http: HttpClient,
+    private userService: UserService,
     @Inject('BASE_URL') baseUrl: string
   ) {
     this.apiUrl = baseUrl + "SysInfo/";
+
+    if (userService.authorized()) {
+      this.startService();
+    }
+  }
+
+  /**
+   * Function that starts sys info service when user logs in
+   */
+  startService() {
+    // Reset fields
+    this.stopRefresh = false;
+    this.data = new SysInfoUsages(60);
+    this.clientIp.set(null);
+    this.nvidiaRefreshSettings.set({
+      refreshSetting: NvidiaRefreshSetting.Enabled,
+      nRefreshIntervals: 10
+    });
+    this.serverVersion = null;
+    this.refreshDelay = 0;
+    this.lastSettingsUpdate = 0n;
+    this.supportedFeatures = null;
+
 
     // Get client IP
     firstValueFrom(this.http.get<string>(this.apiUrl + "clientIP"))
@@ -55,20 +81,18 @@ export class SysInfoService {
     this.getNvidiaRefreshSettings()
       .then(settings => {
         this.nvidiaRefreshSettings.set(settings);
-        this.nvidiaInitialized = true;
       });
-
-    // Update nvidia refresh settings when they change
-    effect(async () => {
-      const settings = this.nvidiaRefreshSettings();
-      // Update refresh settings only after initialization to prevent double save
-      if (!this.nvidiaInitialized)
-        return;
-      await this.updateNvidiaRefreshSettings(settings);
-    })
 
     this.refreshLoop().then(_ => { // ignored
     });
+  }
+
+  /**
+   * Function that stops sysinfo service when user logs out
+   */
+  stopService() {
+    this.stopRefresh = true;
+    clearTimeout(this.refreshTimeout ?? undefined);
   }
 
   /**
@@ -94,7 +118,17 @@ export class SysInfoService {
 
   private async refreshLoop() {
     while (true) {
-      await this.refresh();
+      if (this.stopRefresh) {
+        console.log("Refresh stopped");
+        return;
+      }
+
+      if (this.userService.user) {
+        try {
+          await this.refresh();
+        }
+        catch (e) { }
+      }
 
       // Try to predict time to next refresh
       const timeToNextRefresh = Number(this.data.refreshInfo.refreshInterval) - (Number(this.data.refreshInfo.millisSinceLastRefresh) + this.refreshDelay) / 3;
@@ -138,9 +172,6 @@ export class SysInfoService {
       this.lastSettingsUpdate = time;
       // Refresh interval is being updated constantly, so it is not checked here
 
-      // Disable NVIDIA refresh settings update to prevent infinite loop
-      this.nvidiaInitialized = false;
-
       const nvidiaRefreshSettings = await this.getNvidiaRefreshSettings();
       const currentNvidiaRefreshSettings = this.nvidiaRefreshSettings();
 
@@ -149,8 +180,6 @@ export class SysInfoService {
         nvidiaRefreshSettings.nRefreshIntervals !== currentNvidiaRefreshSettings.nRefreshIntervals) {
         this.nvidiaRefreshSettings.set(nvidiaRefreshSettings);
       }
-      // Re-enable NVIDIA refresh settings update
-      this.nvidiaInitialized = true;
     }
   }
 
@@ -179,6 +208,10 @@ export class SysInfoService {
   }
 
   private async refreshCpuUsage() {
+    if (!this.userService.user?.allowedFeatures.cpuUsage) {
+      return;
+    }
+
     const response = await firstValueFrom(
       this.http.get<CpuUsage | null>(this.apiUrl + "cpuUsage")
     );
@@ -187,6 +220,10 @@ export class SysInfoService {
   }
 
   private async refreshMemoryUsage() {
+    if (!this.userService.user?.allowedFeatures.memoryUsage) {
+      return;
+    }
+
     const response = await firstValueFrom(
       this.http.get<MemoryUsage | null>(this.apiUrl + "memoryUsage")
     );
@@ -195,6 +232,10 @@ export class SysInfoService {
   }
 
   private async refreshDiskUsages() {
+    if (!this.userService.user?.allowedFeatures.diskUsage) {
+      return;
+    }
+
     const response = await firstValueFrom(
       this.http.get<DiskUsages | null>(this.apiUrl + "diskUsages")
     );
@@ -203,6 +244,10 @@ export class SysInfoService {
   }
 
   private async refreshGpuUsages() {
+    if (!this.userService.user?.allowedFeatures.gpuUsage) {
+      return;
+    }
+
     const response = await firstValueFrom(
       this.http.get<GpuUsages | null>(this.apiUrl + "gpuUsages")
     );
@@ -215,6 +260,10 @@ export class SysInfoService {
   }
 
   private async refreshNetworkUsages() {
+    if (!this.userService.user?.allowedFeatures.networkUsage) {
+      return;
+    }
+
     const response = await firstValueFrom(
       this.http.get<NetworkUsages | null>(this.apiUrl + "networkUsages")
     );
@@ -223,6 +272,10 @@ export class SysInfoService {
   }
 
   private async refreshProcessInfos() {
+    if (!this.userService.user?.allowedFeatures.processes) {
+      return;
+    }
+
     this.data.processInfos = await firstValueFrom(
       this.http.get<ProcessList | null>(this.apiUrl + "processList")
     );
@@ -234,11 +287,20 @@ export class SysInfoService {
     );
   }
 
-  private async updateNvidiaRefreshSettings(settings: NvidiaRefreshSettings) {
-    await firstValueFrom(this.http.post(this.apiUrl + "nvidiaRefreshSettings", settings));
+  async updateNvidiaRefreshSettings() {
+    if (!this.userService.user?.allowedFeatures.nvidiaRefreshSettings) {
+      return;
+    }
+
+    console.log("Updating NVIDIA refresh settings");
+    await firstValueFrom(this.http.post(this.apiUrl + "nvidiaRefreshSettings", this.nvidiaRefreshSettings()));
   }
 
   private async refreshBatteryInfo() {
+    if (!this.userService.user?.allowedFeatures.batteryInfo) {
+      return;
+    }
+
     // Refresh battery info only if it has not been refreshed for a long time
     if (this.data.refreshInfo.millisSinceLastRefresh2 < (this.data.refreshInfo.refreshInterval * 5) * 0.9)
       return;

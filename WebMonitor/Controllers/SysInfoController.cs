@@ -1,6 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebMonitor.Attributes;
+using WebMonitor.Model;
 using WebMonitor.Native;
 using WebMonitor.Native.Battery;
 using WebMonitor.Native.Cpu;
@@ -70,6 +73,8 @@ public class SysInfoController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpPost("refreshInterval")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.RefreshIntervalChange))]
     public ActionResult ChangeRefreshInterval([FromBody] int interval)
     {
         if (interval < 1000)
@@ -83,24 +88,31 @@ public class SysInfoController : ControllerBase
     /// Fetches basic computer info
     /// </summary>
     [HttpGet("computerInfo")]
+    [Authorize]
     public ActionResult<ComputerInfo> ComputerInfo() => _sysInfo.ComputerInfo;
 
     /// <summary>
     /// Fetches current memory usage
     /// </summary>
     [HttpGet("memoryUsage")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.MemoryUsage))]
     public ActionResult<MemoryUsage?> MemoryUsage() => _sysInfo.MemoryUsage;
 
     /// <summary>
     /// Fetches data about currently running processes
     /// </summary>
     [HttpGet("processList")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.Processes))]
     public ActionResult<IEnumerable<ProcessInfo>?> ProcessList() => _sysInfo.Processes?.ToList();
 
     /// <summary>
     /// Fetches per thread usage
     /// </summary>
     [HttpGet("cpuUsage")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.CpuUsage))]
     public ActionResult<CpuUsage?> CpuUsage() => _sysInfo.CpuUsage;
 
     /// <summary>
@@ -108,30 +120,39 @@ public class SysInfoController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet("gpuUsages")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.GpuUsage))]
     public ActionResult<IEnumerable<IGpuUsage>?> GpuUsages() => _sysInfo.GpuUsages?.ToList();
 
     /// <summary>
     /// Fetches disk usages
     /// </summary>
     [HttpGet("diskUsages")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.DiskUsage))]
     public ActionResult<IEnumerable<DiskUsage>?> DiskUsages() => _sysInfo.DiskUsages;
 
     /// <summary>
     /// Fetches usage statistics per NIC
     /// </summary>
     [HttpGet("networkUsages")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.NetworkUsage))]
     public ActionResult<IEnumerable<NetworkUsage>?> NetworkUsages() => _sysInfo.NetworkUsages?.ToList();
 
     /// <summary>
     /// Fetches the current Nvidia refresh settings
     /// </summary>
     [HttpGet("nvidiaRefreshSettings")]
+    [Authorize]
     public ActionResult<NvidiaRefreshSettings> NvidiaRefreshSetting() => _settings.NvidiaRefreshSettings;
 
     /// <summary>
     /// Sets the Nvidia refresh settings
     /// </summary>
     [HttpPost("nvidiaRefreshSettings")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.NvidiaRefreshSettings))]
     public async Task<ActionResult> ChangeNvidiaRefreshSetting()
     {
         var settings = await JsonSerializer.DeserializeAsync<JsonObject>(Request.Body);
@@ -153,9 +174,13 @@ public class SysInfoController : ControllerBase
     /// Fetches info about the battery
     /// </summary>
     [HttpGet("batteryInfo")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.BatteryInfo))]
     public ActionResult<BatteryInfo?> BatteryInfo() => _sysInfo.BatteryInfo;
 
     [HttpGet("extendedProcessInfo")]
+    [Authorize]
+    [FeatureGuard(nameof(AllowedFeatures.ExtendedProcessInfo))]
     public ActionResult<ExtendedProcessInfo> ExtendedProcessInfo([FromQuery] int pid)
     {
         try

@@ -6,18 +6,11 @@
   </mat-card-header>
 
   <mat-card-content>
-    <mat-slide-toggle
-      [checked]="isDarkTheme()"
-      (change)="setDarkMode($event.checked)"
-    >Dark mode
+    <mat-slide-toggle [checked]="isDarkTheme()" (change)="setDarkMode($event.checked)">Dark mode
     </mat-slide-toggle>
 
-    <app-color-input
-      *ngFor="let graphColorSetting of graphColorSettings"
-      [label]="graphColorSetting.label"
-      [color]="graphColorSetting.color"
-      (colorChange)="graphColorSetting.changeColor($event)"
-    ></app-color-input>
+    <app-color-input *ngFor="let graphColorSetting of graphColorSettings" [label]="graphColorSetting.label"
+      [color]="graphColorSetting.color" (colorChange)="graphColorSetting.changeColor($event)"></app-color-input>
   </mat-card-content>
 </mat-card>
 
@@ -26,52 +19,35 @@
 
   <mat-card-content>
     <div>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" *ngIf="allowedFeatures?.refreshIntervalChange">
         <mat-label>Refresh interval</mat-label>
-        <input
-          matInput
-          type="number"
-          min="1000"
-          step="100"
-          (change)="onRefreshIntervalChange($event.target)"
-          [value]="sysInfo.data.refreshInfo.refreshInterval.toString()"
-        />
+        <input matInput type="number" min="1000" step="100" (change)="onRefreshIntervalChange($event.target)"
+          [value]="sysInfo.data.refreshInfo.refreshInterval.toString()" />
       </mat-form-field>
+      <p *ngIf="!allowedFeatures?.refreshIntervalChange" class="mat-body-1">Refresh interval: {{
+        sysInfo.data.refreshInfo.refreshInterval }}ms</p>
     </div>
 
     <!-- NVIDIA refresh settings -->
-    <div class="row" *ngIf="supportedFeatures?.nvidiaRefreshSettings">
+    <div class="row"
+      *ngIf="this.supportedFeatures?.nvidiaRefreshSettings && this.allowedFeatures?.nvidiaRefreshSettings">
       <div class="col-12">
         <mat-form-field appearance="outline" class="me-4">
           <mat-label>Nvidia GPU refresh</mat-label>
-          <mat-select
-            [(value)]="selectedNvidiaRefreshSetting"
-            (selectionChange)="onNvidiaRefreshSettingChange()"
-          >
-            <mat-option
-              *ngFor="let setting of nvidiaRefreshSettingValues"
-              [value]="setting"
-            >{{ nvidiaRefreshSettingName(setting) }}</mat-option
-            >
+          <mat-select [(value)]="selectedNvidiaRefreshSetting" (selectionChange)="onNvidiaRefreshSettingChange()">
+            <mat-option *ngFor="let setting of nvidiaRefreshSettingValues" [value]="setting">{{
+              nvidiaRefreshSettingName(setting) }}</mat-option>
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Wait between N intervals</mat-label>
-          <input
-            matInput
-            type="number"
-            min="1"
-            step="1"
-            [disabled]="
+          <input matInput type="number" min="1" step="1" [disabled]="
               sysInfo.nvidiaRefreshSettings().refreshSetting !==
               nvidiaRefreshSettingEnum.LongerInterval
-            "
-            (change)="onNvidiaRefreshIntervalChange($event.target)"
-            [value]="
+            " (change)="onNvidiaRefreshIntervalChange($event.target)" [value]="
               sysInfo.nvidiaRefreshSettings().nRefreshIntervals.toString()
-            "
-          />
+            " />
         </mat-form-field>
       </div>
 
@@ -80,6 +56,10 @@
         usage. This setting allows you tu customize how to refresh that info.
       </p>
     </div>
+    <p *ngIf="this.supportedFeatures?.nvidiaRefreshSettings && !this.allowedFeatures?.nvidiaRefreshSettings"
+      class="mat-body-1">Nvidia GPU refresh: {{ nvidiaRefreshSettingName(sysInfo.nvidiaRefreshSettings().refreshSetting)
+      }}, {{ sysInfo.nvidiaRefreshSettings().nRefreshIntervals }} intervals
+    </p>
   </mat-card-content>
 </mat-card>
 
@@ -89,28 +69,10 @@
   </mat-card-header>
 
   <mat-card-content>
-    <mat-checkbox [checked]="showDebugWindow()" (click)="toggleDebugWindow()"
-    >Show debug window
+    <mat-checkbox [checked]="showDebugWindow()" (click)="toggleDebugWindow()">Show debug window
     </mat-checkbox>
 
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title class="mat-h3">Supported features</mat-card-title>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div>
-          <div class="mat-body-2 mb-0" *ngFor="let feature of supportedFeaturesList">
-            <span
-              [matTooltip]="feature.note ?? ''"
-              [matTooltipDisabled]="feature.note == undefined"
-              matTooltipPosition="below">
-            {{ feature.name }}: <span
-              [class]="feature.supported ? 'primary-color' : 'warn-color'">{{ feature.supported ? 'Supported' : 'Not supported' }}</span></span>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <app-supported-features-card></app-supported-features-card>
 
     <p class="mat-body-2">Server version: {{sysInfo.serverVersion}}</p>
   </mat-card-content>

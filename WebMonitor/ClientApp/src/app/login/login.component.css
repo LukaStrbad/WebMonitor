@@ -1,0 +1,12 @@
+form>* {
+  display: block;
+}
+
+button, mat-spinner {
+  margin: 0 auto;
+  display: block;
+}
+
+.logging-in {
+  text-align: center;
+}

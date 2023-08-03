@@ -1,0 +1,16 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title class="mat-h3">Change features {{ user.displayName }} has access to</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div>
+      <div class="mat-body-2 mb-0" *ngFor="let feature of featuresList">
+        <mat-checkbox [checked]="feature.allowed"
+                      (click)="changeFeatures($event, feature)">
+          {{ feature.name }}
+        </mat-checkbox>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

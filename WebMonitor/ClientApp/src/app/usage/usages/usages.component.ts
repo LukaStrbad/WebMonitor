@@ -19,6 +19,8 @@ import { replaceValues } from "../../../helpers/object-helpers";
 import { Subscription } from 'rxjs';
 import { AppSettingsService, GraphColors } from 'src/services/app-settings.service';
 import { SupportedFeatures } from "../../../model/supported-features";
+import { AllowedFeatures } from 'src/model/allowed-features';
+import { UserService } from 'src/services/user.service';
 
 @Component({
   selector: 'app-usages',
@@ -41,15 +43,20 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
 
   refreshSubscription: Subscription | undefined;
   supportedFeatures?: SupportedFeatures;
+  allowedFeatures?: AllowedFeatures;
 
   constructor(
     public sysInfo: SysInfoService,
-    appSettings: AppSettingsService
+    appSettings: AppSettingsService,
+    userService: UserService
   ) {
     this.graphColors = computed(() => appSettings.settings().graphColors);
 
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
+
+    userService.requireUser()
+      .then(user => this.allowedFeatures = user.allowedFeatures);
   }
 
   ngOnDestroy(): void {
@@ -62,42 +69,50 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
     this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
 
     this.refreshSubscription = this.sysInfo.onRefresh.subscribe(() => {
-      // Refresh disk list if it was changed
-      if (this.diskUsages.length !== this.sysInfo.data.diskUsages?.length) {
-        this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
-      } else {
-        // Refresh values
-        this.sysInfo.data.diskUsages?.forEach((diskUsage, i) => {
-          // We can't just assign the new value to the old one because it will break the reference
-          // and the progress bars will be recreated, starting from zero every update
-          replaceValues(this.diskUsages[i], diskUsage);
-        });
+      if (this.showDiskUsage()) {
+        // Refresh disk list if it was changed
+        if (this.diskUsages.length !== this.sysInfo.data.diskUsages?.length) {
+          this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
+        } else {
+          // Refresh values
+          this.sysInfo.data.diskUsages?.forEach((diskUsage, i) => {
+            // We can't just assign the new value to the old one because it will break the reference
+            // and the progress bars will be recreated, starting from zero every update
+            replaceValues(this.diskUsages[i], diskUsage);
+          });
+        }
       }
 
-      // Refresh network list if it was changed
-      let newNetworkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
-      if (this.networkUsages.length !== newNetworkUsages.length) {
-        this.networkUsages = newNetworkUsages;
-      } else {
-        // Refresh values
-        newNetworkUsages.forEach((networkUsage, i) => {
-          replaceValues(this.networkUsages[i], networkUsage);
-        });
+      if (this.showNetworkUsage()) {
+        // Refresh network list if it was changed
+        let newNetworkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
+        if (this.networkUsages.length !== newNetworkUsages.length) {
+          this.networkUsages = newNetworkUsages;
+        } else {
+          // Refresh values
+          newNetworkUsages.forEach((networkUsage, i) => {
+            replaceValues(this.networkUsages[i], networkUsage);
+          });
+        }
       }
 
-      // Refresh GPU list if there was a driver change or NVIDIA monitoring was enabled/disabled
-      if (this.gpuUsages.length !== this.sysInfo.data.gpuUsages?.length) {
-        this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
-      } else {
-        // Refresh values
-        this.sysInfo.data.gpuUsages?.forEach((gpuUsage, i) => {
-          replaceValues(this.gpuUsages[i], gpuUsage);
-        });
+      if (this.showGpuUsage()) {
+        // Refresh GPU list if there was a driver change or NVIDIA monitoring was enabled/disabled
+        if (this.gpuUsages.length !== this.sysInfo.data.gpuUsages?.length) {
+          this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
+        } else {
+          // Refresh values
+          this.sysInfo.data.gpuUsages?.forEach((gpuUsage, i) => {
+            replaceValues(this.gpuUsages[i], gpuUsage);
+          });
+        }
       }
 
       // Update graphs
-      this.cpuGraph.addValue(this.averageCpuUsage());
-      this.memoryGraph.addValue(this.memoryUsagePercentage());
+      if (this.showCpuUsage())
+        this.cpuGraph.addValue(this.averageCpuUsage());
+      if (this.showMemoryUsage())
+        this.memoryGraph.addValue(this.memoryUsagePercentage());
       // For disks, networks and GPUs we need to update all graphs from the list
       // Their names are used to match the correct graph with the correct usage
       this.diskGraphs.forEach((graph, i) => {
@@ -114,6 +129,26 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
         graph.addValue(utilization);
       });
     })
+  }
+
+  showCpuUsage(): boolean {
+    return (this.supportedFeatures?.cpuUsage && this.allowedFeatures?.cpuUsage) === true;
+  }
+
+  showMemoryUsage(): boolean {
+    return (this.supportedFeatures?.memoryUsage && this.allowedFeatures?.memoryUsage) === true;
+  }
+
+  showDiskUsage(): boolean {
+    return (this.supportedFeatures?.diskUsage && this.allowedFeatures?.diskUsage) === true;
+  }
+
+  showNetworkUsage(): boolean {
+    return (this.supportedFeatures?.networkUsage && this.allowedFeatures?.networkUsage) === true;
+  }
+
+  showGpuUsage(): boolean {
+    return ((this.supportedFeatures?.amdGpuUsage || this.supportedFeatures?.intelGpuUsage || this.supportedFeatures?.nvidiaGpuUsage) && this.allowedFeatures?.gpuUsage) === true;
   }
 
   bytes(value: number | bigint | undefined): string {
