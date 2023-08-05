@@ -1,5 +1,5 @@
 import { Inject, Injectable, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { catchError, firstValueFrom, Subject, throwError } from "rxjs";
 import { User } from "../model/user";
 import { LoginResponse } from "../model/responses/login-response";
@@ -156,15 +156,17 @@ export class UserService {
    * @param username Username of the user to delete
    */
   async deleteUser(username: string) {
-    const deleteSelf = username === this.user?.username;
-    const response = await firstValueFrom(this.http.delete<string>(`${this.apiUrl}deleteUser?username=${username}`)
+    return await firstValueFrom(this.http.delete<string>(`${this.apiUrl}deleteUser?username=${username}`)
+      .pipe(catchError(err => this.handleError(err)))
+    );
+  }
+
+  async deleteSelf() {
+    const response = await firstValueFrom(this.http.delete<string>(`${this.apiUrl}deleteSelf`)
       .pipe(catchError(err => this.handleError(err)))
     );
 
-    // If the current user was deleted, log out
-    if (deleteSelf) {
-      this.logout();
-    }
+    this.logout();
 
     return response;
   }
