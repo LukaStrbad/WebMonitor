@@ -9,3 +9,8 @@
   right: 0;
   bottom: 0;
 }
+
+div.sidebar-container {
+  display: flex;
+  flex-direction: row;
+}

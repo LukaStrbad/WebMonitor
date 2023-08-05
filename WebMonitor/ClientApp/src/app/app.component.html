@@ -1,16 +1,22 @@
 <body [ngClass]="isDarkTheme() ? 'dark-theme' : 'light-theme'">
   <mat-sidenav-container style="height: 100vh">
     <!-- Drawer content -->
-    <mat-sidenav mode="over" [opened]="sidenavOpen" class="d-md-none">
+    <mat-sidenav [mode]="mobileQuery.matches ? 'over' : 'side'" [(opened)]="sidenavOpen">
       <app-nav-menu (onRouteSelected)="closeSidenav()"></app-nav-menu>
     </mat-sidenav>
 
     <!-- Page content -->
     <mat-sidenav-content>
       <app-nav-bar (menuToggleEvent)="toggleSidenav()"></app-nav-bar>
-      <main class="container">
-        <router-outlet></router-outlet>
-      </main>
+      <div class="sidebar-container">
+        <!-- <div style="background-color: lightcoral; width: 100px;">
+          <app-nav-menu></app-nav-menu>
+        </div> -->
+
+        <main class="container">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
     </mat-sidenav-content>
   </mat-sidenav-container>
 

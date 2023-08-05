@@ -1,14 +1,32 @@
 .nav-container {
-  padding: 8pt;
   padding-top: 16pt;
+  padding-bottom: 16pt;
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  row-gap: 8pt;
 }
 
-div>button {
-  width: 100%;
-  display: block;
+div.user {
+  padding-left: 8pt;
+  padding-right: 8pt;
+}
+
+button {
+  margin-left: 8pt;
+  margin-right: 8pt;
+  display: inline-block;
   text-align: start;
 }
 
-.button-container {
-  margin-bottom: 8pt;
+div.spacer {
+  flex-grow: 1;
+}
+
+.settings-button-active {
+  color: white !important;
+}
+
+.settings-button-active:hover {
+  filter: brightness(1.1);
 }

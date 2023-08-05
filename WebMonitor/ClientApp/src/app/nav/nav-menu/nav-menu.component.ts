@@ -6,6 +6,7 @@ import { SupportedFeatures } from "../../../model/supported-features";
 import { Component, EventEmitter, Output, effect } from "@angular/core";
 import { UserService } from "../../../services/user.service";
 import { AllowedFeatures } from 'src/model/allowed-features';
+import { User } from 'src/model/user';
 
 @Component({
   selector: 'app-nav-menu',
@@ -16,12 +17,13 @@ export class NavMenuComponent {
   menuRoutes = menuRoutes;
   @Output() onRouteSelected = new EventEmitter<void>();
   supportedFeatures?: SupportedFeatures;
+  me?: User;
   allowedFeatures?: AllowedFeatures;
 
   constructor(
     public routeWatcher: RouteWatcherService,
     private sysInfo: SysInfoService,
-    private userService: UserService
+    public userService: UserService
   ) {
     effect(() => {
       if (this.userService.authorized()) {
@@ -38,7 +40,10 @@ export class NavMenuComponent {
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
 
     this.userService.requireUser()
-      .then(user => this.allowedFeatures = user.allowedFeatures);
+      .then(user => {
+        this.me = user;
+        this.allowedFeatures = user.allowedFeatures;
+      });
   }
 
   routeClicked() {

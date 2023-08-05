@@ -11,24 +11,18 @@ $primary: mat.define-palette(mat.$indigo-palette);
 $accent: mat.define-palette(mat.$pink-palette);
 $warn: mat.define-palette(mat.$red-palette);
 
-$light-theme: mat.define-light-theme((
-  color: (
-    primary: $primary,
-    accent: $accent,
-    warn: $warn,
-  )
-));
+$light-theme: mat.define-light-theme((color: (primary: $primary,
+        accent: $accent,
+        warn: $warn,
+      )));
 
 $primary-dark: mat.define-palette(mat.$teal-palette);
 $accent-dark: mat.define-palette(mat.$blue-grey-palette);
 $warn-dark: mat.define-palette(mat.$red-palette);
-$dark-theme: mat.define-dark-theme((
-  color: (
-    primary: $primary-dark,
-    accent: $accent-dark,
-    warn: $warn-dark,
-  )
-));
+$dark-theme: mat.define-dark-theme((color: (primary: $primary-dark,
+        accent: $accent-dark,
+        warn: $warn-dark,
+      )));
 
 .dark-theme {
   @include mat.all-component-themes($dark-theme);
@@ -43,6 +37,10 @@ $dark-theme: mat.define-dark-theme((
 
   .warn-color {
     color: mat.get-color-from-palette($warn-dark, 500);
+  }
+
+  .accent-background {
+    background-color: mat.get-color-from-palette($accent-dark, 500);
   }
 
   .mat-mdc-snack-bar-container {
@@ -70,6 +68,10 @@ $dark-theme: mat.define-dark-theme((
 
   .warn-color {
     color: mat.get-color-from-palette($warn, 500);
+  }
+
+  .accent-background {
+    background-color: mat.get-color-from-palette($accent, 500);
   }
 
   .mat-mdc-snack-bar-container {

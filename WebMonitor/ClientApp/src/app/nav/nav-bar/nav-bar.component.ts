@@ -15,30 +15,13 @@ import { UserService } from "../../../services/user.service";
 export class NavBarComponent {
   @Output() menuToggleEvent = new EventEmitter<void>();
   menuRoutes = menuRoutes;
-  supportedFeatures?: SupportedFeatures;
 
   constructor(
     public routeWatcher: RouteWatcherService,
-    sysInfo: SysInfoService,
     public userService: UserService
-  ) {
-    sysInfo.getSupportedFeatures()
-      .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
-  }
+  ) { }
 
   onMenuToggle() {
     this.menuToggleEvent.emit();
-  }
-
-  shouldBeHidden(route: Route): boolean {
-    if (route.path === "file-browser") {
-      return !this.supportedFeatures?.fileBrowser;
-    } else if (route.path === "processes") {
-      return !this.supportedFeatures?.processes;
-    } else if (route.path === "terminal") {
-      return !this.supportedFeatures?.terminal;
-    } else {
-      return false;
-    }
   }
 }
