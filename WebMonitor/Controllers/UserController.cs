@@ -75,9 +75,9 @@ public class UserController : ControllerBase
         await using var db = new WebMonitorContext();
 
         var users = await db.Users
-                    .Where(u => u.Username == formUser.Username)
-                    .Include(u => u.AllowedFeatures)
-                    .ToListAsync();
+            .Where(u => u.Username == formUser.Username)
+            .Include(u => u.AllowedFeatures)
+            .ToListAsync();
         var user = users.FirstOrDefault();
         if (user is null)
             return BadRequest("Invalid username or password");
@@ -103,7 +103,8 @@ public class UserController : ControllerBase
         });
     }
 
-    [HttpGet("me"), Authorize]
+    [HttpGet("me")]
+    [Authorize]
     public async Task<ActionResult> Me()
     {
         await using var db = new WebMonitorContext();
@@ -123,7 +124,8 @@ public class UserController : ControllerBase
         return Ok(new { user.Username, user.DisplayName, user.IsAdmin, user.AllowedFeatures });
     }
 
-    [HttpPost("promoteToAdmin"), Authorize(Roles = "Admin")]
+    [HttpPost("promoteToAdmin")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<string>> PromoteToAdmin([FromBody] UsernameRequest request)
     {
         await using var db = new WebMonitorContext();
@@ -142,7 +144,8 @@ public class UserController : ControllerBase
         return Ok($"User {request.Username} promoted to admin");
     }
 
-    [HttpPost("leaveAdminRole"), Authorize(Roles = "Admin")]
+    [HttpPost("leaveAdminRole")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<string>> LeaveAdminRole()
     {
         await using var db = new WebMonitorContext();
@@ -166,7 +169,8 @@ public class UserController : ControllerBase
         return Ok($"User {user.Username} demoted from admin");
     }
 
-    [HttpGet("listUsers"), Authorize(Roles = "Admin")]
+    [HttpGet("listUsers")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<User>>> ListUsers()
     {
         await using var db = new WebMonitorContext();
@@ -177,7 +181,8 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
-    [HttpDelete("deleteUser"), Authorize(Roles = "Admin")]
+    [HttpDelete("deleteUser")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<string>> DeleteUser([FromQuery] string username)
     {
         await using var db = new WebMonitorContext();
@@ -186,8 +191,8 @@ public class UserController : ControllerBase
         if (user is null)
             return BadRequest("Invalid username");
 
-        // Stop the admin user from deleting another admin user but allow self-deletion
-        if (user.IsAdmin && User.Identity?.Name != username)
+        // Stop deletion of admin users
+        if (user.IsAdmin)
             return BadRequest("Cannot delete admin user");
 
         db.Users.Remove(user);
@@ -198,7 +203,34 @@ public class UserController : ControllerBase
         return Ok($"User {username} deleted");
     }
 
-    [HttpPost("changeAllowedFeatures"), Authorize(Roles = "Admin")]
+    [HttpDelete("deleteSelf")]
+    [Authorize]
+    public async Task<ActionResult<string>> DeleteSelf()
+    {
+        await using var db = new WebMonitorContext();
+
+        if (User.Identity is null)
+            return BadRequest("User not logged in");
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Username == User.Identity.Name);
+        if (user is null)
+            return BadRequest("Invalid username");
+
+        // Stop deletion if the user is the only admin and there are other non-admin users
+        if (user.IsAdmin && await db.Users.CountAsync(u => u.IsAdmin) == 1 &&
+            await db.Users.CountAsync(u => !u.IsAdmin) > 0)
+            return BadRequest("Cannot delete the only admin user when there are other non-admin users");
+
+        db.Users.Remove(user);
+        await db.SaveChangesAsync();
+
+        _logger.LogInformation("User {Username} deleted", user.Username);
+
+        return Ok($"User {user.Username} deleted");
+    }
+
+    [HttpPost("changeAllowedFeatures")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> ChangeAllowedFeatures([FromBody] ChangeAllowedFeaturesForm request)
     {
         await using var db = new WebMonitorContext();

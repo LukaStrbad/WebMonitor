@@ -75,33 +75,56 @@ export class UsersComponent implements AfterViewInit {
     );
   }
 
-  deleteAccount(user: User) {
-    let title = `Delete ${user.displayName}'s account?`;
+  deleteUser(user: User) {
     if (user.username === this.me?.username) {
-      title = "Delete your account?";
+      this.deleteSelf();
+    } else {
+      this.deleteAccount(user);
     }
+  }
 
+  deleteAccount(user: User) {
     this.dialog.open(ActionsDialogComponent, {
       data: <ActionsDialogData>{
-        title,
+        title: `Delete ${user.displayName}'s account?`,
         content: "Account deletion is permanent and cannot be undone.",
         negativeButton: ["Cancel", () => {
         }],
         positiveButton: ["Delete", () => {
           this.userService.deleteUser(user.username)
             .then(() => {
-              showOkSnackbar(this.snackBar, `Successfully deleted ${user.displayName}'s account`);
-              // Only refresh the users if the current user is an admin
-              // This will also stop the refresh if the current user was deleted
-              if (this.userService.user?.isAdmin) {
-                this.refreshUsers();
-              }
-            },
+                showOkSnackbar(this.snackBar, `Successfully deleted ${user.displayName}'s account`);
+                // Only refresh the users if the current user is an admin
+                // This will also stop the refresh if the current user was deleted
+                if (this.userService.user?.isAdmin) {
+                  this.refreshUsers();
+                }
+              },
               err => showErrorSnackbar(this.snackBar, `Failed to delete ${user.displayName}'s account: ${err}`)
             );
         }]
       }
     })
+  }
+
+  deleteSelf() {
+    this.dialog.open(ActionsDialogComponent, {
+      data: <ActionsDialogData>{
+        title: "Delete your account?",
+        content: "Account deletion is permanent and cannot be undone.",
+        negativeButton: ["Cancel", () => {
+        }],
+        positiveButton: ["Delete", () => {
+          this.userService.deleteSelf()
+            .then(() => {
+                showOkSnackbar(this.snackBar, "Successfully deleted your account");
+              },
+              err => showErrorSnackbar(this.snackBar, `Failed to delete your account: ${err}`)
+            );
+        }]
+      }
+    });
+
   }
 
   /**
@@ -127,13 +150,13 @@ export class UsersComponent implements AfterViewInit {
         positiveButton: ["Promote", () => {
           this.userService.promoteToAdmin(user.username)
             .then(async () => {
-              user.isAdmin = true;
-              // Check the checkbox after the user has been promoted
-              target.checked = true;
-              // Update the allowed features to reflect the new admin status
-              // user.allowedFeatures = await this.sysInfo.getSupportedFeatures();
-              showOkSnackbar(this.snackBar, `Successfully promoted ${user.displayName} to admin`);
-            },
+                user.isAdmin = true;
+                // Check the checkbox after the user has been promoted
+                target.checked = true;
+                // Update the allowed features to reflect the new admin status
+                // user.allowedFeatures = await this.sysInfo.getSupportedFeatures();
+                showOkSnackbar(this.snackBar, `Successfully promoted ${user.displayName} to admin`);
+              },
               err => showErrorSnackbar(this.snackBar, `Failed to promote ${user.displayName} to admin: ${err}`)
             );
         }]
