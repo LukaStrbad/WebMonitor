@@ -2,15 +2,14 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Json.Serialization;
 using CommandLine;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebMonitor;
-using WebMonitor.Attributes;
 using WebMonitor.Middleware;
 using WebMonitor.Model;
 using WebMonitor.Native;
@@ -43,6 +42,7 @@ var settings = Settings.Load();
 var sysInfo = new SysInfo(settings, version, supportedFeatures);
 var manager = new Manager(supportedFeatures);
 var db = new WebMonitorContext();
+db.Database.Migrate();
 
 var builder = WebApplication.CreateBuilder(args);
 
