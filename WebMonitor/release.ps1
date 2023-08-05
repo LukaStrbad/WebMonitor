@@ -25,3 +25,6 @@ $terminalPluginCsproj = Get-ChildItem -Path . -Recurse -Filter "TerminalPlugin.c
 # Get assembly version from TerminalPlugin.csproj
 $terminalPluginVersion = (Get-Content $terminalPluginCsproj | Select-String "AssemblyVersion" -Context 0, 1).Context.PostContext[0].Split('>')[1].Split('<')[0]
 Compress-Archive -Path "build\win-x64\*" -DestinationPath "..\WebMonitor\$baseDir\TerminalPlugin-$terminalPluginVersion-win-x64.zip" -CompressionLevel Optimal -Update
+
+# Return to start directory
+cd ..\WebMonitor
