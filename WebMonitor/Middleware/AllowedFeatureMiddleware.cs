@@ -28,7 +28,7 @@ public class AllowedFeatureMiddleware
         if (featureGuard is not null)
         {
             // If the user is not logged in or is not allowed to access the feature, return 403
-            if (!featureGuard.GetValue(await GetAllowedFeaturesAsync(context)))
+            if (!await IsAllowedAsync(featureGuard, context))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 return;
@@ -36,6 +36,13 @@ public class AllowedFeatureMiddleware
         }
 
         await _next(context);
+    }
+
+    internal static async Task<bool> IsAllowedAsync(FeatureGuardAttribute feature, HttpContext context)
+    {
+        var   allowedFeatures = await GetAllowedFeaturesAsync(context);
+
+        return feature.GetValue(allowedFeatures);
     }
 
     private static async Task<AllowedFeatures> GetAllowedFeaturesAsync(HttpContext context)

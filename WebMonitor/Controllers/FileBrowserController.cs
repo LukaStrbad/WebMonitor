@@ -1,9 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.IdentityModel.Tokens;
 using WebMonitor.Attributes;
+using WebMonitor.Middleware;
 using WebMonitor.Model;
 
 namespace WebMonitor.Controllers;
@@ -21,6 +24,13 @@ public class FileBrowserController : ControllerBase
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
+    private readonly JwtOptions _jwtOptions;
+
+    public FileBrowserController(IServiceProvider serviceProvider)
+    {
+        _jwtOptions = serviceProvider.GetRequiredService<JwtOptions>();
+    }
+
     [HttpGet("dir")]
     [Authorize]
     [FeatureGuard(nameof(AllowedFeatures.FileBrowser))]
@@ -28,23 +38,7 @@ public class FileBrowserController : ControllerBase
     {
         if (requestedDirectory is null)
         {
-            List<FileOrDir> rootDirs;
-            if (OperatingSystem.IsLinux())
-            {
-                // On Linux hardcode folders to / and ~
-                rootDirs = new List<FileOrDir>
-                {
-                    FileOrDir.Dir(new DirectoryInfo("/")),
-                    FileOrDir.Dir(new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
-                };
-            }
-            else
-            {
-                rootDirs = DriveInfo
-                    .GetDrives()
-                    .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory))
-                    .ToList();
-            }
+            var rootDirs = GetRootDirs();
 
             if (!rootDirs.Any())
                 return new NotFoundResult();
@@ -72,6 +66,25 @@ public class FileBrowserController : ControllerBase
         };
     }
 
+    internal static List<FileOrDir> GetRootDirs()
+    {
+        List<FileOrDir> rootDirs;
+        if (OperatingSystem.IsLinux())
+        {
+            // On Linux hardcode folders to / and ~
+            return new List<FileOrDir>
+            {
+                FileOrDir.Dir(new DirectoryInfo("/")),
+                FileOrDir.Dir(new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)))
+            };
+        }
+
+        return DriveInfo
+            .GetDrives()
+            .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory))
+            .ToList();
+    }
+
     [HttpGet("file-info")]
     [Authorize]
     [FeatureGuard(nameof(AllowedFeatures.FileBrowser))]
@@ -89,10 +102,33 @@ public class FileBrowserController : ControllerBase
     }
 
     [HttpGet("download-file")]
-    [Authorize]
-    [FeatureGuard(nameof(AllowedFeatures.FileDownload))]
-    public FileResult DownloadFile(string path)
+    public async Task<ActionResult> DownloadFile([FromQuery] string path,
+        [FromQuery(Name = "access_token")] string accessToken)
     {
+        // Authenticate user using the access token
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var validateToken = tokenHandler.ValidateToken(accessToken, new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = _jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = _jwtOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(_jwtOptions.Key),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        }, out _);
+
+        if (validateToken.Identity is not { IsAuthenticated: true })
+            return new UnauthorizedResult();
+
+        HttpContext.User = validateToken;
+
+        // Check if the user is allowed to download files
+        if (!await AllowedFeatureMiddleware.IsAllowedAsync(
+                new FeatureGuardAttribute(nameof(AllowedFeatures.FileDownload)), HttpContext))
+            return new OkObjectResult("You are not allowed to download files");
+
         new FileExtensionContentTypeProvider().TryGetContentType(path, out var contentType);
         var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
         // return new FileStreamResult(stream, contentType ?? "application/octet-stream");

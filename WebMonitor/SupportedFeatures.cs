@@ -1,8 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
 using LibreHardwareMonitor.Hardware;
-using Microsoft.AspNetCore.Mvc;
 using WebMonitor.Controllers;
 using WebMonitor.Native;
 using WebMonitor.Native.Battery;
@@ -84,16 +81,12 @@ public class SupportedFeatures
             processTracker.Refresh(1000);
         });
 
-        var fileBrowserController = new FileBrowserController();
         supportedFeatures.FileBrowser = CheckFeature(() =>
         {
-            // Check if root directories can be listed
-            var result = fileBrowserController.Dir();
-            if (result.Result is not JsonResult)
-                throw new Exception();
+            var rootDirs = FileBrowserController.GetRootDirs();
         });
-        supportedFeatures.FileDownload = true;
-        supportedFeatures.FileUpload = true;
+        supportedFeatures.FileDownload = supportedFeatures.FileBrowser;
+        supportedFeatures.FileUpload = supportedFeatures.FileBrowser;
 
         // Check if Nvidia GPU usage is supported
         supportedFeatures.NvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.CheckIfSupported();

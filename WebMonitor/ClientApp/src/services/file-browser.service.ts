@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { FileInformation, FileInformationResponse } from 'src/model/file-information';
 import { FileOrDir } from 'src/model/file-or-dir';
+import { UserService } from "./user.service";
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ export class FileBrowserService {
 
   constructor(
     private http: HttpClient,
+    private userService: UserService,
     @Inject("BASE_URL") baseUrl: string
   ) {
     this.apiUrl = baseUrl + "FileBrowser/";
@@ -73,7 +75,9 @@ export class FileBrowserService {
   }
 
   downloadFile(path: string) {
-    window.open(`${this.apiUrl}download-file?path=${path}`, "_blank");
+    const requestUrl = `${this.apiUrl}download-file?path=${encodeURI(path)}&access_token=${this.userService.token}`;
+    // Download file in a hidden iframe to avoid navigating to a new page
+    document.getElementById("download_iframe")?.setAttribute("src", requestUrl);
   }
 
   uploadFile(file: File, directory: string): Observable<Object> {
