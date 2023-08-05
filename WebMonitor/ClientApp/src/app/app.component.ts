@@ -1,9 +1,10 @@
-import { Component, Signal, ViewEncapsulation, computed, effect } from '@angular/core';
+import { ChangeDetectorRef, Component, Signal, ViewEncapsulation, computed, effect } from '@angular/core';
 import { SysInfoService } from 'src/services/sys-info.service';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { UserService } from "../services/user.service";
 import { Router } from "@angular/router";
+import { MediaMatcher } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-root',
@@ -15,13 +16,16 @@ export class AppComponent {
   sidenavOpen = false;
   showDebugWindow: Signal<boolean>;
   isDarkTheme: Signal<boolean>;
+  mobileQuery: MediaQueryList;
 
   toggleSidenav() {
     this.sidenavOpen = !this.sidenavOpen;
   }
 
   closeSidenav() {
-    this.sidenavOpen = false;
+    if (this.mobileQuery.matches) {
+      this.sidenavOpen = false;
+    }
   }
 
   constructor(
@@ -29,8 +33,13 @@ export class AppComponent {
     private appSettings: AppSettingsService,
     overlayContainer: OverlayContainer,
     userService: UserService,
-    router: Router
+    router: Router,
+    changeDetectorRef: ChangeDetectorRef,
+    media: MediaMatcher
   ) {
+    this.mobileQuery = media.matchMedia('(max-width: 768px)');
+    this.mobileQuery.addEventListener('change', () => changeDetectorRef.detectChanges());
+
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
     this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
 
@@ -51,6 +60,7 @@ export class AppComponent {
 
     effect(async () => {
       if (!userService.authorized()) {
+        this.sidenavOpen = false;
         await router.navigate(["/login"]);
         sysInfo.stopService();
       }

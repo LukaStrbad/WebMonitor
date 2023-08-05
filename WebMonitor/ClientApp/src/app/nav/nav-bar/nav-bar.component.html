@@ -1,34 +1,6 @@
 <mat-toolbar color="primary">
-  <button
-    mat-icon-button
-    aria-label="Menu button"
-    (click)="onMenuToggle()"
-    class="d-md-none"
-  >
+  <button *ngIf="userService.user" mat-icon-button aria-label="Menu button" (click)="onMenuToggle()">
     <mat-icon>menu</mat-icon>
   </button>
   <span>Web Monitor</span>
-
-  <span class="spacer"></span>
-
-  <span class="d-none d-md-inline">
-    <button
-      *ngFor="let route of menuRoutes"
-      mat-flat-button
-      [hidden]="shouldBeHidden(route)"
-      [routerLink]="route.path"
-      [color]="routeWatcher.currentRoute() === route ? 'accent' : 'primary'"
-    >
-      {{ route.title }}
-    </button>
-  </span>
-
-  <!-- TODO: Just a temporary solution later implement a navigation rail and remove navigation from this component -->
-  <button mat-flat-button (click)="userService.logout()" color="primary">
-    Logout
-  </button>
-
-  <button mat-icon-button routerLink="settings">
-    <mat-icon>settings</mat-icon>
-  </button>
 </mat-toolbar>

@@ -1,8 +1,0 @@
-.spacer {
-    flex: 1 1 auto;
-}
-
-/* Needed to center the icon */
-mat-icon {
-    vertical-align: top;
-}
