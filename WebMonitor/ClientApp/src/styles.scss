@@ -43,6 +43,11 @@ $dark-theme: mat.define-dark-theme((color: (primary: $primary-dark,
     background-color: mat.get-color-from-palette($accent-dark, 500);
   }
 
+  $grey: mat.define-palette(mat.$grey-palette);
+  table.sticky-header th {
+    background-color: mat.get-color-from-palette($grey, 800);
+  }
+
   .mat-mdc-snack-bar-container {
     &.error-snackbar {
       background: mat.get-color-from-palette($warn-dark, 300);
@@ -72,6 +77,10 @@ $dark-theme: mat.define-dark-theme((color: (primary: $primary-dark,
 
   .accent-background {
     background-color: mat.get-color-from-palette($accent, 500);
+  }
+
+  table.sticky-header th {
+    background-color: white;
   }
 
   .mat-mdc-snack-bar-container {

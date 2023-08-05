@@ -18,7 +18,7 @@ import { SupportedFeatures } from "../../model/supported-features";
 @Component({
   selector: 'app-file-browser',
   templateUrl: './file-browser.component.html',
-  styleUrls: ['./file-browser.component.scss'],
+  styleUrls: ['./file-browser.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class FileBrowserComponent implements OnInit, AfterViewInit {

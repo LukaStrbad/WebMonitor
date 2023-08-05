@@ -14,7 +14,7 @@ import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 @Component({
   selector: 'app-process-list',
   templateUrl: './process-list.component.html',
-  styleUrls: ['./process-list.component.scss'],
+  styleUrls: ['./process-list.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class ProcessListComponent implements AfterViewInit, OnDestroy {
