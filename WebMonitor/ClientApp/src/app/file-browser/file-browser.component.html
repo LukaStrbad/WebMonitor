@@ -5,7 +5,7 @@
   [separator]="breadcrumbSeparator"
 ></app-breadcrumbs>
 
-<table matSort mat-table [dataSource]="dataSource" class="mat-elevation-z8 sticky-header">
+<table matSort mat-table [dataSource]="dataSource" class="mat-elevation-z8 sticky-header mb-4">
   <!-- Name -->
   <ng-container [matColumnDef]="headers[0]">
     <th *matHeaderCellDef mat-sort-header class="th-background">Name</th>
@@ -80,7 +80,7 @@
 </mat-card>
 
 <!-- If we are located somewhere on the filesystem and upload is supported show upload button -->
-<ng-container *ngIf="currentDir && supportedFeatures?.fileUpload">
+<ng-container *ngIf="currentDir && supportedFeatures?.fileUpload && allowedFeatures?.fileUpload">
   <button
     class="mt-4 mb-4"
     type="button"

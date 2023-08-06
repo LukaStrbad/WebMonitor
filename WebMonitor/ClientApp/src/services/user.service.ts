@@ -13,6 +13,7 @@ export class UserService {
   errorEmitter = new Subject<string>();
   authorized = signal(false);
   onLogout = new Subject<void>();
+  allowedFeaturesChanged = new Subject<AllowedFeatures>();
 
   constructor(
     private http: HttpClient,
@@ -66,6 +67,31 @@ export class UserService {
     this.user = loginResponse.user;
     this.token = loginResponse.token;
     this.authorized.set(true);
+  }
+
+  async refreshUser() {
+    const user = await this.me();
+
+    let allEqual = true;
+    for (const k in user.allowedFeatures) {
+      if (!(k in user.allowedFeatures)) {
+        continue;
+      }
+      const key = k as keyof AllowedFeatures;
+      if (user.allowedFeatures[key] !== this.user?.allowedFeatures[key]) {
+        allEqual = false;
+        break;
+      }
+    }
+
+    if (allEqual) {
+      return;
+    }
+
+    console.log("User features changed");
+
+    this.user = user;
+    this.allowedFeaturesChanged.next(user.allowedFeatures);
   }
 
   logout() {
