@@ -201,7 +201,7 @@ public class SysInfoController : ControllerBase
         }
         catch (UnauthorizedAccessException)
         {
-            return new UnauthorizedResult();
+            return Forbid();
         }
         catch (Exception e)
         {

@@ -68,7 +68,6 @@ public class FileBrowserController : ControllerBase
 
     internal static List<FileOrDir> GetRootDirs()
     {
-        List<FileOrDir> rootDirs;
         if (OperatingSystem.IsLinux())
         {
             // On Linux hardcode folders to / and ~
