@@ -14,6 +14,8 @@ import { HttpEventType } from '@angular/common/http';
 import { FileUploadInfo } from 'src/model/file-upload-info';
 import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { SupportedFeatures } from "../../model/supported-features";
+import { AllowedFeatures } from "../../model/allowed-features";
+import { UserService } from "../../services/user.service";
 
 @Component({
   selector: 'app-file-browser',
@@ -35,6 +37,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
   uploadSubscription: Subscription | undefined;
   uploadFile: { progress: number; file: File; } | undefined;
   supportedFeatures?: SupportedFeatures;
+  allowedFeatures?: AllowedFeatures;
 
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild("fileUpload") fileUpload!: ElementRef<HTMLInputElement>;
@@ -44,12 +47,15 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     private fileBrowser: FileBrowserService,
     private sysInfo: SysInfoService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    userService: UserService
   ) {
     this.resetBreadcrumbs();
 
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
+
+    userService.requireUser().then(user => this.allowedFeatures = user.allowedFeatures);
   }
 
   resetBreadcrumbs() {
@@ -99,7 +105,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
    * Navigates forward in the directory tree
    * @param dir Directory to navigate to
    */
-  navigateToDir(dir: FileOrDir) {
+  async navigateToDir(dir: FileOrDir) {
     let breadcrumbTitle;
     // If OS is windows and we're navigating to drive root, remove the backslash from drive letter
     if (this.breadcrumbSeparator == "\\" && this.currentDir == undefined) {
@@ -117,23 +123,23 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     this.breadcrumbs.push({
       title: breadcrumbTitle,
       depth: this.depth,
-      onClick: () => {
+      onClick: async () => {
         // Go back to the clicked directory
         this.currentDir = dir.path;
         // Remove breadcrumbs that are deeper than the clicked one
         this.breadcrumbs = this.breadcrumbs.filter(b => b.depth <= currentDepth);
         // Update depth
         this.depth = currentDepth;
-        this.refreshDirsAndFiles();
+        await this.refreshDirsAndFiles();
       }
     });
 
-    this.refreshDirsAndFiles();
+    await this.refreshDirsAndFiles();
   }
 
-  onRowClick(row: FileOrDir) {
+  async onRowClick(row: FileOrDir) {
     if (row.type === "file") {
-      this.onFileClick(row);
+      await this.onFileClick(row);
       return;
     }
 
@@ -142,7 +148,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.navigateToDir(row);
+    await this.navigateToDir(row);
   }
 
   async onFileClick(file: FileOrDir) {
@@ -150,8 +156,8 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     let data: FileDialogData = {
       fileInfo: fileInfo
     }
-    // Only add download function if it's supported
-    if (this.supportedFeatures?.fileDownload) {
+    // Only add download function if it's supported and allowed
+    if (this.supportedFeatures?.fileDownload && this.allowedFeatures?.fileDownload) {
       data.download = () => this.fileBrowser.downloadFile(file.path);
     }
     const dialogRef = this.dialog.open(FileDialogComponent, { data });
@@ -179,7 +185,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
         this.uploadFile = undefined;
       }));
 
-    uploadSub.subscribe((event: any) => {
+    uploadSub.subscribe(async (event: any) => {
       if (event.type == HttpEventType.UploadProgress) {
         if (this.uploadFile) {
           this.uploadFile.progress = event.loaded / event.total;
@@ -194,7 +200,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
 
         if (responses[0].success) {
           this.snackBar.open("Upload successful", undefined, snackBarConfig)
-          this.refreshDirsAndFiles();
+          await this.refreshDirsAndFiles();
         } else {
           this.snackBar.open("Upload failed", undefined, snackBarConfig)
         }
