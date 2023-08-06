@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AllowedFeatures } from 'src/model/allowed-features';
 
 @Component({
@@ -6,7 +6,7 @@ import { AllowedFeatures } from 'src/model/allowed-features';
   templateUrl: './allowed-features-card.component.html',
   styleUrls: ['./allowed-features-card.component.css']
 })
-export class AllowedFeaturesCardComponent implements AfterViewInit {
+export class AllowedFeaturesCardComponent implements AfterViewInit, OnChanges {
   @Input({ required: true }) allowedFeatures!: AllowedFeatures;
 
   featuresList: AllowedFeatureData[] = [];
@@ -14,6 +14,12 @@ export class AllowedFeaturesCardComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     // Use push instead of assignment to avoid ExpressionChangedAfterItHasBeenCheckedError
     this.featuresList.push(...getAllowedFeaturesList(this.allowedFeatures));
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.allowedFeatures) {
+      this.featuresList = getAllowedFeaturesList(this.allowedFeatures);
+    }
   }
 }
 

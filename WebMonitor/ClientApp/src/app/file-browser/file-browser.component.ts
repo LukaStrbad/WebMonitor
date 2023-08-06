@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { FileOrDir } from 'src/model/file-or-dir';
@@ -23,7 +23,7 @@ import { UserService } from "../../services/user.service";
   styleUrls: ['./file-browser.component.css'],
   encapsulation: ViewEncapsulation.None
 })
-export class FileBrowserComponent implements OnInit, AfterViewInit {
+export class FileBrowserComponent implements OnInit, AfterViewInit, OnDestroy {
   headers = ["basename", "type", "size"];
   dataSource = new MatTableDataSource<FileOrDir>([]);
   currentDir?: string;
@@ -35,6 +35,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
   breadcrumbSeparator = "/";
   numberOfSelectedFiles = 0;
   uploadSubscription: Subscription | undefined;
+  subscriptions: Subscription[] = [];
   uploadFile: { progress: number; file: File; } | undefined;
   supportedFeatures?: SupportedFeatures;
   allowedFeatures?: AllowedFeatures;
@@ -56,6 +57,7 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
       .then(supportedFeatures => this.supportedFeatures = supportedFeatures);
 
     userService.requireUser().then(user => this.allowedFeatures = user.allowedFeatures);
+    this.subscriptions.push(userService.allowedFeaturesChanged.subscribe(allowedFeatures => this.allowedFeatures = allowedFeatures));
   }
 
   resetBreadcrumbs() {
@@ -75,6 +77,10 @@ export class FileBrowserComponent implements OnInit, AfterViewInit {
     this.refreshDirsAndFiles();
 
     this.initAsync();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
   async initAsync() {

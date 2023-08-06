@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { UserService } from "../../services/user.service";
 import { User } from "../../model/user";
 import { showErrorSnackbar, showOkSnackbar } from "../../helpers/snackbar-helpers";
@@ -12,6 +12,7 @@ import { MatSort } from "@angular/material/sort";
 import { animate, state, style, transition, trigger } from "@angular/animations";
 import { SysInfoService } from "../../services/sys-info.service";
 import { SupportedFeatures } from "../../model/supported-features";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: 'app-admin',
@@ -30,12 +31,13 @@ import { SupportedFeatures } from "../../model/supported-features";
     ])
   ]
 })
-export class UsersComponent implements AfterViewInit {
+export class UsersComponent implements AfterViewInit, OnDestroy {
   me?: User;
   dataSource = new MatTableDataSource(new Array<User>());
   displayedColumns: string[] = ['displayName', 'username', 'isAdmin', 'delete', 'expand'];
   expandedUser: User | null = null;
   supportedFeatures?: SupportedFeatures;
+  subscription: Subscription | undefined;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -50,8 +52,13 @@ export class UsersComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.userService.me().then(me => {
-      this.me = me;
+    // Get the current user
+    this.userService.requireUser().then(user => this.me = user);
+    // Refresh allowed features when they change
+    this.subscription = this.userService.allowedFeaturesChanged.subscribe(allowedFeatures => {
+      if (this.me) {
+        this.me.allowedFeatures = allowedFeatures;
+      }
     });
 
     // If the user is not an admin, return
@@ -60,6 +67,10 @@ export class UsersComponent implements AfterViewInit {
     }
 
     this.refreshUsers();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   refreshUsers() {

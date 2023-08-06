@@ -141,6 +141,7 @@ export class SysInfoService {
     // Refresh info is refreshed first to get the most accurate data
     const startTime = new Date().getTime();
     this.refreshRefreshInfo();
+    this.userService.refreshUser();
     // Refresh all data in parallel
     await Promise.all([
       this.checkSettingsUpdates(),
