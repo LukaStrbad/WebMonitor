@@ -108,16 +108,17 @@ public class UserController : ControllerBase
     public async Task<ActionResult> Me()
     {
         await using var db = new WebMonitorContext();
-
+        
+        // Returning 401 will cause the client to log out
         if (User.Identity is null)
-            return BadRequest("User not logged in");
+            return Unauthorized("User not logged in");
 
         var users = await db.Users
             .Where(u => u.Username == User.Identity.Name)
             .Include(u => u.AllowedFeatures)
             .ToListAsync();
         if (users.Count != 1)
-            return BadRequest("Invalid username or password");
+            return Unauthorized("Invalid username or password");
 
         var user = users[0];
 

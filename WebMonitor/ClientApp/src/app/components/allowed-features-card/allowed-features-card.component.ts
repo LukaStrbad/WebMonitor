@@ -6,17 +6,13 @@ import { AllowedFeatures } from 'src/model/allowed-features';
   templateUrl: './allowed-features-card.component.html',
   styleUrls: ['./allowed-features-card.component.css']
 })
-export class AllowedFeaturesCardComponent implements AfterViewInit, OnChanges {
+export class AllowedFeaturesCardComponent implements OnChanges {
   @Input({ required: true }) allowedFeatures!: AllowedFeatures;
 
   featuresList: AllowedFeatureData[] = [];
 
-  ngAfterViewInit(): void {
-    // Use push instead of assignment to avoid ExpressionChangedAfterItHasBeenCheckedError
-    this.featuresList.push(...getAllowedFeaturesList(this.allowedFeatures));
-  }
-
   ngOnChanges(changes: SimpleChanges): void {
+    // There is no need for ngAfterViewInit because this method will also handle the initial value
     if (changes.allowedFeatures) {
       this.featuresList = getAllowedFeaturesList(this.allowedFeatures);
     }
