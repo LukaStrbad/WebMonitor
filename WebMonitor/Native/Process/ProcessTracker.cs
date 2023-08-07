@@ -84,12 +84,13 @@ internal class ProcessTracker : IRefreshable
         {
             unsafe
             {
-                var result = PInvoke.OpenProcessToken((HANDLE)process.Handle, TOKEN_ACCESS_MASK.TOKEN_QUERY, (HANDLE*)processHandle);
+                var result = PInvoke.OpenProcessToken((HANDLE)process.Handle, TOKEN_ACCESS_MASK.TOKEN_QUERY,
+                    (HANDLE*)&processHandle);
                 if (result.Value == 0)
                     return null;
             }
 
-            var wi = new WindowsIdentity(processHandle);
+            using var wi = new WindowsIdentity(processHandle);
             var user = wi.Name;
             return user.Contains('\\') ? user[(user.IndexOf(@"\", StringComparison.Ordinal) + 1)..] : user;
         }
@@ -106,8 +107,7 @@ internal class ProcessTracker : IRefreshable
         }
     }
 
-    [SupportedOSPlatform("linux")]
-    private static readonly Dictionary<uint, string> IdToUser = new();
+    [SupportedOSPlatform("linux")] private static readonly Dictionary<uint, string> IdToUser = new();
 
     [SupportedOSPlatform("linux")]
     internal static string? GetProcessOwnerLinux(int processId)
