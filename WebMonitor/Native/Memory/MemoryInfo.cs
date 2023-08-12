@@ -2,6 +2,7 @@
 using System.Management;
 using System.Runtime.Versioning;
 using Windows.Win32;
+using WebMonitor.Extensions;
 
 namespace WebMonitor.Native.Memory;
 
@@ -76,10 +77,14 @@ public class MemoryInfo
             if (firstLoop)
             {
                 // These values are the same for all memory sticks
-                Speed = (uint)obj["Speed"];
-                Voltage = (uint)obj["ConfiguredVoltage"];
-                FormFactor = GetMemoryFormFactor((ushort)obj["FormFactor"]);
-                Type = GetMemoryType((uint)obj["SMBIOSMemoryType"]);
+                if (obj.TryGetValue<uint>("Speed", out var speed)) 
+                    Speed = speed;
+                if (obj.TryGetValue<uint>("ConfiguredVoltage", out var voltage))
+                    Voltage = voltage;
+                if (obj.TryGetValue<ushort>("FormFactor", out var formFactor))
+                    FormFactor = GetMemoryFormFactor(formFactor);
+                if (obj.TryGetValue<uint>("SMBIOSMemoryType", out var memoryType))
+                    Type = GetMemoryType(memoryType);
                 firstLoop = false;
             }
 
