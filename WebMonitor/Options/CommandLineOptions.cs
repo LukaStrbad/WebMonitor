@@ -9,4 +9,7 @@ public class CommandLineOptions
 
     [Option("promote-to-admin", Required = false, HelpText = "Promote the specified user to admin.")]
     public string? PromoteToAdmin { get; set; }
+    
+    [Option("secret", Required = false, HelpText = "A secret that is used for authentication.")]
+    public string? Secret { get; set; }
 }

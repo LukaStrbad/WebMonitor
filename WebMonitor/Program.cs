@@ -30,6 +30,11 @@ Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 // Load config
 var config = Config.Load();
 
+if (cmdOptions.Secret is not null)
+    config.Secret = cmdOptions.Secret;
+
+config.Save();
+
 // Add addresses from command line
 var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
@@ -97,8 +102,17 @@ builder.Logging.AddConsole();
 var jwtOptions = new JwtOptions(
     builder.Configuration["Jwt:Issuer"] ?? throw new InvalidOperationException(),
     builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException(),
-    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException())
+    // Use the secret from the config file if it exists, otherwise use the secret from the appsettings.json file
+    Encoding.UTF8.GetBytes((config.Secret ?? builder.Configuration["Jwt:Key"]) ?? throw new InvalidOperationException())
 );
+
+if (jwtOptions.Key.Length < 16)
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine("The secret must have at least 16 characters.");
+    Console.ResetColor();
+    Environment.Exit(1);
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -132,9 +146,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddAuthorization();
-// builder.Services
-//     .AddDefaultIdentity<IdentityUser>()
-//     .AddRoles<IdentityRole>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -233,4 +244,22 @@ app.MapFallbackToFile("index.html");
 app.Lifetime.ApplicationStopping.Register(() => { settings.Save(); });
 
 Console.WriteLine("Starting server...");
+
+app.Lifetime.ApplicationStarted.Register(async () =>
+{
+    if (config.Secret is not null)
+        return;
+    
+    await Task.Delay(1000);
+    // Display a warning if no secret is set and the server is not running in debug mode
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine(
+        "To ensure security, you should set a secret in the config file or using the --secret command line option.");
+    Console.WriteLine(
+        "Without a strong secret, the server can be compromised by anyone with access to the server.");
+    Console.WriteLine(
+        "The secret should have at least 16 characters. This is a requirement of the encryption algorithm in use.");
+    Console.ResetColor();
+    Console.WriteLine("This is not a password, so it does not need to be memorized. It should be kept secret though.");
+});
 app.Run();
