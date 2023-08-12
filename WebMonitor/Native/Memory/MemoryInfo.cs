@@ -88,9 +88,9 @@ public class MemoryInfo
                 firstLoop = false;
             }
 
-            var manufacturer = obj["Manufacturer"].ToString()?.Trim();
-            var partNumber = obj["PartNumber"].ToString()?.Trim();
-            var capacity = (ulong)obj["Capacity"];
+            obj.TryGetValue("Manufacturer", out string? manufacturer);
+            obj.TryGetValue("PartNumber", out string? partNumber);
+            obj.TryGetValue("Capacity", out ulong capacity);
             memorySticks.Add(new MemoryStickInfo(manufacturer, partNumber, capacity));
         }
 
