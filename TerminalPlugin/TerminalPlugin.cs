@@ -13,7 +13,6 @@ public class TerminalPlugin : ITerminalPlugin
     private Process? _process;
 
     // Get version from AssemblyVersion
-    
     public Version Version
     {
         get
@@ -28,10 +27,43 @@ public class TerminalPlugin : ITerminalPlugin
     private readonly Dictionary<int, (Process Process, int Port)> _sessions = new();
     private int _nextSessionId = 0;
 
-    public bool Start(string parentDirectory)
+    public (bool Success, string? Message) Start(string parentDirectory)
     {
         _parentDirectory = parentDirectory;
-        return true;
+        var nodeVersion = GetNodeVersion();
+        if (nodeVersion is null)
+            return (false, "Node.js is not installed");
+        
+        return nodeVersion.Major == 18 
+            ? (true, null) 
+            : (false, $"Node.js version 18.x.x is required, current version: {nodeVersion}");
+    }
+
+    private static Version? GetNodeVersion()
+    {
+        var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "node",
+                Arguments = "--version",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            }
+        };
+
+        process.Start();
+        var output = "";
+        var task = Task.Run(() => output = process.StandardOutput.ReadLine());
+        process.WaitForExit();
+
+        // Wait for the task to complete or timeout after 2 seconds
+        task.Wait(TimeSpan.FromSeconds(2));
+        if (!task.IsCompletedSuccessfully)
+            return null;
+
+        // Remove leading 'v'
+        return Version.TryParse(output[1..], out var version) ? version : null;
     }
 
     private static int GetOpenPort()

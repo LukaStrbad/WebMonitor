@@ -16,9 +16,8 @@ public interface IPlugin
     /// Function that is called when the plugin is loaded
     /// </summary>
     /// <param name="parentDirectory">Directory where the plugin is located</param>
-    /// <returns>true if plugin has been started successfully</returns>
-    public bool Start(string parentDirectory) => true;
-
+    /// <returns>A tuple indicating success and an optional message</returns>
+    public (bool Success, string? Message) Start(string parentDirectory) => (true, null);
     /// <summary>
     /// Function that is called when the plugin is unloaded
     /// </summary>

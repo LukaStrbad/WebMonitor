@@ -9,6 +9,11 @@ public class Config
     /// List of addresses to listen on
     /// </summary>
     public List<AddressInfo> Addresses { get; set; } = new();
+    
+    /// <summary>
+    /// Jwt secret
+    /// </summary>
+    public string? Secret { get; set; }
 
     public const string ConfigPath = "config.json";
 
@@ -23,6 +28,13 @@ public class Config
         }
     }
 
+    private static JsonSerializerOptions SerializerOptions => new()
+    {
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
     public static Config Load(bool loadFromFile = true)
     {
         // Don't load from file if in debug mode
@@ -32,11 +44,7 @@ public class Config
         try
         {
             var json = File.ReadAllText(ConfigPath);
-            var config = JsonSerializer.Deserialize<Config>(json, new JsonSerializerOptions()
-            {
-                ReadCommentHandling = JsonCommentHandling.Skip,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+            var config = JsonSerializer.Deserialize<Config>(json, SerializerOptions);
             return config ?? new Config();
         }
         catch (Exception e)
@@ -56,5 +64,11 @@ public class Config
         Console.WriteLine("Using default config.");
 
         return new Config();
+    }
+
+    public void Save()
+    {
+        var config = JsonSerializer.Serialize(this, SerializerOptions);
+        File.WriteAllText(ConfigPath, config);
     }
 }

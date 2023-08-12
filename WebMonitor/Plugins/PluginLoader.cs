@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using WebMonitor.Extensions;
 
 namespace WebMonitor.Plugins;
 
@@ -78,8 +79,13 @@ public class PluginLoader : IDisposable
                     }
 
                     _logger.LogInformation("Loaded plugin '{Name}', version: {Version}", _terminalPlugin.Name,
-                        _terminalPlugin.Version);
-                    _terminalPlugin.Start(directory);
+                        _terminalPlugin.Version.ToShortString());
+                    var result = _terminalPlugin.Start(directory);
+                    if (result.Success) continue;
+                    // If plugin failed to start, log the error and stop the plugin
+                    _logger.LogError("Failed to start terminal plugin: {Message}", result.Message);
+                    _terminalPlugin.Stop();
+                    _terminalPlugin = null;
                 }
             }
             catch (Exception e)
