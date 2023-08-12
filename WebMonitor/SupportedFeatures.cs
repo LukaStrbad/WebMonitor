@@ -39,7 +39,7 @@ public class SupportedFeatures
     public bool ProcessAffinity { get; set; }
     public bool Terminal { get; set; }
 
-    public static SupportedFeatures Detect()
+    public static SupportedFeatures Detect(ILogger<SupportedFeatures> logger)
     {
         var supportedFeatures = new SupportedFeatures();
         var updateVisitor = new UpdateVisitor();
@@ -52,53 +52,57 @@ public class SupportedFeatures
         computer.Open();
         computer.Accept(updateVisitor);
 
-        supportedFeatures.CpuInfo = CheckFeature(() => new CpuInfo(computer));
-        supportedFeatures.MemoryInfo = CheckFeature(() => new MemoryInfo());
-        supportedFeatures.DiskInfo = CheckFeature(() => Native.Disk.DiskInfo.GetDiskInfos());
-        supportedFeatures.CpuUsage = CheckFeature(() =>
+        supportedFeatures.CpuInfo = CheckFeature(logger, () => new CpuInfo(computer));
+        supportedFeatures.MemoryInfo = CheckFeature(logger, () => new MemoryInfo());
+        supportedFeatures.DiskInfo = CheckFeature(logger, () => Native.Disk.DiskInfo.GetDiskInfos());
+        supportedFeatures.CpuUsage = CheckFeature(logger, () =>
         {
             var cpuUsage = new CpuUsage();
             cpuUsage.Refresh(1000);
         });
-        supportedFeatures.MemoryUsage = CheckFeature(() =>
+        supportedFeatures.MemoryUsage = CheckFeature(logger, () =>
         {
             var memoryUsage = new MemoryUsage();
             memoryUsage.Refresh(1000);
         });
-        supportedFeatures.DiskUsage = CheckFeature(() =>
+        supportedFeatures.DiskUsage = CheckFeature(logger, () =>
         {
             var diskUsage = new DiskUsageTracker();
             diskUsage.Refresh(1000);
         });
-        supportedFeatures.NetworkUsage = CheckFeature(() =>
+        supportedFeatures.NetworkUsage = CheckFeature(logger, () =>
         {
             var networkUsage = new NetworkUsageTracker();
             networkUsage.Refresh(1000);
         });
-        supportedFeatures.Processes = CheckFeature(() =>
+        supportedFeatures.Processes = CheckFeature(logger, () =>
         {
             var processTracker = new ProcessTracker();
             processTracker.Refresh(1000);
         });
 
-        supportedFeatures.FileBrowser = CheckFeature(() =>
+        supportedFeatures.FileBrowser = CheckFeature(logger, () =>
         {
-            var rootDirs = FileBrowserController.GetRootDirs();
+            var rootDirs = FileBrowserController.GetRootDirs(logger);
         });
         supportedFeatures.FileDownload = supportedFeatures.FileBrowser;
         supportedFeatures.FileUpload = supportedFeatures.FileBrowser;
 
         // Check if Nvidia GPU usage is supported
         supportedFeatures.NvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.CheckIfSupported();
+        if (!supportedFeatures.NvidiaGpuUsage)
+            logger.LogWarning("NVIDIA GPU usage is not supported");
 
         if (OperatingSystem.IsLinux())
         {
             // AMD GPU usage is not yet supported on Linux
             supportedFeatures.AmdGpuUsage = false;
+            supportedFeatures.IntelGpuUsage = false;
             // This is unnecessary on Linux
             supportedFeatures.NvidiaRefreshSettings = false;
+            logger.LogWarning("AMD GPU usage, Intel GPU usage and NVIDIA refresh settings are not supported on Linux");
             supportedFeatures.ProcessPriority = true;
-            supportedFeatures.ProcessPriorityChange = CheckFeature(() =>
+            supportedFeatures.ProcessPriorityChange = CheckFeature(logger, () =>
             {
                 var currentProcess = Process.GetCurrentProcess();
                 var priority = ExtendedProcessInfoLinux.getpriority(0, currentProcess.Id);
@@ -111,9 +115,10 @@ public class SupportedFeatures
         {
             supportedFeatures.AmdGpuUsage = true;
             supportedFeatures.IntelGpuUsage = false;
+            logger.LogWarning("Intel GPU usage is not supported on Windows");
             supportedFeatures.NvidiaRefreshSettings = supportedFeatures.NvidiaGpuUsage;
             supportedFeatures.ProcessPriority = true;
-            supportedFeatures.ProcessPriorityChange = CheckFeature(() =>
+            supportedFeatures.ProcessPriorityChange = CheckFeature(logger, () =>
             {
                 var currentProcess = Process.GetCurrentProcess();
                 currentProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
@@ -121,10 +126,7 @@ public class SupportedFeatures
             });
         }
 
-        // LibreHardwareMonitor does not support Intel GPUs
-        supportedFeatures.IntelGpuUsage = false;
-
-        supportedFeatures.BatteryInfo = CheckFeature(() =>
+        supportedFeatures.BatteryInfo = CheckFeature(logger, () =>
         {
             var batteryInfo =
                 new BatteryInfo(computer.Hardware.First(hardware => hardware.HardwareType == HardwareType.Battery))
@@ -135,11 +137,13 @@ public class SupportedFeatures
         });
 
         supportedFeatures.ProcessAffinity = OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
+        if (!supportedFeatures.ProcessAffinity)
+            logger.LogWarning("Process affinity is only supported on Windows and Linux");
 
         return supportedFeatures;
     }
 
-    private static bool CheckFeature(Action action)
+    private static bool CheckFeature(ILogger logger, Action action)
     {
         try
         {
@@ -148,8 +152,9 @@ public class SupportedFeatures
             // Wait for the task to complete or timeout after 5 seconds
             return task.Wait(TimeSpan.FromSeconds(5)) && task.IsCompletedSuccessfully;
         }
-        catch
+        catch (Exception e)
         {
+            logger.LogWarning(e, "Feature is not supported");
             return false;
         }
     }

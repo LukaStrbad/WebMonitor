@@ -13,7 +13,7 @@ public class FileBrowserControllerTests
     public FileBrowserControllerTests()
     {
         _serviceProvider = new WebMonitorServiceProvider();
-        _controller = new FileBrowserController();
+        _controller = new FileBrowserController(_serviceProvider);
     }
     
     [Fact]

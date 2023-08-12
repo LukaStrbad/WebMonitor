@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebMonitor;
+using WebMonitor.Extensions;
 using WebMonitor.Middleware;
 using WebMonitor.Model;
 using WebMonitor.Native;
@@ -33,10 +34,13 @@ var config = Config.Load();
 var addressInfos = AddressInfo.ParseFromStrings(cmdOptions.Ips);
 config.Addresses.AddRange(addressInfos);
 
+using var loggerFactory = LoggerFactory.Create(loggingBuilder => loggingBuilder
+    .SetMinimumLevel(LogLevel.Trace)
+    .AddConsole());
 Console.WriteLine("Analyzing supported features...");
-var supportedFeatures = SupportedFeatures.Detect();
+var supportedFeatures = SupportedFeatures.Detect(loggerFactory.CreateLogger<SupportedFeatures>());
 
-var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToShortString();
 // Initialize Settings and SysInfo early so they can start immediately
 var settings = Settings.Load();
 var sysInfo = new SysInfo(settings, version, supportedFeatures);
@@ -45,10 +49,6 @@ var db = new WebMonitorContext();
 db.Database.Migrate();
 
 var builder = WebApplication.CreateBuilder(args);
-
-using var loggerFactory = LoggerFactory.Create(loggingBuilder => loggingBuilder
-    .SetMinimumLevel(LogLevel.Trace)
-    .AddConsole());
 
 var pluginLoader = new PluginLoader(loggerFactory.CreateLogger<PluginLoader>());
 pluginLoader.Load();

@@ -66,7 +66,11 @@ public class FileBrowserController : ControllerBase
         };
     }
 
-    internal static List<FileOrDir> GetRootDirs()
+    /// <summary>
+    /// Returns root directories of the system
+    /// </summary>
+    /// <param name="logger">Logger to log the error</param>
+    internal static List<FileOrDir> GetRootDirs(ILogger? logger = null)
     {
         if (OperatingSystem.IsLinux())
         {
@@ -78,10 +82,20 @@ public class FileBrowserController : ControllerBase
             };
         }
 
-        return DriveInfo
-            .GetDrives()
-            .Select(driveInfo => FileOrDir.Dir(driveInfo.RootDirectory))
-            .ToList();
+        var rootDirs = new List<FileOrDir>();
+        foreach (var driveInfo in DriveInfo.GetDrives())
+        {
+            try
+            {
+                rootDirs.Add(FileOrDir.Dir(driveInfo.RootDirectory));
+            }
+            catch (Exception e)
+            {
+                logger?.LogInformation(e, "Failed to read drive");
+            }
+        }
+
+        return rootDirs;
     }
 
     [HttpGet("file-info")]

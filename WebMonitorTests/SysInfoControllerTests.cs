@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using WebMonitor;
 using WebMonitor.Controllers;
 using WebMonitor.Options;
 
