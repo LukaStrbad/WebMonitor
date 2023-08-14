@@ -8,6 +8,7 @@ namespace TerminalPlugin;
 
 public class TerminalPlugin : ITerminalPlugin
 {
+    private const string NodeVersionFile = "node-version.txt";
     private string _parentDirectory = null!;
 
     private Process? _process;
@@ -33,10 +34,22 @@ public class TerminalPlugin : ITerminalPlugin
         var nodeVersion = GetNodeVersion();
         if (nodeVersion is null)
             return (false, "Node.js is not installed");
-        
-        return nodeVersion.Major == 18 
-            ? (true, null) 
-            : (false, $"Node.js version 18.x.x is required, current version: {nodeVersion}");
+
+        try
+        {
+            // Load the compiled node version
+            var versionFromFile = File.ReadAllText(NodeVersionFile);
+            var pluginNodeVersion = new Version(versionFromFile[1..]);
+
+            return nodeVersion.Major == pluginNodeVersion.Major
+                ? (true, null)
+                : (false, $"Node.js version {pluginNodeVersion.Major}.x.x is required, current version: {nodeVersion}");
+        }
+        catch
+        {
+            return (false, $"{NodeVersionFile} doesn't exist!");
+        }
+
     }
 
     private static Version? GetNodeVersion()

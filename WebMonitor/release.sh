@@ -30,6 +30,8 @@ cd $ROOT_DIR/../TerminalPlugin
 TERMINAL_PLUGIN_CSPROJ=`find . -name TerminalPlugin.csproj`
 # Get assembly version from TerminalPlugin.csproj (extract from <AssemblyVersion> tag)
 TERMINAL_PLUGIN_VERSION=`grep AssemblyVersion $TERMINAL_PLUGIN_CSPROJ | cut -d \> -f 2 | cut -d \< -f 1`
-cd build/linux-x64
-tar -czf "$ROOT_DIR/$BASE_DIR/TerminalPlugin-$TERMINAL_PLUGIN_VERSION-linux-x64.tar.gz" *
- 
+# Get Node.js version
+nodeVersion=$(node --version)
+nodeVersion=${nodeVersion:1}
+cd build/linux-x64-node_$nodeVersion
+tar -czf "$ROOT_DIR/$BASE_DIR/TerminalPlugin-$TERMINAL_PLUGIN_VERSION-linux-x64-node_$nodeVersion.tar.gz" *
