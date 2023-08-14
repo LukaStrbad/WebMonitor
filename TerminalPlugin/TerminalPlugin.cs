@@ -38,8 +38,8 @@ public class TerminalPlugin : ITerminalPlugin
         try
         {
             // Load the compiled node version
-            var versionFromFile = File.ReadAllText(NodeVersionFile);
-            var pluginNodeVersion = new Version(versionFromFile[1..]);
+            var versionFromFile = File.ReadAllText(Path.Combine(parentDirectory, NodeVersionFile));
+            var pluginNodeVersion = new Version(versionFromFile);
 
             return nodeVersion.Major == pluginNodeVersion.Major
                 ? (true, null)
@@ -108,19 +108,15 @@ public class TerminalPlugin : ITerminalPlugin
     public int StartNewSession()
     {
         var port = GetOpenPort();
-        var fileName = OperatingSystem.IsWindows() ? "cmd.exe" : "bash";
         var shell = OperatingSystem.IsWindows() ? "powershell.exe" : "bash";
         var indexJs = Path.Combine(_parentDirectory, "index.js");
-        var arguments = OperatingSystem.IsWindows()
-            ? $"/c node {indexJs} {shell} {port}"
-            : $"""-c "node {indexJs} {shell} {port}" """;
 
         _process = new Process
         {
             StartInfo = new ProcessStartInfo
             {
-                FileName = fileName,
-                Arguments = arguments,
+                FileName = "node",
+                Arguments = $"{indexJs} {shell} {port}",
                 RedirectStandardOutput = true,
                 RedirectStandardInput = true,
                 UseShellExecute = false

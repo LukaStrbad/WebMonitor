@@ -3,15 +3,22 @@ if (Test-Path build)
     Remove-Item build -Recurse
 }
 
-cd .\node-backend
+Set-Location .\node-backend
+Remove-Item -Recurse .\node_modules
 npm install
 ncc build .\src\index.js -o ..\build
-cd ..
+Set-Location ..
 
-mkdir build\win-x64 -Force
+# Get node version and trim leading 'v'
+$nodeVersion = (node -v).TrimStart("v")
+
+$winDir = ".\build\win-x64-node_$nodeVersion"
+
+mkdir $winDir -Force
 
 dotnet publish TerminalPlugin.csproj --configuration Release -o build\plugin
 
-mv .\build\build .\build\win-x64
-mv .\build\index.js .\build\win-x64
-mv .\build\plugin\TerminalPlugin.dll .\build\win-x64
+Move-Item .\build\build $winDir
+Move-Item .\build\index.js $winDir
+Move-Item .\build\plugin\TerminalPlugin.dll $winDir
+Write-Output $nodeVersion > $winDir\node-version.txt
