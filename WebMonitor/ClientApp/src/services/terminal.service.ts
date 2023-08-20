@@ -7,7 +7,28 @@ import { firstValueFrom } from "rxjs";
 })
 export class TerminalService {
   private readonly apiUrl: string;
-  sessionId: number | null = null;
+
+  get sessionId(): number | null {
+    const sessionId = sessionStorage.getItem("terminalSessionId");
+    if (sessionId === null) {
+      return null;
+    }
+    const parsed = parseFloat(sessionId);
+    // Return null if the value is not a number
+    if (isNaN(parsed)) {
+      return null;
+    }
+    return parsed;
+  }
+
+  set sessionId(value: number | null) {
+    if (value === null) {
+      sessionStorage.removeItem("terminalSessionId");
+    } else {
+      sessionStorage.setItem("terminalSessionId", value.toString());
+    }
+  }
+
 
   constructor(
     private http: HttpClient,

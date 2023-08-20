@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebMonitor.Model;
 using WebMonitor.Model.Db;
+using WebMonitor.Utility;
 
 namespace WebMonitor.Controllers;
 
@@ -18,13 +19,12 @@ public class UserController : ControllerBase
 {
     private readonly ILogger<UserController> _logger;
     private readonly JwtOptions _jwtOptions;
-    private readonly SupportedFeatures _supportedFeatures;
 
     public UserController(IServiceProvider serviceProvider, ILogger<UserController> logger)
     {
         _logger = logger;
-        _jwtOptions = serviceProvider.GetRequiredService<JwtOptions>();
-        _supportedFeatures = serviceProvider.GetRequiredService<SupportedFeatures>();
+        var authUtility = serviceProvider.GetRequiredService<AuthUtility>();
+        _jwtOptions = authUtility.JwtOptions;
     }
 
     [HttpPost("register")]
@@ -108,7 +108,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult> Me()
     {
         await using var db = new WebMonitorContext();
-        
+
         // Returning 401 will cause the client to log out
         if (User.Identity is null)
             return Unauthorized("User not logged in");

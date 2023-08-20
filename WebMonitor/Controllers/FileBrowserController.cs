@@ -1,13 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.IdentityModel.Tokens;
 using WebMonitor.Attributes;
 using WebMonitor.Middleware;
 using WebMonitor.Model;
+using WebMonitor.Utility;
 
 namespace WebMonitor.Controllers;
 
@@ -24,11 +23,11 @@ public class FileBrowserController : ControllerBase
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    private readonly JwtOptions _jwtOptions;
+    private readonly AuthUtility _authUtility;
 
     public FileBrowserController(IServiceProvider serviceProvider)
     {
-        _jwtOptions = serviceProvider.GetRequiredService<JwtOptions>();
+        _authUtility = serviceProvider.GetRequiredService<AuthUtility>();
     }
 
     [HttpGet("dir")]
@@ -118,19 +117,7 @@ public class FileBrowserController : ControllerBase
     public async Task<ActionResult> DownloadFile([FromQuery] string path,
         [FromQuery(Name = "access_token")] string accessToken)
     {
-        // Authenticate user using the access token
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var validateToken = tokenHandler.ValidateToken(accessToken, new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = _jwtOptions.Issuer,
-            ValidateAudience = true,
-            ValidAudience = _jwtOptions.Audience,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(_jwtOptions.Key),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        }, out _);
+        var validateToken = _authUtility.ValidateToken(accessToken);
 
         if (validateToken.Identity is not { IsAuthenticated: true })
             return new UnauthorizedResult();

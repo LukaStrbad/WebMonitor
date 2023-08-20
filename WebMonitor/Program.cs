@@ -16,6 +16,7 @@ using WebMonitor.Model;
 using WebMonitor.Native;
 using WebMonitor.Options;
 using WebMonitor.Plugins;
+using WebMonitor.Utility;
 
 [assembly: InternalsVisibleTo("WebMonitorTests")]
 
@@ -122,7 +123,10 @@ builder.Services.AddSingleton(supportedFeatures);
 builder.Services.AddSingleton(manager);
 builder.Services.AddSingleton(pluginLoader);
 builder.Services.AddSingleton(cmdOptions);
-builder.Services.AddSingleton(jwtOptions);
+
+var authUtility = new AuthUtility(jwtOptions);
+builder.Services.AddSingleton(authUtility);
+
 // Transient services are used to avoid concurrency issues with the database
 builder.Services.AddTransient<WebMonitorContext>();
 

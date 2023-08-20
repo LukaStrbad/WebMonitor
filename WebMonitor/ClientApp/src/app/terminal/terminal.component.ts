@@ -15,7 +15,7 @@ import { environment } from "../../environments/environment";
 import { TerminalService } from "../../services/terminal.service";
 import { UserService } from "../../services/user.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { showErrorSnackbar, showOkSnackbar } from "../../helpers/snackbar-helpers";
+import { showErrorSnackbar } from "../../helpers/snackbar-helpers";
 
 @Component({
   selector: 'app-terminal',
@@ -73,7 +73,10 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
 
     const isAlive = await this.terminalService.isSessionAlive(sessionId);
     if (!isAlive) {
-      this.term.write("\r\nSession has expired. Starting a new session...\r\n");
+      // Only show the message if the user already had a session.
+      if (this.terminalService.sessionId !== null) {
+        this.term.write("\r\nSession has expired. Starting a new session...\r\n");
+      }
       sessionId = await this.terminalService.startNewSession();
     }
 
@@ -93,7 +96,10 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
       if (this.term.element) {
         const top = this.term.element.getBoundingClientRect().top;
         const margin = "32px";
+        // Resize the terminal to fit the screen.
         this.term.element.style.height = `calc(100vh - ${top}px - ${margin})`;
+        // Limit the minimum height of the terminal.
+        this.term.element.style.minHeight = `100px`;
       }
 
       // Resize on init
@@ -111,7 +117,11 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
     };
 
     this.term.onResize(async (size) => {
-      await this.terminalService.changePtySize(sessionId, size.cols, size.rows);
+      try {
+        await this.terminalService.changePtySize(sessionId, size.cols, size.rows);
+      } catch (e) {
+        console.log(e);
+      }
     });
   }
 
@@ -124,8 +134,12 @@ export class TerminalComponent implements AfterViewInit, OnDestroy {
 
     const width = xterm.clientWidth;
     const height = xterm.clientHeight;
-    const cols = Math.floor(width / this.letterSize[0]);
+    let cols = Math.floor(width / this.letterSize[0]);
+    if (cols < 10)
+      cols = 10;
     const rows = Math.floor(height / this.letterSize[1]);
+    if (rows < 5)
+      cols = 5;
 
     // Only resize if the size has changed.
     if (cols === this.term.cols && rows === this.term.rows) {
