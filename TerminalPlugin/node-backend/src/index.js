@@ -23,7 +23,7 @@ console.log(`Terminal server started on port ${port}`);
 const ptyProcess = pty.spawn(shell, [], {
     name: 'xterm-color',
     env: process.env,
-    cwd: process.env.HOME
+    cwd: require('os').homedir()
 });
 
 // If shell exits, exit the process
