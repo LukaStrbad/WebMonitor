@@ -137,10 +137,9 @@ public class TerminalPlugin : ITerminalPlugin
 
     public int GetPort(int sessionId)
     {
-        var session = _sessions[sessionId];
-        if (session.Process.HasExited)
+        if (!_sessions.TryGetValue(sessionId, out var session))
             return 0;
-        return session.Port;
+        return session.Process.HasExited ? 0 : session.Port;
     }
 
     public void ChangePtySize(int sessionId, int cols, int rows)
