@@ -113,6 +113,15 @@ export class UserService {
   }
 
   /**
+   * Checks if a user exists
+   */
+  async someUserExists() {
+    return await firstValueFrom(this.http.get<boolean>(this.apiUrl + "someUserExists")
+      .pipe(catchError(err => this.handleError(err)))
+    );
+  }
+
+  /**
    * Register a new user
    * @param user Data of the new user
    */

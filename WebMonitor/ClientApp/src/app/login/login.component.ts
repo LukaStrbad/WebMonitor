@@ -13,7 +13,8 @@ import { SysInfoService } from 'src/services/sys-info.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnDestroy {
-  isRegister = false;
+  isRegister: boolean | null = null;
+  showFirstUserMessage = false;
   submitted = false;
   error?: string;
   hidePassword = true;
@@ -32,7 +33,16 @@ export class LoginComponent implements OnDestroy {
     private snackBar: MatSnackBar,
     private sysInfo: SysInfoService
   ) {
-    this.isRegister = this.router.url.includes("register");
+    userService.someUserExists().then(async exists => {
+      // If there are no users, redirect to register
+      if (!exists && !this.router.url.includes("register")) {
+        await this.router.navigate(["/register"]);
+      }
+      this.showFirstUserMessage = !exists;
+    }).finally(() => {
+      // Set isRegister after the user check to avoid briefly showing the wrong form
+      this.isRegister = this.router.url.includes("register");
+    })
 
     this.subscription = userService.errorEmitter.subscribe(err => {
       this.error = err;

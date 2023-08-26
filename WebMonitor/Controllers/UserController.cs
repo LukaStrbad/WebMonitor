@@ -26,6 +26,14 @@ public class UserController : ControllerBase
         var authUtility = serviceProvider.GetRequiredService<AuthUtility>();
         _jwtOptions = authUtility.JwtOptions;
     }
+    
+    [HttpGet("someUserExists")]
+    public async Task<ActionResult<bool>> SomeUserExists()
+    {
+        await using var db = new WebMonitorContext();
+
+        return await db.Users.AnyAsync();
+    }
 
     [HttpPost("register")]
     public async Task<ActionResult> Register([FromBody] FormUser formUser)
