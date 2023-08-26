@@ -78,7 +78,7 @@
     {{ isRegister ? "Login" : "Register" }} instead
   </button>
 
-  <div class="no-users-div mt-4">
+  <div class="no-users-div mt-4" *ngIf="showFirstUserMessage">
     <mat-card appearance="outlined" class="no-users-card">
       <mat-card-content>
         There are currently no users in the database. The first user to register will be an admin.
