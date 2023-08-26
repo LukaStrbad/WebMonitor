@@ -1,4 +1,4 @@
-<div *ngIf="!submitted">
+<div *ngIf="!submitted && isRegister !== null">
   <h1 class="mat-headline-4 mb-4 mt-2">{{ isRegister ? "Register" : "Login" }}</h1>
 
   <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
@@ -77,6 +77,14 @@
   <button mat-button color="accent" (click)="switchLoginRegister()" class="mt-3">
     {{ isRegister ? "Login" : "Register" }} instead
   </button>
+
+  <div class="no-users-div mt-4">
+    <mat-card appearance="outlined" class="no-users-card">
+      <mat-card-content>
+        There are currently no users in the database. The first user to register will be an admin.
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>
 
 <div *ngIf="submitted && !error" class="logging-in">

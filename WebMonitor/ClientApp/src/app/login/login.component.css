@@ -10,3 +10,17 @@ button, mat-spinner {
 .logging-in {
   text-align: center;
 }
+
+.no-users-div {
+  display: flex;
+}
+
+.no-users-card {
+  background-color: transparent;
+  display: inline-block;
+  margin: 0 auto;
+  text-align: center;
+  /* For now this is only supported on Chromium */
+  /*noinspection CssInvalidPropertyValue*/
+  text-wrap: balance;
+}
