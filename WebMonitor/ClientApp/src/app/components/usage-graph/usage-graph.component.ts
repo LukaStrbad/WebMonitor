@@ -1,5 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 
+const verticalLinesSpace = 5;
+
 @Component({
   selector: 'app-usage-graph',
   templateUrl: './usage-graph.component.html',
@@ -7,7 +9,7 @@ import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '
 })
 export class UsageGraphComponent implements AfterViewInit {
   /**
-   * Starting values for the graph
+   * Primary values for the graph
    */
   @Input() usages: number[] = [];
   /**
@@ -87,7 +89,7 @@ export class UsageGraphComponent implements AfterViewInit {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Width between points
-    let w = canvas.width / (this.maxPoints - 1);
+    let w = canvas.width / (this.maxPoints - 2);
     ctx.lineWidth = window.devicePixelRatio;
 
     ctx.strokeStyle = this.color;
@@ -100,7 +102,7 @@ export class UsageGraphComponent implements AfterViewInit {
 
     // Get the starting offset
     let start = this.maxPoints - this.usages.length;
-    // If there are less than maxPoints, start at 0
+    // If there are more than maxPoints, start at 0
     if (start < 0)
       start = 0;
 
@@ -108,7 +110,7 @@ export class UsageGraphComponent implements AfterViewInit {
     ctx.lineWidth = window.devicePixelRatio * 2;
     // Draw the points
     ctx.moveTo(start * w, canvas.height - this.usages[0] / this.maxValue * canvas.height);
-    for (let i = start + 1; i < this.maxPoints; i++) {
+    for (let i = start; i < this.maxPoints; i++) {
       ctx.lineTo(i * w, canvas.height - this.usages[i - start] / this.maxValue * canvas.height);
     }
     ctx.stroke()
@@ -134,7 +136,7 @@ export class UsageGraphComponent implements AfterViewInit {
       ctx.lineWidth = window.devicePixelRatio * 2;
       ctx.beginPath();
       ctx.moveTo(start * w, canvas.height - this.secondaryUsages[0] / this.maxValue * canvas.height);
-      for (let i = start + 1; i < this.maxPoints; i++) {
+      for (let i = start; i < this.maxPoints; i++) {
         ctx.lineTo(i * w, canvas.height - this.secondaryUsages[i - start] / this.maxValue * canvas.height);
       }
       ctx.stroke()
@@ -154,25 +156,17 @@ export class UsageGraphComponent implements AfterViewInit {
 
       // Draw horizontal lines
       ctx.beginPath();
-      for (let i = 0; i < horizontalLines; i++) {
+      // Line 0 and 10 are the top and bottom borders of the graph so they are not drawn
+      for (let i = 1; i < horizontalLines; i++) {
         ctx.moveTo(0, canvas.height / horizontalLines * i);
         ctx.lineTo(canvas.width, canvas.height / horizontalLines * i);
       }
 
-      // Calculate the number of vertical lines from width / height ratio
-      // Floor ensures that the number of lines is always an integer
-      const verticalLines = Math.floor(canvas.width / canvas.height * horizontalLines);
-
-      // Calculate the actual offset
-      const offset = this.gridOffset % verticalLines * w;
-
       // Draw vertical lines
-      // TODO: Potentially optimize this by only drawing the lines that are visible
-      for (let i = 0; i < verticalLines + 4; i++) {
-        ctx.moveTo(canvas.width / verticalLines * i - offset, 0);
-        ctx.lineTo(canvas.width / verticalLines * i - offset, canvas.height);
+      for (let i = -this.gridOffset * w; i < canvas.width; i += w * verticalLinesSpace) {
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
       }
-
       ctx.stroke();
     }
   }
@@ -183,7 +177,7 @@ export class UsageGraphComponent implements AfterViewInit {
       this.usages.shift();
     }
 
-    this.gridOffset = (this.gridOffset + 1) % this.maxPoints;
+    this.gridOffset = (this.gridOffset + 1) % verticalLinesSpace;
 
     this.redrawGraph();
   }
@@ -199,7 +193,7 @@ export class UsageGraphComponent implements AfterViewInit {
       this.secondaryUsages.shift();
     }
 
-    this.gridOffset = (this.gridOffset + 1) % this.maxPoints;
+    this.gridOffset = (this.gridOffset + 1) % verticalLinesSpace;
 
     this.redrawGraph();
   }
