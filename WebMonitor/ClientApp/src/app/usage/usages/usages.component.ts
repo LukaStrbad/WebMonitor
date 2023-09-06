@@ -6,7 +6,7 @@ import {
   Signal,
   ViewChild,
   ViewChildren,
-  computed
+  computed, OnInit, ChangeDetectorRef
 } from '@angular/core';
 import { UsageGraphComponent } from "../../components/usage-graph/usage-graph.component";
 import { SysInfoService } from "../../../services/sys-info.service";
@@ -27,12 +27,20 @@ import { UserService } from 'src/services/user.service';
   templateUrl: './usages.component.html',
   styleUrls: ['./usages.component.css']
 })
-export class UsagesComponent implements AfterViewInit, OnDestroy {
-  @ViewChild("cpuGraph") private cpuGraph!: UsageGraphComponent;
-  @ViewChild("memoryGraph") private memoryGraph!: UsageGraphComponent;
-  @ViewChildren("diskGraph") private diskGraphs!: QueryList<UsageGraphComponent>;
-  @ViewChildren("networkGraph") private networkGraphs!: QueryList<UsageGraphComponent>;
-  @ViewChildren("gpuGraph") private gpuGraphs!: QueryList<UsageGraphComponent>;
+export class UsagesComponent implements AfterViewInit, OnInit, OnDestroy {
+  @ViewChild("cpuGraph") private cpuGraph?: UsageGraphComponent;
+  @ViewChild("memoryGraph") private memoryGraph?: UsageGraphComponent;
+  @ViewChildren("diskGraph") private diskGraphs?: QueryList<UsageGraphComponent>;
+  @ViewChildren("networkGraph") private networkGraphs?: QueryList<UsageGraphComponent>;
+  @ViewChildren("gpuGraph") private gpuGraphs?: QueryList<UsageGraphComponent>;
+  initializedGraphs = {
+    cpu: false,
+    memory: false,
+    disks: false,
+    networks: false,
+    gpus: false
+  };
+
   graphColors: Signal<GraphColors>;
 
   // These are used to detect changes only
@@ -45,10 +53,14 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   supportedFeatures?: SupportedFeatures;
   allowedFeatures?: AllowedFeatures;
 
+  // Using the field instead of calling the function directly stops the ExpressionChangedAfterItHasBeenCheckedError
+  networkUsageUtilizations: number[] = [];
+
   constructor(
     public sysInfo: SysInfoService,
     appSettings: AppSettingsService,
-    userService: UserService
+    userService: UserService,
+    private changeDetector: ChangeDetectorRef
   ) {
     this.graphColors = computed(() => appSettings.settings().graphColors);
 
@@ -57,6 +69,18 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
 
     userService.requireUser()
       .then(user => this.allowedFeatures = user.allowedFeatures);
+
+
+  }
+
+  ngOnInit(): void {
+    this.networkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
+    // Bind the function to "this" so it can be used in the template
+    this.networkUsageUtilizations = this.networkUsages.map(this._networkUsageUtilization.bind(this));
+    this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
+    this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
+    // Force change detection to instantly show all panels
+    this.changeDetector.detectChanges();
   }
 
   ngOnDestroy(): void {
@@ -64,15 +88,12 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
-    this.networkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
-    this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
-
     this.refreshSubscription = this.sysInfo.onRefresh.subscribe(() => {
       if (this.showDiskUsage()) {
         // Refresh disk list if it was changed
         if (this.diskUsages.length !== this.sysInfo.data.diskUsages?.length) {
           this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
+          this.initializedGraphs.disks = false;
         } else {
           // Refresh values
           this.sysInfo.data.diskUsages?.forEach((diskUsage, i) => {
@@ -88,10 +109,13 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
         let newNetworkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
         if (this.networkUsages.length !== newNetworkUsages.length) {
           this.networkUsages = newNetworkUsages;
+          this.networkUsageUtilizations = this.networkUsages.map(this._networkUsageUtilization.bind(this));
+          this.initializedGraphs.networks = false;
         } else {
           // Refresh values
           newNetworkUsages.forEach((networkUsage, i) => {
             replaceValues(this.networkUsages[i], networkUsage);
+            this.networkUsageUtilizations[i] = this._networkUsageUtilization(networkUsage);
           });
         }
       }
@@ -100,6 +124,7 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
         // Refresh GPU list if there was a driver change or NVIDIA monitoring was enabled/disabled
         if (this.gpuUsages.length !== this.sysInfo.data.gpuUsages?.length) {
           this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
+          this.initializedGraphs.gpus = false;
         } else {
           // Refresh values
           this.sysInfo.data.gpuUsages?.forEach((gpuUsage, i) => {
@@ -110,25 +135,73 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
 
       // Update graphs
       if (this.showCpuUsage())
-        this.cpuGraph.addValue(this.averageCpuUsage());
+        this.cpuGraph?.addValue(this.averageCpuUsage());
       if (this.showMemoryUsage())
-        this.memoryGraph.addValue(this.memoryUsagePercentage());
+        this.memoryGraph?.addValue(this.memoryUsagePercentage());
       // For disks, networks and GPUs we need to update all graphs from the list
       // Their names are used to match the correct graph with the correct usage
-      this.diskGraphs.forEach((graph, i) => {
+      this.diskGraphs?.forEach((graph, i) => {
         const utilization = this.diskUsages[i].utilization;
         graph.addValue(utilization);
       });
-      this.networkGraphs.forEach((graph, i) => {
+      this.networkGraphs?.forEach((graph, i) => {
         const downloadSpeed = this.networkUsages[i].downloadSpeed;
         const uploadSpeed = this.networkUsages[i].uploadSpeed;
         graph.addValues(downloadSpeed, uploadSpeed);
       });
-      this.gpuGraphs.forEach((graph, i) => {
+      this.gpuGraphs?.forEach((graph, i) => {
         const utilization = this.gpuUsages[i].utilization;
         graph.addValue(utilization);
       });
+
+      this.checkInitialization();
     })
+  }
+
+  /**
+   * Initialize graphs with previous values
+   */
+  checkInitialization() {
+    // Int previous CPU usage
+    if (!this.initializedGraphs.cpu && this.cpuGraph) {
+      this.cpuGraph?.initWithValues(this.averageCpuUsageHistory());
+      this.initializedGraphs.cpu = true;
+    }
+
+    // Init previous memory usage
+    if (!this.initializedGraphs.memory && this.memoryGraph) {
+      this.memoryGraph?.initWithValues(this.memoryUsagePercentageHistory());
+      this.initializedGraphs.memory = true;
+    }
+
+    // Init previous disk usages
+    if (!this.initializedGraphs.disks && (this.diskGraphs?.length ?? 0) > 0) {
+      this.diskGraphs?.forEach((graph, i) => {
+        const utilizationHistory = this._diskUsageUtilizationHistory(this.diskUsages[i]);
+        graph.initWithValues(utilizationHistory);
+      });
+      this.initializedGraphs.disks = true;
+    }
+
+    // Init previous network usages
+    if (!this.initializedGraphs.networks && (this.diskGraphs?.length ?? 0) > 0) {
+      this.networkGraphs?.forEach((graph, i) => {
+        graph.initWithValues(
+          this._networkDownloadSpeedHistory(this.networkUsages[i]),
+          this._networkUploadSpeedHistory(this.networkUsages[i])
+        );
+      });
+      this.initializedGraphs.networks = true;
+    }
+
+    // Init previous GPU usages
+    if (!this.initializedGraphs.gpus && (this.gpuGraphs?.length ?? 0) > 0) {
+      this.gpuGraphs?.forEach((graph, i) => {
+        const utilizationHistory = this.gpuUsageUtilizationHistory(this.gpuUsages[i].name);
+        graph.initWithValues(utilizationHistory);
+      });
+      this.initializedGraphs.gpus = true;
+    }
   }
 
   showCpuUsage(): boolean {
@@ -186,7 +259,7 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
       .map(usage => Number(usage!.used) / Number(usage!.total) * 100);
   }
 
-  diskUsageUtilizationHistory(diskUsage: DiskUsage): number[] {
+  _diskUsageUtilizationHistory(diskUsage: DiskUsage): number[] {
     return this.sysInfo.data.diskUsagesHistory
       .filter(usages => usages != null)
       .map(usages => usages!.find(usage => usage.name === diskUsage.name)?.utilization ?? 0);
@@ -200,7 +273,9 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
     return `R: ${readSpeed}/s | W: ${writeSpeed}/s`;
   }
 
-  networkUsageUtilization(networkUsage: NetworkUsage): number {
+  _networkUsageUtilization(networkUsage: NetworkUsage): number {
+    if (!this.networkGraphs)
+      return 0;
     let usageGraph: UsageGraphComponent | undefined;
 
     // Network utilization needs to be relative because the maximum value is not known
@@ -214,16 +289,26 @@ export class UsagesComponent implements AfterViewInit, OnDestroy {
       i++;
     }
 
-    return (usageGraph?.currentUsage ?? 0) * 100;
+    if (!usageGraph) {
+      return 0;
+    }
+
+    // Select a higher value from download and upload
+    let usage = usageGraph.currentUsage;
+    if (usageGraph.currentSecondaryUsage > usage) {
+      usage = usageGraph.currentSecondaryUsage;
+    }
+
+    return usage * 100;
   }
 
-  networkDownloadSpeedHistory(networkUsage: NetworkUsage): number[] {
+  private _networkDownloadSpeedHistory(networkUsage: NetworkUsage): number[] {
     return this.sysInfo.data.networkUsagesHistory
       .filter(usages => usages != null)
       .map(usages => usages!.find(usage => usage.name === networkUsage.name)?.downloadSpeed ?? 0);
   }
 
-  networkUploadSpeedHistory(networkUsage: NetworkUsage): number[] {
+  private _networkUploadSpeedHistory(networkUsage: NetworkUsage): number[] {
     return this.sysInfo.data.networkUsagesHistory
       .filter(usages => usages != null)
       .map(usages => usages!.find(usage => usage.name === networkUsage.name)?.uploadSpeed ?? 0);

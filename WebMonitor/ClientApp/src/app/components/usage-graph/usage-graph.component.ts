@@ -11,11 +11,11 @@ export class UsageGraphComponent implements AfterViewInit {
   /**
    * Primary values for the graph
    */
-  @Input() usages: number[] = [];
+  usages: number[] = [];
   /**
    * Secondary values for the graph
    */
-  @Input() secondaryUsages: number[] = [];
+  secondaryUsages: number[] = [];
   /**
    * Maximum amount of points to tract, discarding the oldest ones
    */
@@ -51,10 +51,22 @@ export class UsageGraphComponent implements AfterViewInit {
   private gridOffset = 0;
 
   /**
+   * Whether the graph should be refreshed
+   */
+  @Input() disableDraw = false;
+
+  /**
    * Returns the current usage as a percentage relative to the maximum value
    */
   get currentUsage() {
     return (this.usages[this.usages.length - 1] ?? 0) / this.maxValue;
+  }
+
+  /**
+   * Returns the secondary usage as a percentage relative to the maximum value
+   */
+  get currentSecondaryUsage() {
+    return (this.secondaryUsages[this.secondaryUsages.length - 1] ?? 0) / this.maxValue;
   }
 
   private get maxValue() {
@@ -70,11 +82,32 @@ export class UsageGraphComponent implements AfterViewInit {
     while (this.usages.length > this.maxPoints) {
       this.usages.shift();
     }
+    while (this.secondaryUsages.length > this.maxPoints) {
+      this.secondaryUsages.shift();
+    }
     // Draw starting points
     this.redrawGraph();
   }
 
-  private redrawGraph() {
+  /**
+   * Initializes the graph with the given values
+   * @param usages Primary values
+   * @param secondaryUsages Secondary values
+   */
+  initWithValues(usages: number[], secondaryUsages?: number[]) {
+    this.usages = usages;
+    if (secondaryUsages) {
+      this.secondaryUsages = secondaryUsages;
+    }
+
+    this.ngAfterViewInit();
+  }
+
+  redrawGraph() {
+    if (this.disableDraw) {
+      return;
+    }
+
     let canvas = this.canvasRef.nativeElement;
 
     // Resize the canvas so it doesn't look blurry
