@@ -1,4 +1,4 @@
-import { effect, EventEmitter, Inject, Injectable, signal } from '@angular/core';
+import { EventEmitter, Inject, Injectable, signal } from '@angular/core';
 import { catchError, firstValueFrom, Subject, throwError } from "rxjs";
 import { SysInfoUsages } from "../model/sys-info/sys-info-usages";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
@@ -126,8 +126,8 @@ export class SysInfoService {
       if (this.userService.user) {
         try {
           await this.refresh();
+        } catch (e) {
         }
-        catch (e) { }
       }
 
       // Try to predict time to next refresh
