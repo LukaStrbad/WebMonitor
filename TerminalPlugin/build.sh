@@ -5,7 +5,7 @@ rm -rf build
 cd node-backend
 rm -rf node_modules
 npm install
-ncc build ./src/index.js -o ../build
+npx ncc build ./src/index.js -o ../build
 cd ..
 
 # Get node version and trim leading 'v'
