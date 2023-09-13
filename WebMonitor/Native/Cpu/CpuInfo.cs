@@ -45,11 +45,10 @@ public partial class CpuInfo
         var cpu = computer.Hardware.First(h => h.HardwareType == HardwareType.Cpu);
 
         Name = cpu.Name;
-        Identifier = cpu.Identifier.ToString();
+        Identifier = cpu.Identifier.ToString() ?? "Unknown";
         NumThreads = Environment.ProcessorCount;
-        // Only physical cores have a clock LibreHardwareMonitor
-        // TODO: Investigate why it returned 9 on my 8 core CPU and possible fetch data from the OS instead
-        NumCores = cpu.Sensors.Count(s => s.SensorType == SensorType.Clock);
+        // Find the number of cores that have a clock (only physical cores have a clock)
+        NumCores = cpu.Sensors.Count(s => s.SensorType == SensorType.Clock && s.Name.ToLower().Contains("core"));
 
         BaseFrequencies = new();
 

@@ -2,7 +2,9 @@
 
 <mat-accordion>
   <!-- CPU panel -->
-  <mat-expansion-panel *ngIf="showCpuUsage()">
+  <!-- If the panel is expands, redraw the graph immediately to avoid showing out of date state -->
+  <!-- (afterExpand) and (opened) events are not used because they are called only after the animation is finished -->
+  <mat-expansion-panel *ngIf="showCpuUsage()" #cpuPanel (click)="cpuPanel.expanded ? cpuGraph.redrawGraph() : null">
     <!-- Panel header -->
     <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
@@ -16,15 +18,17 @@
     </mat-expansion-panel-header>
 
     <!-- Panel content -->
+    <!-- [disableDraw] disables drawing when panel is closed -->
     <app-usage-graph
       #cpuGraph
       [color]="graphColors().cpu"
-      [usages]="averageCpuUsageHistory()"
+      [disableDraw]="!cpuPanel.expanded"
     />
   </mat-expansion-panel>
 
   <!-- Memory panel -->
-  <mat-expansion-panel *ngIf="showMemoryUsage()">
+  <mat-expansion-panel *ngIf="showMemoryUsage()" #memoryPanel
+                       (click)="memoryPanel.expanded ? memoryGraph.redrawGraph() : null">
     <!-- Panel header -->
     <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
       <mat-panel-description class="row">
@@ -41,7 +45,7 @@
     <app-usage-graph
       #memoryGraph
       [color]="graphColors().memory"
-      [usages]="memoryUsagePercentageHistory()"
+      [disableDraw]="!memoryPanel.expanded"
     />
 
     <div class="mat-body-1">
@@ -63,7 +67,8 @@
 
   <!-- Disk panels -->
   <ng-container *ngIf="showDiskUsage()">
-    <mat-expansion-panel *ngFor="let diskUsage of diskUsages">
+    <mat-expansion-panel *ngFor="let diskUsage of diskUsages" #diskPanel
+                         (click)="diskPanel.expanded ? diskGraph.redrawGraph() : null">
       <!-- Panel header -->
       <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
         <mat-panel-description class="row">
@@ -83,7 +88,7 @@
       <app-usage-graph
         #diskGraph
         [color]="graphColors().disk"
-        [usages]="diskUsageUtilizationHistory(diskUsage)"
+        [disableDraw]="!diskPanel.expanded"
       />
 
       <div class="mat-body-1">Read speed: {{ bytes(diskUsage.readSpeed) }}/s</div>
@@ -95,7 +100,8 @@
 
   <!-- Network panels -->
   <ng-container *ngIf="showNetworkUsage()">
-    <mat-expansion-panel *ngFor="let networkUsage of networkUsages">
+    <mat-expansion-panel *ngFor="let networkUsage of networkUsages; let i = index;" #networkPanel
+                         (click)="networkPanel.expanded ? networkGraph.redrawGraph() : null">
       <!-- Panel header -->
       <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
         <mat-panel-description class="row">
@@ -105,7 +111,7 @@
           </div>
           <mat-progress-bar
             mode="determinate"
-            [value]="networkUsageUtilization(networkUsage)"
+            [value]="networkUsageUtilizations[i]"
           >
           </mat-progress-bar>
         </mat-panel-description>
@@ -117,9 +123,8 @@
         [color]="graphColors().network"
         [secondaryColor]="graphColors().networkUpload"
         [relativeMax]="true"
-        [usages]="networkDownloadSpeedHistory(networkUsage)"
-        [secondaryUsages]="networkUploadSpeedHistory(networkUsage)"
         [showSecondary]="true"
+        [disableDraw]="!networkPanel.expanded"
       />
 
       <div class="mat-body-1">
@@ -140,7 +145,8 @@
   <!-- GPU panels -->
   <ng-container
     *ngIf="showGpuUsage()">
-    <mat-expansion-panel *ngFor="let gpuUsage of gpuUsages">
+    <mat-expansion-panel *ngFor="let gpuUsage of gpuUsages" #gpuPanel
+                         (click)="gpuPanel.expanded ? gpuGraph.redrawGraph() : null">
       <!-- Panel header -->
       <mat-expansion-panel-header collapsedHeight="auto" class="panel-header">
         <mat-panel-description class="row">
@@ -157,7 +163,7 @@
       <app-usage-graph
         #gpuGraph
         [color]="graphColors().gpu"
-        [usages]="gpuUsageUtilizationHistory(gpuUsage.name)"
+        [disableDraw]="!gpuPanel.expanded"
       />
 
       <div class="mat-body-1" *ngIf="gpuUsage.memoryTotal; else memoryElse">
