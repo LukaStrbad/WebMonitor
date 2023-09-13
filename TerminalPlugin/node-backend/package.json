@@ -16,5 +16,8 @@
   },
   "bin": {
     "terminal-server": "index.js"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.36.1"
   }
 }

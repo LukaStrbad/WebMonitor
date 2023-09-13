@@ -6,7 +6,7 @@ if (Test-Path build)
 Set-Location .\node-backend
 Remove-Item -Recurse .\node_modules
 npm install
-ncc build .\src\index.js -o ..\build
+npx ncc build .\src\index.js -o ..\build
 Set-Location ..
 
 # Get node version and trim leading 'v'
