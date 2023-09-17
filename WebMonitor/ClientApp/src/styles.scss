@@ -104,3 +104,8 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+// Without this, it's impossible to scroll on <td>s with tooltips on touch devices
+.mat-tooltip-trigger {
+  touch-action: auto !important;
+}

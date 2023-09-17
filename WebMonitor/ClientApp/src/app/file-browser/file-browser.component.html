@@ -13,11 +13,12 @@
       mat-cell
       *matCellDef="let element"
       class="center-thtr"
-      [matTooltip]="element.basename"
-      matTooltipPosition="right"
     >
       <!-- Limit width to 20 characters -->
-      {{ element.basename | ellipsis }}
+      <span [matTooltip]="element.basename"
+            matTooltipPosition="right">
+        {{ element.basename | ellipsis }}
+      </span>
     </td>
   </ng-container>
 
