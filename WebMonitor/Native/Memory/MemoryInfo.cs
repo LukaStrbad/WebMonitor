@@ -91,7 +91,7 @@ public class MemoryInfo
             obj.TryGetValue("Manufacturer", out string? manufacturer);
             obj.TryGetValue("PartNumber", out string? partNumber);
             obj.TryGetValue("Capacity", out ulong capacity);
-            memorySticks.Add(new MemoryStickInfo(manufacturer, partNumber, capacity));
+            memorySticks.Add(new MemoryStickInfo(manufacturer?.Trim(), partNumber?.Trim(), capacity));
         }
 
         MemorySticks = memorySticks;

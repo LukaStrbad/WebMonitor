@@ -16,8 +16,8 @@ public record MemoryStickInfo(
     [SupportedOSPlatform("linux")]
     public static MemoryStickInfo FromDictionary(Dictionary<string, string> memStick)
     {
-        var manufacturer = memStick.GetValueOrDefault("Manufacturer");
-        var partNumber = memStick.GetValueOrDefault("Part Number");
+        var manufacturer = memStick.GetValueOrDefault("Manufacturer")?.Trim();
+        var partNumber = memStick.GetValueOrDefault("Part Number")?.Trim();
         var capacity = ulong.Parse(memStick.GetValueOrDefault("Size", "0").Split(' ')[0]) * 1024 * 1024;
 
         return new MemoryStickInfo(manufacturer, partNumber, capacity);

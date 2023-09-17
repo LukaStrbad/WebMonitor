@@ -105,8 +105,11 @@
         Connection: {{ disk.connectionType }}
       </div>
       <!-- Hard drive only -->
-      <div class="mat-body-1" *ngIf="disk.rotationalSpeed">
-        Speed: {{ disk.rotationalSpeed }} RPM
+      <div class="mat-body-1" *ngIf="disk.rotationalSpeed && disk.rotationalSpeed != 4294967295">
+        Rotational speed: {{ disk.rotationalSpeed }} RPM
+      </div>
+      <div class="mat-body-1" *ngIf="disk.rotationalSpeed == 4294967295">
+        Rotational speed: Unknown
       </div>
     </mat-card-content>
   </mat-card>

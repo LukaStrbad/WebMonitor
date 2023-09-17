@@ -88,74 +88,78 @@ export class UsagesComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.refreshSubscription = this.sysInfo.onRefresh.subscribe(() => {
-      if (this.showDiskUsage()) {
-        // Refresh disk list if it was changed
-        if (this.diskUsages.length !== this.sysInfo.data.diskUsages?.length) {
-          this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
-          this.initializedGraphs.disks = false;
-        } else {
-          // Refresh values
-          this.sysInfo.data.diskUsages?.forEach((diskUsage, i) => {
-            // We can't just assign the new value to the old one because it will break the reference
-            // and the progress bars will be recreated, starting from zero every update
-            replaceValues(this.diskUsages[i], diskUsage);
-          });
-        }
+    // Initialize graphs with previous values to avoid showing empty graphs before the next refresh
+    this.onRefresh();
+    this.refreshSubscription = this.sysInfo.onRefresh.subscribe(this.onRefresh.bind(this));
+  }
+
+  private onRefresh() {
+    if (this.showDiskUsage()) {
+      // Refresh disk list if it was changed
+      if (this.diskUsages.length !== this.sysInfo.data.diskUsages?.length) {
+        this.diskUsages = [...this.sysInfo.data.diskUsages ?? []];
+        this.initializedGraphs.disks = false;
+      } else {
+        // Refresh values
+        this.sysInfo.data.diskUsages?.forEach((diskUsage, i) => {
+          // We can't just assign the new value to the old one because it will break the reference
+          // and the progress bars will be recreated, starting from zero every update
+          replaceValues(this.diskUsages[i], diskUsage);
+        });
       }
+    }
 
-      if (this.showNetworkUsage()) {
-        // Refresh network list if it was changed
-        let newNetworkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
-        if (this.networkUsages.length !== newNetworkUsages.length) {
-          this.networkUsages = newNetworkUsages;
-          this.networkUsageUtilizations = this.networkUsages.map(this._networkUsageUtilization.bind(this));
-          this.initializedGraphs.networks = false;
-        } else {
-          // Refresh values
-          newNetworkUsages.forEach((networkUsage, i) => {
-            replaceValues(this.networkUsages[i], networkUsage);
-            this.networkUsageUtilizations[i] = this._networkUsageUtilization(networkUsage);
-          });
-        }
+    if (this.showNetworkUsage()) {
+      // Refresh network list if it was changed
+      let newNetworkUsages = [...this.sysInfo.data.networkUsages ?? []].filter(this.networkUsageFilter);
+      if (this.networkUsages.length !== newNetworkUsages.length) {
+        this.networkUsages = newNetworkUsages;
+        this.networkUsageUtilizations = this.networkUsages.map(this._networkUsageUtilization.bind(this));
+        this.initializedGraphs.networks = false;
+      } else {
+        // Refresh values
+        newNetworkUsages.forEach((networkUsage, i) => {
+          replaceValues(this.networkUsages[i], networkUsage);
+          this.networkUsageUtilizations[i] = this._networkUsageUtilization(networkUsage);
+        });
       }
+    }
 
-      if (this.showGpuUsage()) {
-        // Refresh GPU list if there was a driver change or NVIDIA monitoring was enabled/disabled
-        if (this.gpuUsages.length !== this.sysInfo.data.gpuUsages?.length) {
-          this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
-          this.initializedGraphs.gpus = false;
-        } else {
-          // Refresh values
-          this.sysInfo.data.gpuUsages?.forEach((gpuUsage, i) => {
-            replaceValues(this.gpuUsages[i], gpuUsage);
-          });
-        }
+    if (this.showGpuUsage()) {
+      // Refresh GPU list if there was a driver change or NVIDIA monitoring was enabled/disabled
+      if (this.gpuUsages.length !== this.sysInfo.data.gpuUsages?.length) {
+        this.gpuUsages = [...this.sysInfo.data.gpuUsages ?? []];
+        this.initializedGraphs.gpus = false;
+      } else {
+        // Refresh values
+        this.sysInfo.data.gpuUsages?.forEach((gpuUsage, i) => {
+          replaceValues(this.gpuUsages[i], gpuUsage);
+        });
       }
+    }
 
-      // Update graphs
-      if (this.showCpuUsage())
-        this.cpuGraph?.addValue(this.averageCpuUsage());
-      if (this.showMemoryUsage())
-        this.memoryGraph?.addValue(this.memoryUsagePercentage());
-      // For disks, networks and GPUs we need to update all graphs from the list
-      // Their names are used to match the correct graph with the correct usage
-      this.diskGraphs?.forEach((graph, i) => {
-        const utilization = this.diskUsages[i].utilization;
-        graph.addValue(utilization);
-      });
-      this.networkGraphs?.forEach((graph, i) => {
-        const downloadSpeed = this.networkUsages[i].downloadSpeed;
-        const uploadSpeed = this.networkUsages[i].uploadSpeed;
-        graph.addValues(downloadSpeed, uploadSpeed);
-      });
-      this.gpuGraphs?.forEach((graph, i) => {
-        const utilization = this.gpuUsages[i].utilization;
-        graph.addValue(utilization);
-      });
+    // Update graphs
+    if (this.showCpuUsage())
+      this.cpuGraph?.addValue(this.averageCpuUsage());
+    if (this.showMemoryUsage())
+      this.memoryGraph?.addValue(this.memoryUsagePercentage());
+    // For disks, networks and GPUs we need to update all graphs from the list
+    // Their names are used to match the correct graph with the correct usage
+    this.diskGraphs?.forEach((graph, i) => {
+      const utilization = this.diskUsages[i].utilization;
+      graph.addValue(utilization);
+    });
+    this.networkGraphs?.forEach((graph, i) => {
+      const downloadSpeed = this.networkUsages[i].downloadSpeed;
+      const uploadSpeed = this.networkUsages[i].uploadSpeed;
+      graph.addValues(downloadSpeed, uploadSpeed);
+    });
+    this.gpuGraphs?.forEach((graph, i) => {
+      const utilization = this.gpuUsages[i].utilization;
+      graph.addValue(utilization);
+    });
 
-      this.checkInitialization();
-    })
+    this.checkInitialization();
   }
 
   /**
