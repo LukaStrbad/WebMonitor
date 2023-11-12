@@ -8,7 +8,7 @@
 
     <mat-card-content>
       <div class="mat-body-1">
-        {{ computerInfo.currentUser }}@{{ computerInfo.hostname }}
+        {{ computerInfo.currentUser }}&#64;{{ computerInfo.hostname }}
       </div>
       <div class="mat-body-1">
         {{ computerInfo.osName }} (Version: {{ computerInfo.osVersion
@@ -53,25 +53,20 @@
         Capacity:
         {{
         (computerInfo!.memory?.totalMemory ?? 0) > 0
-          ? sizeDisplay(computerInfo!.memory?.totalMemory)
-          : "Unknown"
+        ? sizeDisplay(computerInfo!.memory?.totalMemory)
+        : "Unknown"
         }}
         ({{
         numberHelpers.toByteString(computerInfo!.memory?.usableMemory)
         }}
-        usable<span *ngIf="computerInfo!.memory?.reservedMemory"
-      >,
-        {{ numberHelpers.toByteString(computerInfo!.memory?.reservedMemory) }}
-        reserved</span
-      >)
+        usable<span *ngIf="computerInfo!.memory?.reservedMemory">,
+          {{ numberHelpers.toByteString(computerInfo!.memory?.reservedMemory) }}
+          reserved</span>)
       </div>
       <div class="mat-body-1" *ngIf="computerInfo!.memory?.speed">
         Speed: {{ computerInfo!.memory?.speed }} MHz
       </div>
-      <div
-        class="mat-body-1"
-        *ngIf="computerInfo!.memory?.type && computerInfo!.memory?.formFactor"
-      >
+      <div class="mat-body-1" *ngIf="computerInfo!.memory?.type && computerInfo!.memory?.formFactor">
         Type: {{ computerInfo!.memory?.type }}
         {{ computerInfo!.memory?.formFactor }}
       </div>
@@ -151,7 +146,8 @@
       </div>
       <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.designCapacity && sysInfo.data.batteryInfo.fullCapacity">
         <span matTooltip="The percentage of energy that the battery can hold compared to its design capacity">
-          Health: {{ sysInfo.data.batteryInfo.fullCapacity / sysInfo.data.batteryInfo.designCapacity * 100 | number: '1.0-2' }}
+          Health: {{ sysInfo.data.batteryInfo.fullCapacity / sysInfo.data.batteryInfo.designCapacity * 100 | number:
+          '1.0-2' }}
           %
         </span>
       </div>
