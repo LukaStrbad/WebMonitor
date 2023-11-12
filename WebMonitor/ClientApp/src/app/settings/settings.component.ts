@@ -50,45 +50,69 @@ export class SettingsComponent {
       {
         label: "CPU graph color",
         color: this.appSettings.settings().graphColors.cpu,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.cpu = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          s.graphColors.cpu = color;
+          return s;
+        })
       },
       {
         label: "Memory graph color",
         color: this.appSettings.settings().graphColors.memory,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.memory = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          s.graphColors.memory = color;
+          return s;
+        })
       },
       {
         label: "Disk graph color",
         color: this.appSettings.settings().graphColors.disk,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.disk = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          s.graphColors.disk = color;
+          return s;
+        })
       },
       {
         label: "Network graph color (download)",
         color: this.appSettings.settings().graphColors.network,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.network = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          s.graphColors.network = color;
+          return s;
+        })
       },
       {
         label: "Network graph color (upload)",
         color: this.appSettings.settings().graphColors.networkUpload,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.networkUpload = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          s.graphColors.networkUpload = color;
+          return s;
+        })
       },
       {
         label: "GPU graph color",
         color: this.appSettings.settings().graphColors.gpu,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.gpu = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          s.graphColors.gpu = color;
+          return s;
+        })
       }
     ]
   }
 
   setDarkMode(value: boolean) {
-    this.appSettings.settings.mutate(s => s.theme = value ? AppTheme.Dark : AppTheme.Light);
+    this.appSettings.settings.update(s => {
+      s.theme = value ? AppTheme.Dark : AppTheme.Light;
+      return s;
+    });
   }
 
   /**
    * Toggles the values of the showDebugWindow setting.
    */
   toggleDebugWindow() {
-    this.appSettings.settings.mutate(s => s.showDebugWindow = !s.showDebugWindow);
+    this.appSettings.settings.update(s => {
+      s.showDebugWindow = !s.showDebugWindow;
+      return s;
+    });
   }
 
   nvidiaRefreshSettingName(refreshSetting: NvidiaRefreshSetting): string {
@@ -105,7 +129,10 @@ export class SettingsComponent {
   }
 
   onNvidiaRefreshSettingChange() {
-    this.sysInfo.nvidiaRefreshSettings.mutate(s => s.refreshSetting = this.selectedNvidiaRefreshSetting);
+    this.sysInfo.nvidiaRefreshSettings.update(s => {
+      s.refreshSetting = this.selectedNvidiaRefreshSetting;
+      return s;
+    });
   }
 
   onNvidiaRefreshIntervalChange(target: EventTarget | null) {
@@ -114,7 +141,10 @@ export class SettingsComponent {
     }
 
     const value = parseInt((target as HTMLInputElement).value);
-    this.sysInfo.nvidiaRefreshSettings.mutate(s => s.nRefreshIntervals = value);
+    this.sysInfo.nvidiaRefreshSettings.update(s => {
+      s.nRefreshIntervals = value;
+      return s;
+    });
   }
 
   onRefreshIntervalChange(target: EventTarget | null) {
