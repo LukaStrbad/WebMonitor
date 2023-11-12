@@ -51,48 +51,54 @@ export class SettingsComponent {
         label: "CPU graph color",
         color: this.appSettings.settings().graphColors.cpu,
         changeColor: (color: string) => appSettings.settings.update(s => {
-          s.graphColors.cpu = color;
-          return s;
+          let clone = Object.assign({}, s);
+          clone.graphColors.cpu = color;
+          return clone;
         })
       },
       {
         label: "Memory graph color",
         color: this.appSettings.settings().graphColors.memory,
         changeColor: (color: string) => appSettings.settings.update(s => {
-          s.graphColors.memory = color;
-          return s;
+          let clone = Object.assign({}, s);
+          clone.graphColors.memory = color;
+          return clone;
         })
       },
       {
         label: "Disk graph color",
         color: this.appSettings.settings().graphColors.disk,
         changeColor: (color: string) => appSettings.settings.update(s => {
-          s.graphColors.disk = color;
-          return s;
+          let clone = Object.assign({}, s);
+          clone.graphColors.disk = color;
+          return clone;
         })
       },
       {
         label: "Network graph color (download)",
         color: this.appSettings.settings().graphColors.network,
         changeColor: (color: string) => appSettings.settings.update(s => {
-          s.graphColors.network = color;
-          return s;
+          let clone = Object.assign({}, s);
+          clone.graphColors.network = color;
+          return clone;
         })
       },
       {
         label: "Network graph color (upload)",
         color: this.appSettings.settings().graphColors.networkUpload,
         changeColor: (color: string) => appSettings.settings.update(s => {
-          s.graphColors.networkUpload = color;
-          return s;
+          let clone = Object.assign({}, s);
+          clone.graphColors.networkUpload = color;
+          return clone;
         })
       },
       {
         label: "GPU graph color",
         color: this.appSettings.settings().graphColors.gpu,
         changeColor: (color: string) => appSettings.settings.update(s => {
-          s.graphColors.gpu = color;
-          return s;
+          let clone = Object.assign({}, s);
+          clone.graphColors.gpu = color;
+          return clone;
         })
       }
     ]
@@ -100,8 +106,9 @@ export class SettingsComponent {
 
   setDarkMode(value: boolean) {
     this.appSettings.settings.update(s => {
-      s.theme = value ? AppTheme.Dark : AppTheme.Light;
-      return s;
+      let clone = Object.assign({}, s);
+      clone.theme = value ? AppTheme.Dark : AppTheme.Light;
+      return clone;
     });
   }
 
@@ -110,8 +117,9 @@ export class SettingsComponent {
    */
   toggleDebugWindow() {
     this.appSettings.settings.update(s => {
-      s.showDebugWindow = !s.showDebugWindow;
-      return s;
+      let clone = Object.assign({}, s);
+      clone.showDebugWindow = !s.showDebugWindow;
+      return clone;
     });
   }
 
@@ -130,8 +138,9 @@ export class SettingsComponent {
 
   onNvidiaRefreshSettingChange() {
     this.sysInfo.nvidiaRefreshSettings.update(s => {
-      s.refreshSetting = this.selectedNvidiaRefreshSetting;
-      return s;
+      let clone = Object.assign({}, s);
+      clone.refreshSetting = this.selectedNvidiaRefreshSetting;
+      return clone;
     });
   }
 
@@ -142,8 +151,9 @@ export class SettingsComponent {
 
     const value = parseInt((target as HTMLInputElement).value);
     this.sysInfo.nvidiaRefreshSettings.update(s => {
-      s.nRefreshIntervals = value;
-      return s;
+      let clone = Object.assign({}, s);
+      clone.nRefreshIntervals = value;
+      return clone;
     });
   }
 
