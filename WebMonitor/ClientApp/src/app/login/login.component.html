@@ -1,75 +1,82 @@
-<div *ngIf="!submitted && isRegister !== null">
+@if (!submitted && isRegister !== null) {
+<div>
   <h1 class="mat-headline-4 mb-4 mt-2">{{ isRegister ? "Register" : "Login" }}</h1>
 
   <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
     <mat-form-field>
       <mat-label>Username</mat-label>
-      <input matInput placeholder="Username" [(ngModel)]="username"
-             required minlength="4" #usernameInput="ngModel" name="username">
-      <button *ngIf="username" matSuffix mat-icon-button aria-label="Clear" (click)="username = ''" type="button"
-      >
+      <input matInput placeholder="Username" [(ngModel)]="username" required minlength="4" #usernameInput="ngModel"
+        name="username">
+      @if (username) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="username = ''" type="button">
         <mat-icon>close</mat-icon>
       </button>
+      }
       <mat-error [hidden]="usernameInput.valid || usernameInput.pristine">
         Username must have at least 4 characters
       </mat-error>
     </mat-form-field>
 
     <!-- No validation on login form -->
-    <mat-form-field *ngIf="!isRegister">
+    @if (!isRegister) {
+    <mat-form-field>
       <mat-label>Password</mat-label>
       <input matInput placeholder="Password" [(ngModel)]="loginPassword" [type]="hidePassword ? 'password' : 'text'"
-             name="loginPassword">
+        name="loginPassword">
       <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
         <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
       </button>
     </mat-form-field>
+    }
 
-    <ng-container *ngIf="isRegister">
+    @if (isRegister) {
 
-      <mat-form-field>
-        <mat-label>Display Name</mat-label>
-        <input matInput placeholder="Display Name" [(ngModel)]="displayName"
-               required #displayNameInput="ngModel" name="displayName">
-        <button *ngIf="displayName" matSuffix mat-icon-button aria-label="Clear" (click)="displayName = ''"
-                type="button">
-          <mat-icon>close</mat-icon>
-        </button>
-        <mat-error [hidden]="displayNameInput.valid || displayNameInput.pristine">
-          Display Name is required
-        </mat-error>
-      </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Password</mat-label>
-        <input matInput placeholder="Password" [(ngModel)]="password" [type]="hidePassword ? 'password' : 'text'"
-               required minlength="8" #passwordInput="ngModel" name="password">
-        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-        <mat-error [hidden]="passwordInput.valid || passwordInput.pristine">
-          Password must have at least 8 characters
-        </mat-error>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Display Name</mat-label>
+      <input matInput placeholder="Display Name" [(ngModel)]="displayName" required #displayNameInput="ngModel"
+        name="displayName">
+      @if (displayName) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="displayName = ''" type="button">
+        <mat-icon>close</mat-icon>
+      </button>
+      }
+      <mat-error [hidden]="displayNameInput.valid || displayNameInput.pristine">
+        Display Name is required
+      </mat-error>
+    </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Confirm Password</mat-label>
-        <input matInput placeholder="Confirm Password" [(ngModel)]="confirmPassword"
-               [type]="hideConfirmPassword ? 'password' : 'text'"
-               required minlength="8" #confirmPasswordInput="ngModel" name="confirmPassword">
-        <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
-          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-        <mat-error [hidden]="confirmPasswordInput.pristine ||confirmPasswordInput.value == passwordInput.value">
-          Passwords must match
-        </mat-error>
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input matInput placeholder="Password" [(ngModel)]="password" [type]="hidePassword ? 'password' : 'text'" required
+        minlength="8" #passwordInput="ngModel" name="password">
+      <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
+        <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-error [hidden]="passwordInput.valid || passwordInput.pristine">
+        Password must have at least 8 characters
+      </mat-error>
+    </mat-form-field>
 
-    </ng-container>
+    <mat-form-field>
+      <mat-label>Confirm Password</mat-label>
+      <input matInput placeholder="Confirm Password" [(ngModel)]="confirmPassword"
+        [type]="hideConfirmPassword ? 'password' : 'text'" required minlength="8" #confirmPasswordInput="ngModel"
+        name="confirmPassword">
+      <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword" type="button">
+        <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <mat-error [hidden]="confirmPasswordInput.pristine ||confirmPasswordInput.value == passwordInput.value">
+        Passwords must match
+      </mat-error>
+    </mat-form-field>
+
+
+    }
 
     <div>
-      <button mat-raised-button type="submit" color="primary" (click)="onLogin()"
-              [disabled]="!loginForm.form.valid">{{ isRegister ? "Register" : "Login" }}</button>
+      <button mat-raised-button type="submit" color="primary" (click)="onLogin()" [disabled]="!loginForm.form.valid">{{
+        isRegister ? "Register" : "Login" }}</button>
     </div>
 
   </form>
@@ -78,22 +85,29 @@
     {{ isRegister ? "Login" : "Register" }} instead
   </button>
 
-  <div class="no-users-div mt-4" *ngIf="showFirstUserMessage">
+  @if (showFirstUserMessage) {
+  <div class="no-users-div mt-4">
     <mat-card appearance="outlined" class="no-users-card">
       <mat-card-content>
         There are currently no users in the database. The first user to register will be an admin.
       </mat-card-content>
     </mat-card>
   </div>
+  }
 </div>
+}
 
-<div *ngIf="submitted && !error" class="logging-in">
+@if (submitted && !error) {
+<div class="logging-in">
   <h3 class="mat-headline-4">{{ isRegister ? 'Registering' : 'Logging in' }}</h3>
   <mat-spinner></mat-spinner>
 </div>
+}
 
-<div *ngIf="submitted && error" class="">
+@if (submitted && error) {
+<div class="">
   <h3 class="mat-headline-4">Error</h3>
   <p class="warn-color">{{ error }}</p>
   <button mat-raised-button color="primary" (click)="tryAgain()">Try again</button>
 </div>
+}

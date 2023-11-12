@@ -50,45 +50,77 @@ export class SettingsComponent {
       {
         label: "CPU graph color",
         color: this.appSettings.settings().graphColors.cpu,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.cpu = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          let clone = Object.assign({}, s);
+          clone.graphColors.cpu = color;
+          return clone;
+        })
       },
       {
         label: "Memory graph color",
         color: this.appSettings.settings().graphColors.memory,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.memory = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          let clone = Object.assign({}, s);
+          clone.graphColors.memory = color;
+          return clone;
+        })
       },
       {
         label: "Disk graph color",
         color: this.appSettings.settings().graphColors.disk,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.disk = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          let clone = Object.assign({}, s);
+          clone.graphColors.disk = color;
+          return clone;
+        })
       },
       {
         label: "Network graph color (download)",
         color: this.appSettings.settings().graphColors.network,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.network = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          let clone = Object.assign({}, s);
+          clone.graphColors.network = color;
+          return clone;
+        })
       },
       {
         label: "Network graph color (upload)",
         color: this.appSettings.settings().graphColors.networkUpload,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.networkUpload = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          let clone = Object.assign({}, s);
+          clone.graphColors.networkUpload = color;
+          return clone;
+        })
       },
       {
         label: "GPU graph color",
         color: this.appSettings.settings().graphColors.gpu,
-        changeColor: (color: string) => appSettings.settings.mutate(s => s.graphColors.gpu = color)
+        changeColor: (color: string) => appSettings.settings.update(s => {
+          let clone = Object.assign({}, s);
+          clone.graphColors.gpu = color;
+          return clone;
+        })
       }
     ]
   }
 
   setDarkMode(value: boolean) {
-    this.appSettings.settings.mutate(s => s.theme = value ? AppTheme.Dark : AppTheme.Light);
+    this.appSettings.settings.update(s => {
+      let clone = Object.assign({}, s);
+      clone.theme = value ? AppTheme.Dark : AppTheme.Light;
+      return clone;
+    });
   }
 
   /**
    * Toggles the values of the showDebugWindow setting.
    */
   toggleDebugWindow() {
-    this.appSettings.settings.mutate(s => s.showDebugWindow = !s.showDebugWindow);
+    this.appSettings.settings.update(s => {
+      let clone = Object.assign({}, s);
+      clone.showDebugWindow = !s.showDebugWindow;
+      return clone;
+    });
   }
 
   nvidiaRefreshSettingName(refreshSetting: NvidiaRefreshSetting): string {
@@ -105,7 +137,11 @@ export class SettingsComponent {
   }
 
   onNvidiaRefreshSettingChange() {
-    this.sysInfo.nvidiaRefreshSettings.mutate(s => s.refreshSetting = this.selectedNvidiaRefreshSetting);
+    this.sysInfo.nvidiaRefreshSettings.update(s => {
+      let clone = Object.assign({}, s);
+      clone.refreshSetting = this.selectedNvidiaRefreshSetting;
+      return clone;
+    });
   }
 
   onNvidiaRefreshIntervalChange(target: EventTarget | null) {
@@ -114,7 +150,11 @@ export class SettingsComponent {
     }
 
     const value = parseInt((target as HTMLInputElement).value);
-    this.sysInfo.nvidiaRefreshSettings.mutate(s => s.nRefreshIntervals = value);
+    this.sysInfo.nvidiaRefreshSettings.update(s => {
+      let clone = Object.assign({}, s);
+      clone.nRefreshIntervals = value;
+      return clone;
+    });
   }
 
   onRefreshIntervalChange(target: EventTarget | null) {

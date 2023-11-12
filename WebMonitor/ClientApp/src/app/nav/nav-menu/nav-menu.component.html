@@ -1,17 +1,21 @@
 <div class="nav-container">
-  <div *ngIf="me" class="user">
+  @if (me) {
+  <div class="user">
     <!-- Tabindex is used to stop the first button from being highlighted -->
     <p class="mat-subtitle-1 fw-bold" tabindex="0">User: {{ me.displayName }}</p>
     <p class="mat-subtitle-2">Username: {{ me.username }}</p>
   </div>
+  }
 
   <mat-divider class="mt-2 mb-2"></mat-divider>
 
-  <button *ngFor="let route of menuRoutes" mat-flat-button [hidden]="!shouldBeVisible(route)"
+  @for (route of menuRoutes; track route) {
+  <button mat-flat-button [hidden]="!shouldBeVisible(route)"
     [color]="routeWatcher.currentRoute() === route ? 'primary' : ''" [routerLink]="route.path" (click)="routeClicked()">
     <mat-icon aria-hidden="false" [fontIcon]="route.icon ?? ''" style="vertical-align: middle"></mat-icon>
     <span>{{ getRouteName(route) }}</span>
   </button>
+  }
 
   <!-- Ensures that settings and logout button are aligned to the bottom -->
   <div class="spacer"></div>

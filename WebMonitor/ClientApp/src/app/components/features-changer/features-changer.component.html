@@ -5,12 +5,13 @@
 
   <mat-card-content>
     <div>
-      <div class="mat-body-2 mb-0" *ngFor="let feature of featuresList">
-        <mat-checkbox [checked]="feature.allowed"
-                      (click)="changeFeatures($event, feature)">
+      @for (feature of featuresList; track feature) {
+      <div class="mat-body-2 mb-0">
+        <mat-checkbox [checked]="feature.allowed" (click)="changeFeatures($event, feature)">
           {{ feature.name }}
         </mat-checkbox>
       </div>
+      }
     </div>
   </mat-card-content>
 </mat-card>
