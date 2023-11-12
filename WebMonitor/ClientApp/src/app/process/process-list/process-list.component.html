@@ -4,39 +4,32 @@
   <div class="row">
     <mat-form-field class="col-12 col-md-4">
       <mat-label>Search by</mat-label>
-      <mat-select
-        [(value)]="selectedFilter"
-        (selectionChange)="onFilterSelectionChange()"
-      >
-        <mat-option *ngFor="let filter of filters" [value]="filter">{{
+      <mat-select [(value)]="selectedFilter" (selectionChange)="onFilterSelectionChange()">
+        @for (filter of filters; track filter) {
+        <mat-option [value]="filter">{{
           processFilterName(filter)
           }}</mat-option>
+        }
       </mat-select>
     </mat-form-field>
 
     <mat-form-field class="col-12 col-md-4">
       <mat-label>{{ processFilterName(selectedFilter) }} search</mat-label>
-      <input
-        matInput
-        [(ngModel)]="filterValue"
-        (ngModelChange)="onFilterChange($event)"
-        placeholder="Enter a search term"
-      />
-      <button
-        *ngIf="filterValue"
-        matSuffix
-        mat-icon-button
-        aria-label="Clear"
-        (click)="clearFilter()"
-      >
+      <input matInput [(ngModel)]="filterValue" (ngModelChange)="onFilterChange($event)"
+        placeholder="Enter a search term" />
+      @if (filterValue) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="clearFilter()">
         <mat-icon>close</mat-icon>
       </button>
+      }
     </mat-form-field>
 
-    <span *ngIf="filterValue" class="col-12 col-md-4 align-self-center">
+    @if (filterValue) {
+    <span class="col-12 col-md-4 align-self-center">
       Showing {{ dataSource.filteredData.length }} /
       {{ sysInfo.data.processInfos?.length }} processes
     </span>
+    }
   </div>
 </div>
 
@@ -79,6 +72,5 @@
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="headers; sticky: true"></tr>
-  <tr mat-row *matRowDef="let row; columns: headers"
-      (click)="onProcessClick(row)"></tr>
+  <tr mat-row *matRowDef="let row; columns: headers" (click)="onProcessClick(row)"></tr>
 </table>

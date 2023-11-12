@@ -2,56 +2,66 @@
 
 <div mat-dialog-content>
 
-  <mat-spinner *ngIf="!extendedInfo && !error"></mat-spinner>
+  @if (!extendedInfo && !error) {
+  <mat-spinner></mat-spinner>
+  }
 
-  <div *ngIf="error" class="mat-headline-6 warn-color">{{ error }}</div>
+  @if (error) {
+  <div class="mat-headline-6 warn-color">{{ error }}</div>
+  }
 
-  <div *ngIf="extendedInfo" class="extended-info">
-    <p *ngIf="extendedInfo.owner">Owner: {{ extendedInfo.owner }}</p>
-    <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityWin">
+  @if (extendedInfo) {
+  <div class="extended-info">
+    @if (extendedInfo.owner) {
+    <p>Owner: {{ extendedInfo.owner }}</p>
+    }
+    @if (supportedFeatures?.processPriority && extendedInfo.priorityWin) {
 
-      <mat-form-field *ngIf="supportedFeatures?.processPriorityChange; else noPriorityChange" appearance="outline"
-                      class="mt-4">
+
+    @if (supportedFeatures?.processPriorityChange) {
+    <mat-form-field appearance="outline" class="mt-4">
+      <mat-label>Priority</mat-label>
+      <mat-select [(value)]="selectedPriorityWin" (selectionChange)="onPriorityChangeWin()">
+        @for (priority of allProcessPrioritiesWin; track priority) {
+        <mat-option [value]="priority">
+          {{ processPriorityName(priority) }}
+        </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    } @else {
+
+    <p>
+      Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
+    </p>
+
+    }
+
+
+
+
+    }
+
+    @if (supportedFeatures?.processPriority && extendedInfo.priorityLinux !== undefined) {
+
+    @if (supportedFeatures?.processPriorityChange && selectedPriorityLinux !== null) {
+    <div class="mt-4">
+      <mat-form-field appearance="outline">
         <mat-label>Priority</mat-label>
-        <mat-select [(value)]="selectedPriorityWin" (selectionChange)="onPriorityChangeWin()">
-          <mat-option *ngFor="let priority of allProcessPrioritiesWin" [value]="priority">
-            {{ processPriorityName(priority) }}
-          </mat-option>
-        </mat-select>
+        <input matInput type="number" min="-20" max="19" [(ngModel)]="selectedPriorityLinux" />
       </mat-form-field>
 
-      <ng-template #noPriorityChange>
-        <p>
-          Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
-        </p>
-      </ng-template>
+      <button mat-raised-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">Set Priority</button>
+    </div>
+    } @else {
 
-    </ng-container>
+    <p>
+      Priority: {{ extendedInfo.priorityLinux }}
+    </p>
 
-    <ng-container *ngIf="supportedFeatures?.processPriority && extendedInfo.priorityLinux !== undefined">
-      <div *ngIf="supportedFeatures?.processPriorityChange && selectedPriorityLinux !== null; else noPriorityChangeLinux"
-           class="mt-4">
-        <mat-form-field appearance="outline"
-        >
-          <mat-label>Priority</mat-label>
-          <input
-            matInput
-            type="number"
-            min="-20"
-            max="19"
-            [(ngModel)]="selectedPriorityLinux"
-          />
-        </mat-form-field>
+    }
 
-        <button mat-raised-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">Set Priority</button>
-      </div>
-
-      <ng-template #noPriorityChangeLinux>
-        <p>
-          Priority: {{ extendedInfo.priorityLinux }}
-        </p>
-      </ng-template>
-    </ng-container>
+    }
 
     <p>Thread count: {{ extendedInfo.threadCount }}</p>
     <p>Handle count: {{ extendedInfo.handleCount }}</p>
@@ -75,33 +85,42 @@
     </p>
 
 
-    <mat-card *ngIf="affinityThreads" appearance="outlined">
+    @if (affinityThreads) {
+    <mat-card appearance="outlined">
       <mat-card-header>
         <mat-card-title matTooltip="Which threads this process can run on">Enabled threads (affinity)</mat-card-title>
       </mat-card-header>
 
       <mat-card-content>
         <!-- Multiple rows ensure that chips have correct animations -->
-        <mat-chip-listbox [selectable]="false" *ngFor="let row of rowsArray" multiple>
-          <mat-chip-option *ngFor="let i of row" [selected]="affinityThreads[i]" (click)="changeAffinity(i)">
+        @for (row of rowsArray; track row) {
+        <mat-chip-listbox [selectable]="false" multiple>
+          @for (i of row; track i) {
+          <mat-chip-option [selected]="affinityThreads[i]" (click)="changeAffinity(i)">
             CPU {{ i }}
           </mat-chip-option>
+          }
         </mat-chip-listbox>
+        }
 
         <mat-chip-listbox [selectable]="false">
           <mat-chip-option [selected]="allAffinityThreadsSelected()" (click)="enableAllThreads()"
-                           matTooltip="Enable all threads">
+            matTooltip="Enable all threads">
             CPU 0 - {{ affinityThreads.length - 1 }}
           </mat-chip-option>
         </mat-chip-listbox>
       </mat-card-content>
     </mat-card>
+    }
 
   </div>
+  }
 </div>
 
 <div mat-dialog-actions>
   <button mat-button mat-dialog-close>Close</button>
-  <button *ngIf="data.onKill" mat-button cdkFocusInitial (click)="data.onKill()" mat-dialog-close>Kill
+  @if (data.onKill) {
+  <button mat-button cdkFocusInitial (click)="data.onKill()" mat-dialog-close>Kill
   </button>
+  }
 </div>

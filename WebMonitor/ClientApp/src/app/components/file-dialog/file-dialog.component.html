@@ -7,11 +7,8 @@
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCloseClick()">Close</button>
-  <button
-    *ngIf="data.download"
-    mat-button
-    cdkFocusInitial
-    (click)="data.download()"
-  >Download
+  @if (data.download) {
+  <button mat-button cdkFocusInitial (click)="data.download()">Download
   </button>
+  }
 </div>

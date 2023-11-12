@@ -5,12 +5,14 @@
 
   <mat-card-content>
     <div>
-      <div class="mat-body-2 mb-0" *ngFor="let feature of featuresList">
-            <span>
-            {{ feature.name }}: <span [class]="feature.allowed ? 'primary-color' : 'warn-color'">
-                    {{ feature.allowed ? "Yes" : "No" }}
-            </span></span>
+      @for (feature of featuresList; track feature) {
+      <div class="mat-body-2 mb-0">
+        <span>
+          {{ feature.name }}: <span [class]="feature.allowed ? 'primary-color' : 'warn-color'">
+            {{ feature.allowed ? "Yes" : "No" }}
+          </span></span>
       </div>
+      }
     </div>
   </mat-card-content>
 </mat-card>

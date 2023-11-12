@@ -20,9 +20,11 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 
-  <div id="debugWindow" *ngIf="showDebugWindow()">
+  @if (showDebugWindow()) {
+  <div id="debugWindow">
     IP: {{ sysInfo.clientIp() }}
     <br />
     Time since refresh: {{ sysInfo.data.refreshInfo.millisSinceLastRefresh }} ms
   </div>
+  }
 </body>

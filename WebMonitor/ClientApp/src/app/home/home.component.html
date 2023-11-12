@@ -1,13 +1,14 @@
 <h1 class="mat-headline-4 mb-0 mt-2">Home</h1>
 
-<div *ngIf="computerInfo">
+@if (computerInfo) {
+<div>
   <mat-card>
     <mat-card-header>
       <mat-card-title class="mat-h1">OS</mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
-      <div class="mat-body-1">
+      <div class="mat-body-1F">
         {{ computerInfo.currentUser }}&#64;{{ computerInfo.hostname }}
       </div>
       <div class="mat-body-1">
@@ -22,7 +23,8 @@
       <mat-card-title class="mat-h1">CPU</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content *ngIf="supportedFeatures?.cpuInfo; else cpuInfoElse">
+    @if (supportedFeatures?.cpuInfo) {
+    <mat-card-content>
       <div class="mat-body-1">Name: {{ computerInfo.cpu?.name }}</div>
       <div class="mat-body-1">Core count: {{ computerInfo.cpu?.numCores }}</div>
       <div class="mat-body-1">
@@ -34,12 +36,13 @@
         MHz
       </div>
     </mat-card-content>
+    } @else {
 
-    <ng-template #cpuInfoElse>
-      <mat-card-content>
-        <div class="mat-body-1">CPU info is not supported</div>
-      </mat-card-content>
-    </ng-template>
+    <mat-card-content>
+      <div class="mat-body-1">CPU info is not supported</div>
+    </mat-card-content>
+
+    }
 
   </mat-card>
 
@@ -48,7 +51,8 @@
       <mat-card-title class="mat-h1">Memory</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content *ngIf="supportedFeatures?.memoryInfo && computerInfo; else memoryInfoElse">
+    @if (supportedFeatures?.memoryInfo && computerInfo) {
+    <mat-card-content>
       <div class="mat-body-1">
         Capacity:
         {{
@@ -59,36 +63,48 @@
         ({{
         numberHelpers.toByteString(computerInfo!.memory?.usableMemory)
         }}
-        usable<span *ngIf="computerInfo!.memory?.reservedMemory">,
+        usable@if (computerInfo!.memory?.reservedMemory) {
+        <span>,
           {{ numberHelpers.toByteString(computerInfo!.memory?.reservedMemory) }}
-          reserved</span>)
+          reserved</span>
+        })
       </div>
-      <div class="mat-body-1" *ngIf="computerInfo!.memory?.speed">
+      @if (computerInfo!.memory?.speed) {
+      <div class="mat-body-1">
         Speed: {{ computerInfo!.memory?.speed }} MHz
       </div>
-      <div class="mat-body-1" *ngIf="computerInfo!.memory?.type && computerInfo!.memory?.formFactor">
+      }
+      @if (computerInfo!.memory?.type && computerInfo!.memory?.formFactor) {
+      <div class="mat-body-1">
         Type: {{ computerInfo!.memory?.type }}
         {{ computerInfo!.memory?.formFactor }}
       </div>
+      }
       <ul>
-        <li *ngFor="let stick of computerInfo!.memory?.memorySticks">
+        @for (stick of computerInfo!.memory?.memorySticks; track stick) {
+        <li>
           <div class="mat-body-1">
             {{ sizeDisplay(stick.capacity) }} ({{ stick.manufacturer }}
             {{ stick.partNumber }})
           </div>
         </li>
+        }
       </ul>
     </mat-card-content>
+    } @else {
 
-    <ng-template #memoryInfoElse>
-      <mat-card-content>
-        <div class="mat-body-1">Memory info is not supported</div>
-      </mat-card-content>
-    </ng-template>
+    <mat-card-content>
+      <div class="mat-body-1">Memory info is not supported</div>
+    </mat-card-content>
+
+    }
+
+
 
   </mat-card>
 
-  <mat-card *ngFor="let disk of computerInfo.disks">
+  @for (disk of computerInfo.disks; track disk) {
+  <mat-card>
     <mat-card-header>
       <mat-card-title class="mat-h1">Disk {{ disk.name }}</mat-card-title>
     </mat-card-header>
@@ -96,61 +112,87 @@
     <mat-card-content>
       <div class="mat-body-1">Size: {{ sizeDisplay(disk.totalSize) }}</div>
       <div class="mat-body-1">Type: {{ disk.diskType }}</div>
-      <div class="mat-body-1" *ngIf="disk.connectionType">
+      @if (disk.connectionType) {
+      <div class="mat-body-1">
         Connection: {{ disk.connectionType }}
       </div>
+      }
       <!-- Hard drive only -->
-      <div class="mat-body-1" *ngIf="disk.rotationalSpeed && disk.rotationalSpeed != 4294967295">
+      @if (disk.rotationalSpeed && disk.rotationalSpeed != 4294967295) {
+      <div class="mat-body-1">
         Rotational speed: {{ disk.rotationalSpeed }} RPM
       </div>
-      <div class="mat-body-1" *ngIf="disk.rotationalSpeed == 4294967295">
+      }
+      @if (disk.rotationalSpeed == 4294967295) {
+      <div class="mat-body-1">
         Rotational speed: Unknown
       </div>
+      }
     </mat-card-content>
   </mat-card>
+  }
 
-  <mat-card *ngIf="supportedFeatures?.batteryInfo && allowedFeatures?.batteryInfo">
+  @if (supportedFeatures?.batteryInfo && allowedFeatures?.batteryInfo) {
+  <mat-card>
     <mat-card-header>
       <mat-card-title class="mat-h1">Battery</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content *ngIf="sysInfo.data.batteryInfo">
+    @if (sysInfo.data.batteryInfo) {
+    <mat-card-content>
       <div class="mat-body-1">Charge level: {{ sysInfo.data.batteryInfo.chargeLevel | number:'1.0-1' }} %</div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.voltage">
+      @if (sysInfo.data.batteryInfo.voltage) {
+      <div class="mat-body-1">
         Voltage: {{ sysInfo.data.batteryInfo.voltage / 1000 | number:'1.0-1' }} V
       </div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.power != null">
+      }
+      @if (sysInfo.data.batteryInfo.power != null) {
+      <div class="mat-body-1">
         <span matTooltip="Battery power (negative for discharging)">
           Power: {{ sysInfo.data.batteryInfo.power / 1000 | number:'1.0-1' }} W
         </span>
       </div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.current != null">
+      }
+      @if (sysInfo.data.batteryInfo.current != null) {
+      <div class="mat-body-1">
         <span matTooltip="Battery current (negative for discharging)">
           Current: {{ sysInfo.data.batteryInfo.current / 1000 | number:'1.0-1' }} A
         </span>
       </div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.currentCapacity">
+      }
+      @if (sysInfo.data.batteryInfo.currentCapacity) {
+      <div class="mat-body-1">
         <span matTooltip="How much energy the battery currently holds">
           Current capacity: {{ sysInfo.data.batteryInfo.currentCapacity / 1000 }} Wh
         </span>
       </div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.fullCapacity">
+      }
+      @if (sysInfo.data.batteryInfo.fullCapacity) {
+      <div class="mat-body-1">
         <span matTooltip="How much energy the battery holds when it's fully charged">
           Full capacity: {{ sysInfo.data.batteryInfo.fullCapacity / 1000 }} Wh
         </span>
       </div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.designCapacity">
+      }
+      @if (sysInfo.data.batteryInfo.designCapacity) {
+      <div class="mat-body-1">
         <span matTooltip="How much energy the battery should hold by design">
           Design capacity: {{ sysInfo.data.batteryInfo.designCapacity / 1000 }} Wh
         </span>
       </div>
-      <div class="mat-body-1" *ngIf="sysInfo.data.batteryInfo.designCapacity && sysInfo.data.batteryInfo.fullCapacity">
+      }
+      @if (sysInfo.data.batteryInfo.designCapacity && sysInfo.data.batteryInfo.fullCapacity) {
+      <div class="mat-body-1">
         <span matTooltip="The percentage of energy that the battery can hold compared to its design capacity">
           Health: {{ sysInfo.data.batteryInfo.fullCapacity / sysInfo.data.batteryInfo.designCapacity * 100 | number:
           '1.0-2' }}
           %
         </span>
       </div>
+      }
     </mat-card-content>
+    }
   </mat-card>
+  }
 </div>
+}

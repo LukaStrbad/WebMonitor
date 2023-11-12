@@ -5,15 +5,15 @@
 
   <mat-card-content>
     <div>
-      <div class="mat-body-2 mb-0" *ngFor="let feature of featuresList">
-            <span
-              [matTooltip]="feature.note ?? ''"
-              [matTooltipDisabled]="feature.note == undefined"
-              matTooltipPosition="below">
-            {{ feature.name }}: <span [class]="feature.supported ? 'primary-color' : 'warn-color'">
-                    {{ feature.supported ? "Supported" : "Not Supported" }}
-            </span></span>
+      @for (feature of featuresList; track feature) {
+      <div class="mat-body-2 mb-0">
+        <span [matTooltip]="feature.note ?? ''" [matTooltipDisabled]="feature.note == undefined"
+          matTooltipPosition="below">
+          {{ feature.name }}: <span [class]="feature.supported ? 'primary-color' : 'warn-color'">
+            {{ feature.supported ? "Supported" : "Not Supported" }}
+          </span></span>
       </div>
+      }
     </div>
   </mat-card-content>
 </mat-card>
