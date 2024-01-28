@@ -1,22 +1,20 @@
 ﻿using System.Diagnostics;
 using LibreHardwareMonitor.Hardware;
-using WebMonitor.Controllers;
-using WebMonitor.Native;
-using WebMonitor.Native.Battery;
-using WebMonitor.Native.Cpu;
-using WebMonitor.Native.Disk;
-using WebMonitor.Native.Memory;
-using WebMonitor.Native.Network;
-using WebMonitor.Native.Process;
-using WebMonitor.Native.Process.Linux;
-using WebMonitor.Plugins;
+using WebMonitorLib.Battery;
+using WebMonitorLib.Cpu;
+using WebMonitorLib.Disk;
+using WebMonitorLib.Fs;
+using WebMonitorLib.Memory;
+using WebMonitorLib.Network;
+using WebMonitorLib.Process;
+using WebMonitorLib.Process.Linux;
 
-namespace WebMonitor;
+namespace WebMonitorLib;
 
 /// <summary>
 /// A class containing all the features that are supported by the server.
 /// </summary>
-public class SupportedFeatures 
+public class SupportedFeatures : ISupportedFeatures
 {
     public bool CpuInfo { get; set; }
     public bool MemoryInfo { get; set; }
@@ -39,7 +37,12 @@ public class SupportedFeatures
     public bool ProcessAffinity { get; set; }
     public bool Terminal { get; set; }
 
-    public static SupportedFeatures Detect(ILogger<SupportedFeatures> logger)
+    /// <summary>
+    /// This will contain any warnings that were generated during the detection process.
+    /// </summary>
+    public List<(Exception, string)> Warnings { get; } = [];
+
+    public static SupportedFeatures Detect(Action<Exception?, string> onWarning)
     {
         var supportedFeatures = new SupportedFeatures();
         var updateVisitor = new UpdateVisitor();
@@ -49,49 +52,56 @@ public class SupportedFeatures
             IsBatteryEnabled = true
         };
 
-        computer.Open();
-        computer.Accept(updateVisitor);
+        // computer.Open();
+        // computer.Accept(updateVisitor);
 
-        supportedFeatures.CpuInfo = CheckFeature(logger, () => new CpuInfo(computer));
-        supportedFeatures.MemoryInfo = CheckFeature(logger, () => new MemoryInfo());
-        supportedFeatures.DiskInfo = CheckFeature(logger, () => Native.Disk.DiskInfo.GetDiskInfos());
-        supportedFeatures.CpuUsage = CheckFeature(logger, () =>
+        supportedFeatures.CpuInfo = CheckFeature(onWarning, () => new CpuInfo(computer));
+        supportedFeatures.MemoryInfo = CheckFeature(onWarning, () => new MemoryInfo());
+        supportedFeatures.DiskInfo = CheckFeature(onWarning, () => Disk.DiskInfo.GetDiskInfos());
+        supportedFeatures.CpuUsage = CheckFeature(onWarning, () =>
         {
             var cpuUsage = new CpuUsage();
             cpuUsage.Refresh(1000);
         });
-        supportedFeatures.MemoryUsage = CheckFeature(logger, () =>
+        supportedFeatures.MemoryUsage = CheckFeature(onWarning, () =>
         {
             var memoryUsage = new MemoryUsage();
             memoryUsage.Refresh(1000);
         });
-        supportedFeatures.DiskUsage = CheckFeature(logger, () =>
+        supportedFeatures.DiskUsage = CheckFeature(onWarning, () =>
         {
             var diskUsage = new DiskUsageTracker();
             diskUsage.Refresh(1000);
         });
-        supportedFeatures.NetworkUsage = CheckFeature(logger, () =>
+        supportedFeatures.NetworkUsage = CheckFeature(onWarning, () =>
         {
             var networkUsage = new NetworkUsageTracker();
             networkUsage.Refresh(1000);
         });
-        supportedFeatures.Processes = CheckFeature(logger, () =>
+        supportedFeatures.Processes = CheckFeature(onWarning, () =>
         {
             var processTracker = new ProcessTracker();
             processTracker.Refresh(1000);
         });
 
-        supportedFeatures.FileBrowser = CheckFeature(logger, () =>
+        supportedFeatures.FileBrowser = CheckFeature(onWarning, () =>
         {
-            var rootDirs = FileBrowserController.GetRootDirs(logger);
+            try
+            {
+                var rootDirs = FilesystemHelper.GetRootDirs();
+            }
+            catch (FsException e)
+            {
+                onWarning(e.InnerException, e.Message);
+            }
         });
         supportedFeatures.FileDownload = supportedFeatures.FileBrowser;
         supportedFeatures.FileUpload = supportedFeatures.FileBrowser;
 
         // Check if Nvidia GPU usage is supported
-        supportedFeatures.NvidiaGpuUsage = Native.Gpu.NvidiaGpuUsage.CheckIfSupported();
+        supportedFeatures.NvidiaGpuUsage = Gpu.NvidiaGpuUsage.CheckIfSupported();
         if (!supportedFeatures.NvidiaGpuUsage)
-            logger.LogWarning("NVIDIA GPU usage is not supported");
+            onWarning(null, "NVIDIA GPU usage is not supported");
 
         if (OperatingSystem.IsLinux())
         {
@@ -100,13 +110,16 @@ public class SupportedFeatures
             supportedFeatures.IntelGpuUsage = false;
             // This is unnecessary on Linux
             supportedFeatures.NvidiaRefreshSettings = false;
-            logger.LogWarning("AMD GPU usage, Intel GPU usage and NVIDIA refresh settings are not supported on Linux");
+            onWarning(null, "AMD GPU usage, Intel GPU usage and NVIDIA refresh settings are not supported on Linux");
             supportedFeatures.ProcessPriority = true;
-            supportedFeatures.ProcessPriorityChange = CheckFeature(logger, () =>
+            supportedFeatures.ProcessPriorityChange = CheckFeature(onWarning, () =>
             {
-                var currentProcess = Process.GetCurrentProcess();
+                var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
+                // Reachability is checked, this warning can be ignored
+#pragma warning disable CA1416
                 var priority = ExtendedProcessInfoLinux.getpriority(0, currentProcess.Id);
                 var result = Manager.setpriority(0, currentProcess.Id, priority);
+#pragma warning restore CA1416
                 if (result == -1)
                     throw new Exception("Error setting priority");
             });
@@ -115,18 +128,18 @@ public class SupportedFeatures
         {
             supportedFeatures.AmdGpuUsage = true;
             supportedFeatures.IntelGpuUsage = false;
-            logger.LogWarning("Intel GPU usage is not supported on Windows");
+            onWarning(null, "Intel GPU usage is not supported on Windows");
             supportedFeatures.NvidiaRefreshSettings = supportedFeatures.NvidiaGpuUsage;
             supportedFeatures.ProcessPriority = true;
-            supportedFeatures.ProcessPriorityChange = CheckFeature(logger, () =>
+            supportedFeatures.ProcessPriorityChange = CheckFeature(onWarning, () =>
             {
-                var currentProcess = Process.GetCurrentProcess();
+                var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
                 currentProcess.PriorityClass = ProcessPriorityClass.AboveNormal;
                 currentProcess.PriorityClass = ProcessPriorityClass.Normal;
             });
         }
 
-        supportedFeatures.BatteryInfo = CheckFeature(logger, () =>
+        supportedFeatures.BatteryInfo = CheckFeature(onWarning, () =>
         {
             var batteryInfo =
                 new BatteryInfo(computer.Hardware.First(hardware => hardware.HardwareType == HardwareType.Battery))
@@ -138,12 +151,12 @@ public class SupportedFeatures
 
         supportedFeatures.ProcessAffinity = OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
         if (!supportedFeatures.ProcessAffinity)
-            logger.LogWarning("Process affinity is only supported on Windows and Linux");
+            onWarning(null, "Process affinity is only supported on Windows and Linux");
 
         return supportedFeatures;
     }
 
-    private static bool CheckFeature(ILogger logger, Action action)
+    private static bool CheckFeature(Action<Exception?, string> onWarning, Action action)
     {
         try
         {
@@ -154,13 +167,8 @@ public class SupportedFeatures
         }
         catch (Exception e)
         {
-            logger.LogWarning(e, "Feature is not supported");
+            onWarning(e, "Feature is not supported");
             return false;
         }
-    }
-
-    public void ReevaluateWithPlugins(PluginLoader pluginLoader)
-    {
-        Terminal = pluginLoader.TerminalPlugin is not null;
     }
 }

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <SpaRoot>ClientApp\</SpaRoot>
@@ -44,6 +44,10 @@
         <Folder Include="ClientApp\src\app\usage\" />
         <Folder Include="ClientApp\src\interceptors\" />
         <Folder Include="ClientApp\src\services\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\WebMonitorLib\WebMonitorLib.csproj" />
     </ItemGroup>
 
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
