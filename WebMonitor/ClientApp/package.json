@@ -36,7 +36,7 @@
     "xterm-addon-attach": "^0.8.0",
     "xterm-addon-fit": "^0.8.0",
     "xterm-addon-web-links": "^0.8.0",
-    "zone.js": "~0.14.4"
+    "zone.js": "~0.14.5"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.3.6",
