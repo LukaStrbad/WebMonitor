@@ -23,6 +23,7 @@ $dark-theme: mat.define-dark-theme((color: (primary: $primary-dark,
         accent: $accent-dark,
         warn: $warn-dark,
       )));
+$grey: mat.define-palette(mat.$grey-palette);
 
 .dark-theme {
   @include mat.all-component-themes($dark-theme);
@@ -43,7 +44,6 @@ $dark-theme: mat.define-dark-theme((color: (primary: $primary-dark,
     background-color: mat.get-color-from-palette($accent-dark, 500);
   }
 
-  $grey: mat.define-palette(mat.$grey-palette);
   table.sticky-header th {
     background-color: mat.get-color-from-palette($grey, 800);
   }
@@ -103,6 +103,15 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+html.dark-theme{
+  body {
+    // Sets the same background color as the sidenav
+    // Along with the theme-check script this ensures that site doesn't flash white
+    // when it's refreshed in dark mode
+    background-color: var(--mat-sidenav-content-background-color);
+  }
 }
 
 // Without this, it's impossible to scroll on <td>s with tooltips on touch devices
