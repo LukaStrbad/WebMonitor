@@ -39,7 +39,7 @@ import { EllipsisPipe } from '../pipes/ellipsis.pipe';
 import { MatSelectModule } from '@angular/material/select';
 import { MatListModule } from "@angular/material/list";
 import { ProcessDialogComponent } from './components/process-dialog/process-dialog.component';
-import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatChipsModule } from "@angular/material/chips";
 import { ActionsDialogComponent } from './components/actions-dialog/actions-dialog.component';
@@ -76,9 +76,9 @@ import { AllowedFeaturesCardComponent } from './components/allowed-features-card
     FeaturesChangerComponent,
     AllowedFeaturesCardComponent
   ],
+  bootstrap: [AppComponent],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
-    HttpClientModule,
     FormsModule,
     RouterModule.forRoot(appRoutes),
     BrowserAnimationsModule,
@@ -102,13 +102,12 @@ import { AllowedFeaturesCardComponent } from './components/allowed-features-card
     MatListModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MatPaginatorModule
-  ],
+    MatPaginatorModule],
   providers: [
     { provide: LOCALE_ID, useValue: "hr-HR" },
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
-  ],
-  bootstrap: [AppComponent]
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideHttpClient(withInterceptorsFromDi())
+  ]
 })
 export class AppModule {
   constructor() {
