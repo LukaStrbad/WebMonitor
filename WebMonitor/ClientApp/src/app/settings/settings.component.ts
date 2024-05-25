@@ -110,6 +110,12 @@ export class SettingsComponent {
       clone.theme = value ? AppTheme.Dark : AppTheme.Light;
       return clone;
     });
+
+    document.documentElement.classList.remove("dark-theme", "light-theme");
+
+    const theme = value ? "dark-theme" : "light-theme";
+
+    document.documentElement.classList.add(theme);
   }
 
   /**
