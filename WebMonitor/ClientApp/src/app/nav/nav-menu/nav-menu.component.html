@@ -17,11 +17,13 @@
   </button>
   }
 
+  <button mat-button color="accent"></button>
+
   <!-- Ensures that settings and logout button are aligned to the bottom -->
   <div class="spacer"></div>
 
   <button mat-button color="accent" routerLink="settings" (click)="routeClicked()"
-    [ngClass]="{'accent-background settings-button-active' : routeWatcher.currentRoute().path === 'settings'}">
+    [ngClass]="{'secondary-container settings-button-active' : routeWatcher.currentRoute().path === 'settings'}">
     <mat-icon>settings</mat-icon>Settings
   </button>
   <button mat-button color="warn" (click)="routeClicked(); userService.logout()">

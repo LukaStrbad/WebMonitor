@@ -9,7 +9,7 @@
       <div class="mat-body-2 mb-0">
         <span [matTooltip]="feature.note ?? ''" [matTooltipDisabled]="feature.note == undefined"
           matTooltipPosition="below">
-          {{ feature.name }}: <span [class]="feature.supported ? 'primary-color' : 'warn-color'">
+          {{ feature.name }}: <span [class]="feature.supported ? 'primary-color' : 'error-color'">
             {{ feature.supported ? "Supported" : "Not Supported" }}
           </span></span>
       </div>

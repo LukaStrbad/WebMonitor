@@ -4,95 +4,102 @@
 @include mat.core();
 
 // Needed to make material typography work
-$typography-config: mat.define-typography-config();
-@include mat.all-component-typographies($typography-config);
+// $typography-config: mat.define-typography-config();
+// @include mat.all-component-typographies($typography-config);
 
-$primary: mat.define-palette(mat.$indigo-palette);
-$accent: mat.define-palette(mat.$pink-palette);
-$warn: mat.define-palette(mat.$red-palette);
+$light-theme: mat.define-theme((color: (theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$chartreuse-palette,
+      ),
+    ));
 
-$light-theme: mat.define-light-theme((color: (primary: $primary,
-        accent: $accent,
-        warn: $warn,
+$dark-theme: mat.define-theme((color: (theme-type: dark,
+        primary: mat.$cyan-palette,
+        tertiary: mat.$blue-palette,
       )));
-
-$primary-dark: mat.define-palette(mat.$teal-palette);
-$accent-dark: mat.define-palette(mat.$blue-grey-palette);
-$warn-dark: mat.define-palette(mat.$red-palette);
-$dark-theme: mat.define-dark-theme((color: (primary: $primary-dark,
-        accent: $accent-dark,
-        warn: $warn-dark,
-      )));
-$grey: mat.define-palette(mat.$grey-palette);
 
 .dark-theme {
   @include mat.all-component-themes($dark-theme);
+  // @include mat.form-theme($dark-theme);
+  // @include mat.all-component-themes($dark-theme);
+  // @include mat.all-component-bases($dark-theme);
+  // @include mat.all-component-colors($dark-theme);
 
   .primary-color {
-    color: mat.get-color-from-palette($primary-dark, 500);
+    color: mat.get-theme-color($dark-theme, primary);
   }
 
-  .accent-color {
-    color: mat.get-color-from-palette($accent-dark, 500);
+  .error-color {
+    color: mat.get-theme-color($dark-theme, error);
   }
 
-  .warn-color {
-    color: mat.get-color-from-palette($warn-dark, 500);
+  .secondary-container {
+    background-color: mat.get-theme-color($dark-theme, secondary-container);
   }
 
-  .accent-background {
-    background-color: mat.get-color-from-palette($accent-dark, 500);
+  mat-card {
+    background-color: mat.get-theme-color($dark-theme, surface-container);
   }
 
+  .mat-mdc-table,
+  mat-paginator,
   table.sticky-header th {
-    background-color: mat.get-color-from-palette($grey, 800);
+    background-color: mat.get-theme-color($dark-theme, surface-container-high);
   }
 
   .mat-mdc-snack-bar-container {
+    background-color: mat.get-theme-color($dark-theme, surface-container-low);
+    // Dummy value to make the line above work
+    --mdc-snackbar-container-color: mat.get-theme-color($dark-theme, surface-container-low);
+    color: mat.get-theme-color($dark-theme, on-surface);
+    // Dummy value to make the line above work
+    --mdc-snackbar-supporting-text-color: mat.get-theme-color($dark-theme, on-surface);
+
     &.error-snackbar {
-      background: mat.get-color-from-palette($warn-dark, 300);
-      // Dummy value to make the line above work
-      --mdc-snackbar-container-color: mat.get-color-from-palette($warn-dark, 300);
-      color: mat.get-color-from-palette($warn-dark, 50);
-      // Dummy value to make the line above work
-      --mdc-snackbar-supporting-text-color: mat.get-color-from-palette($warn-dark, 50);
+      background-color: mat.get-theme-color($dark-theme, error);
+      --mdc-snackbar-container-color: mat.get-theme-color($dark-theme, error);
+      color: mat.get-theme-color($dark-theme, on-error);
+      --mdc-snackbar-supporting-text-color: mat.get-theme-color($dark-theme, on-error);
     }
   }
 }
 
 .light-theme {
-  @include mat.all-component-themes($light-theme);
+  @include mat.core-theme($light-theme);
+  @include mat.button-theme($light-theme);
 
   .primary-color {
-    color: mat.get-color-from-palette($primary, 500);
+    color: mat.get-theme-color($light-theme, primary);
   }
 
-  .accent-color {
-    color: mat.get-color-from-palette($accent, 500);
+  .error-color {
+    color: mat.get-theme-color($light-theme, error);
   }
 
-  .warn-color {
-    color: mat.get-color-from-palette($warn, 500);
+  .secondary-container {
+    background-color: mat.get-theme-color($light-theme, secondary-container);
   }
 
-  .accent-background {
-    background-color: mat.get-color-from-palette($accent, 500);
+  mat-card {
+    background-color: mat.get-theme-color($light-theme, surface-container-low);
   }
 
+  .mat-mdc-table,
+  mat-paginator,
   table.sticky-header th {
-    background-color: white;
+    background-color: mat.get-theme-color($light-theme, surface-container);
   }
 
-  .mat-mdc-snack-bar-container {
-    &.error-snackbar {
-      background: mat.get-color-from-palette($warn, 300);
-      // Dummy value to make the line above work
-      --mdc-snackbar-container-color: mat.get-color-from-palette($warn, 300);
-      color: mat.get-color-from-palette($warn, 50);
-      // Dummy value to make the line above work
-      --mdc-snackbar-supporting-text-color: mat.get-color-from-palette($warn, 50);
-    }
-  }
+  // .mat-mdc-snack-bar-container {
+  //   &.error-snackbar {
+  //     background: mat.get-color-from-palette($warn, 300);
+  //     // Dummy value to make the line above work
+  //     --mdc-snackbar-container-color: mat.get-color-from-palette($warn, 300);
+  //     color: mat.get-color-from-palette($warn, 50);
+  //     // Dummy value to make the line above work
+  //     --mdc-snackbar-supporting-text-color: mat.get-color-from-palette($warn, 50);
+  //   }
+  // }
 }
 
 html,
@@ -103,15 +110,6 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-html.dark-theme{
-  body {
-    // Sets the same background color as the sidenav
-    // Along with the theme-check script this ensures that site doesn't flash white
-    // when it's refreshed in dark mode
-    background-color: var(--mat-sidenav-content-background-color);
-  }
 }
 
 // Without this, it's impossible to scroll on <td>s with tooltips on touch devices

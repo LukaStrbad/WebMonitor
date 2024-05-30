@@ -7,7 +7,7 @@
   }
 
   @if (error) {
-  <div class="mat-headline-6 warn-color">{{ error }}</div>
+  <div class="mat-headline-6 error-color">{{ error }}</div>
   }
 
   @if (extendedInfo) {
@@ -51,7 +51,7 @@
         <input matInput type="number" min="-20" max="19" [(ngModel)]="selectedPriorityLinux" />
       </mat-form-field>
 
-      <button mat-raised-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">Set Priority</button>
+      <button mat-flat-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">Set Priority</button>
     </div>
     } @else {
 

@@ -77,13 +77,13 @@
 <!-- If we are located somewhere on the filesystem and upload is supported show upload button -->
 @if (currentDir && supportedFeatures?.fileUpload && allowedFeatures?.fileUpload) {
 
-<button class="mt-4 mb-4" type="button" mat-raised-button color="accent" (click)="fileUpload.click()">
+<button class="mt-4 mb-4" type="button" mat-flat-button color="accent" (click)="fileUpload.click()">
   Select file to upload
 </button>
 
 <input hidden type="file" mat-button #fileUpload (change)="uploadOnChange()" />
 
-<button class="ms-4" type="button" mat-raised-button color="primary" (click)="uploadFiles()"
+<button class="ms-4" type="button" mat-flat-button color="primary" (click)="uploadFiles()"
   [disabled]="!numberOfSelectedFiles">
   Upload
 </button>

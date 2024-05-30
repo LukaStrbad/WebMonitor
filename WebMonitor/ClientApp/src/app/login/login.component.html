@@ -75,7 +75,7 @@
     }
 
     <div>
-      <button mat-raised-button type="submit" color="primary" (click)="onLogin()" [disabled]="!loginForm.form.valid">{{
+      <button mat-flat-button type="submit" color="accent" (click)="onLogin()" [disabled]="!loginForm.form.valid">{{
         isRegister ? "Register" : "Login" }}</button>
     </div>
 
@@ -107,7 +107,7 @@
 @if (submitted && error) {
 <div class="">
   <h3 class="mat-headline-4">Error</h3>
-  <p class="warn-color">{{ error }}</p>
-  <button mat-raised-button color="primary" (click)="tryAgain()">Try again</button>
+  <p class="error-color">{{ error }}</p>
+  <button mat-flat-button color="primary" (click)="tryAgain()">Try again</button>
 </div>
 }

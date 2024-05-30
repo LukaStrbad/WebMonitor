@@ -70,7 +70,6 @@ import { AllowedFeaturesCardComponent } from './components/allowed-features-card
     ProcessDialogComponent,
     ActionsDialogComponent,
     TerminalComponent,
-    LoginComponent,
     UsersComponent,
     SupportedFeaturesCardComponent,
     FeaturesChangerComponent,
