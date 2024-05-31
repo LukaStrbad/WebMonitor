@@ -21,10 +21,10 @@
   </mat-sidenav-container>
 
   @if (showDebugWindow()) {
-  <div id="debugWindow">
-    IP: {{ sysInfo.clientIp() }}
-    <br />
-    Time since refresh: {{ sysInfo.data.refreshInfo.millisSinceLastRefresh }} ms
-  </div>
+    <div id="debugWindow">
+      IP: {{ sysInfo.clientIp() }}
+      <br />
+      Time since refresh: {{ sysInfo.data.refreshInfo.millisSinceLastRefresh }} ms
+    </div>
   }
 </body>

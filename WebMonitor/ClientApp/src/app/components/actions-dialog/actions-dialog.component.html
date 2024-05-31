@@ -6,11 +6,13 @@
 
 <div mat-dialog-actions>
   @if (data.negativeButton) {
-  <button mat-button mat-dialog-close (click)="data.negativeButton[1]()">{{ data.negativeButton[0] }}</button>
+    <button mat-button mat-dialog-close (click)="data.negativeButton[1]()">
+      {{ data.negativeButton[0] }}
+    </button>
   }
   @if (data.positiveButton) {
-  <button mat-button mat-dialog-close cdkFocusInitial (click)="data.positiveButton[1]()">
-    {{ data.positiveButton[0] }}
-  </button>
+    <button mat-button mat-dialog-close cdkFocusInitial (click)="data.positiveButton[1]()">
+      {{ data.positiveButton[0] }}
+    </button>
   }
 </div>

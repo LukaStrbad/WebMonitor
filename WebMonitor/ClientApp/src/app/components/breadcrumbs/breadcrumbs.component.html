@@ -1,12 +1,10 @@
 @for (item of items; track item; let i = $index) {
-
-<span class="breadcrumb mat-headline-5" (click)="item?.onClick()">{{
-  item.title
-  }}</span>
-@if (i != items.length - 1) {
-<span class="separator mat-headline-5">{{
-  separator
-  }}</span>
-}
-
+  <span class="breadcrumb mat-headline-5" (click)="item?.onClick()">
+    {{item.title}}
+  </span>
+  @if (i != items.length - 1) {
+    <span class="separator mat-headline-5">
+      {{separator}}
+    </span>
+  }
 }

@@ -6,12 +6,14 @@
   <mat-card-content>
     <div>
       @for (feature of featuresList; track feature) {
-      <div class="mat-body-2 mb-0">
-        <span>
-          {{ feature.name }}: <span [class]="feature.allowed ? 'primary-color' : 'error-color'">
-            {{ feature.allowed ? "Yes" : "No" }}
-          </span></span>
-      </div>
+        <div class="mat-body-2 mb-0">
+          <span>
+            {{ feature.name }}:
+            <span [class]="feature.allowed ? 'primary-color' : 'error-color'">
+              {{ feature.allowed ? "Yes" : "No" }}
+            </span></span
+          >
+        </div>
       }
     </div>
   </mat-card-content>

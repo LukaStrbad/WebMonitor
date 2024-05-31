@@ -1,126 +1,117 @@
 <h1 mat-dialog-title>{{ data.processInfo.name }} ({{ data.processInfo.pid }})</h1>
 
 <div mat-dialog-content>
-
   @if (!extendedInfo && !error) {
-  <mat-spinner></mat-spinner>
+    <mat-spinner></mat-spinner>
   }
 
   @if (error) {
-  <div class="mat-headline-6 error-color">{{ error }}</div>
+    <div class="mat-headline-6 error-color">{{ error }}</div>
   }
 
   @if (extendedInfo) {
-  <div class="extended-info">
-    @if (extendedInfo.owner) {
-    <p>Owner: {{ extendedInfo.owner }}</p>
-    }
-    @if (supportedFeatures?.processPriority && extendedInfo.priorityWin) {
-
-
-    @if (supportedFeatures?.processPriorityChange) {
-    <mat-form-field appearance="outline" class="mt-4">
-      <mat-label>Priority</mat-label>
-      <mat-select [(value)]="selectedPriorityWin" (selectionChange)="onPriorityChangeWin()">
-        @for (priority of allProcessPrioritiesWin; track priority) {
-        <mat-option [value]="priority">
-          {{ processPriorityName(priority) }}
-        </mat-option>
+    <div class="extended-info">
+      @if (extendedInfo.owner) {
+        <p>Owner: {{ extendedInfo.owner }}</p>
+      }
+      @if (supportedFeatures?.processPriority && extendedInfo.priorityWin) {
+        @if (supportedFeatures?.processPriorityChange) {
+          <mat-form-field appearance="outline" class="mt-4">
+            <mat-label>Priority</mat-label>
+            <mat-select [(value)]="selectedPriorityWin" (selectionChange)="onPriorityChangeWin()">
+              @for (priority of allProcessPrioritiesWin; track priority) {
+                <mat-option [value]="priority">
+                  {{ processPriorityName(priority) }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <p>Priority: {{ processPriorityName(extendedInfo.priorityWin) }}</p>
         }
-      </mat-select>
-    </mat-form-field>
-    } @else {
+      }
 
-    <p>
-      Priority: {{ processPriorityName(extendedInfo.priorityWin) }}
-    </p>
+      @if (supportedFeatures?.processPriority && extendedInfo.priorityLinux !== undefined) {
+        @if (supportedFeatures?.processPriorityChange && selectedPriorityLinux !== null) {
+          <div class="mt-4">
+            <mat-form-field appearance="outline">
+              <mat-label>Priority</mat-label>
+              <input
+                matInput
+                type="number"
+                min="-20"
+                max="19"
+                [(ngModel)]="selectedPriorityLinux"
+              />
+            </mat-form-field>
 
-    }
+            <button mat-flat-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">
+              Set Priority
+            </button>
+          </div>
+        } @else {
+          <p>Priority: {{ extendedInfo.priorityLinux }}</p>
+        }
+      }
 
+      <p>Thread count: {{ extendedInfo.threadCount }}</p>
+      <p>Handle count: {{ extendedInfo.handleCount }}</p>
+      <p>
+        <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakWorkingSet) }}">
+          Working set: {{ numberHelpers.toByteString(extendedInfo.workingSet) }}
+        </span>
+      </p>
+      <p>
+        <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakPagedMemory) }}">
+          Virtual size: {{ numberHelpers.toByteString(extendedInfo.pagedMemory) }}
+        </span>
+      </p>
+      <p>
+        <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakVirtualMemory) }}">
+          Paged memory: {{ numberHelpers.toByteString(extendedInfo.virtualMemory) }}
+        </span>
+      </p>
+      <p>Private memory: {{ numberHelpers.toByteString(extendedInfo.privateMemory) }}</p>
 
+      @if (affinityThreads) {
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title matTooltip="Which threads this process can run on"
+              >Enabled threads (affinity)</mat-card-title
+            >
+          </mat-card-header>
 
+          <mat-card-content>
+            <!-- Multiple rows ensure that chips have correct animations -->
+            @for (row of rowsArray; track row) {
+              <mat-chip-listbox [selectable]="false" multiple>
+                @for (i of row; track i) {
+                  <mat-chip-option [selected]="affinityThreads[i]" (click)="changeAffinity(i)">
+                    CPU {{ i }}
+                  </mat-chip-option>
+                }
+              </mat-chip-listbox>
+            }
 
-    }
-
-    @if (supportedFeatures?.processPriority && extendedInfo.priorityLinux !== undefined) {
-
-    @if (supportedFeatures?.processPriorityChange && selectedPriorityLinux !== null) {
-    <div class="mt-4">
-      <mat-form-field appearance="outline">
-        <mat-label>Priority</mat-label>
-        <input matInput type="number" min="-20" max="19" [(ngModel)]="selectedPriorityLinux" />
-      </mat-form-field>
-
-      <button mat-flat-button color="accent" class="ms-4" (click)="onSetPriorityLinux()">Set Priority</button>
+            <mat-chip-listbox [selectable]="false">
+              <mat-chip-option
+                [selected]="allAffinityThreadsSelected()"
+                (click)="enableAllThreads()"
+                matTooltip="Enable all threads"
+              >
+                CPU 0 - {{ affinityThreads.length - 1 }}
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
-    } @else {
-
-    <p>
-      Priority: {{ extendedInfo.priorityLinux }}
-    </p>
-
-    }
-
-    }
-
-    <p>Thread count: {{ extendedInfo.threadCount }}</p>
-    <p>Handle count: {{ extendedInfo.handleCount }}</p>
-    <p>
-      <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakWorkingSet) }}">
-        Working set: {{ numberHelpers.toByteString(extendedInfo.workingSet) }}
-      </span>
-    </p>
-    <p>
-      <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakPagedMemory) }}">
-        Virtual size: {{ numberHelpers.toByteString(extendedInfo.pagedMemory) }}
-      </span>
-    </p>
-    <p>
-      <span matTooltip="Peak: {{ numberHelpers.toByteString(extendedInfo.peakVirtualMemory) }}">
-        Paged memory: {{ numberHelpers.toByteString(extendedInfo.virtualMemory) }}
-      </span>
-    </p>
-    <p>
-      Private memory: {{ numberHelpers.toByteString(extendedInfo.privateMemory) }}
-    </p>
-
-
-    @if (affinityThreads) {
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title matTooltip="Which threads this process can run on">Enabled threads (affinity)</mat-card-title>
-      </mat-card-header>
-
-      <mat-card-content>
-        <!-- Multiple rows ensure that chips have correct animations -->
-        @for (row of rowsArray; track row) {
-        <mat-chip-listbox [selectable]="false" multiple>
-          @for (i of row; track i) {
-          <mat-chip-option [selected]="affinityThreads[i]" (click)="changeAffinity(i)">
-            CPU {{ i }}
-          </mat-chip-option>
-          }
-        </mat-chip-listbox>
-        }
-
-        <mat-chip-listbox [selectable]="false">
-          <mat-chip-option [selected]="allAffinityThreadsSelected()" (click)="enableAllThreads()"
-            matTooltip="Enable all threads">
-            CPU 0 - {{ affinityThreads.length - 1 }}
-          </mat-chip-option>
-        </mat-chip-listbox>
-      </mat-card-content>
-    </mat-card>
-    }
-
-  </div>
   }
 </div>
 
 <div mat-dialog-actions>
   <button mat-button mat-dialog-close>Close</button>
   @if (data.onKill) {
-  <button mat-button cdkFocusInitial (click)="data.onKill()" mat-dialog-close>Kill
-  </button>
+    <button mat-button cdkFocusInitial (click)="data.onKill()" mat-dialog-close>Kill</button>
   }
 </div>
