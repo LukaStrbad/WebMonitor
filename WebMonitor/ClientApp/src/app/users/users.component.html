@@ -76,7 +76,8 @@
               (click)="deleteUser(user); $event.stopPropagation()"
               [disabled]="user.isAdmin && user.username !== me?.username"
             >
-              <mat-icon>delete</mat-icon>
+              <!-- TODO: remove class when button color starts working with mat-icons again -->
+              <mat-icon class="error-color">delete</mat-icon>
             </button>
           </td>
         </ng-container>

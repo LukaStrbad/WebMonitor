@@ -46,22 +46,6 @@ $dark-theme: mat.define-theme((color: (theme-type: dark,
   table.sticky-header th {
     background-color: mat.get-theme-color($dark-theme, surface-container-high);
   }
-
-  .mat-mdc-snack-bar-container {
-    background-color: mat.get-theme-color($dark-theme, surface-container-low);
-    // Dummy value to make the line above work
-    --mdc-snackbar-container-color: mat.get-theme-color($dark-theme, surface-container-low);
-    color: mat.get-theme-color($dark-theme, on-surface);
-    // Dummy value to make the line above work
-    --mdc-snackbar-supporting-text-color: mat.get-theme-color($dark-theme, on-surface);
-
-    &.error-snackbar {
-      background-color: mat.get-theme-color($dark-theme, error);
-      --mdc-snackbar-container-color: mat.get-theme-color($dark-theme, error);
-      color: mat.get-theme-color($dark-theme, on-error);
-      --mdc-snackbar-supporting-text-color: mat.get-theme-color($dark-theme, on-error);
-    }
-  }
 }
 
 .light-theme {
@@ -89,17 +73,6 @@ $dark-theme: mat.define-theme((color: (theme-type: dark,
   table.sticky-header th {
     background-color: mat.get-theme-color($light-theme, surface-container);
   }
-
-  // .mat-mdc-snack-bar-container {
-  //   &.error-snackbar {
-  //     background: mat.get-color-from-palette($warn, 300);
-  //     // Dummy value to make the line above work
-  //     --mdc-snackbar-container-color: mat.get-color-from-palette($warn, 300);
-  //     color: mat.get-color-from-palette($warn, 50);
-  //     // Dummy value to make the line above work
-  //     --mdc-snackbar-supporting-text-color: mat.get-color-from-palette($warn, 50);
-  //   }
-  // }
 }
 
 html,
