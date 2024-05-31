@@ -116,6 +116,8 @@ export class SettingsComponent {
     const theme = value ? "dark-theme" : "light-theme";
 
     document.documentElement.classList.add(theme);
+    const pageTheme = document.getElementById("page-theme");
+    pageTheme?.setAttribute("href", `${theme}.css`);
   }
 
   /**

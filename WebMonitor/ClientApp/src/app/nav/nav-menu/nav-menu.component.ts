@@ -12,7 +12,7 @@ import { Subscription } from "rxjs";
 @Component({
   selector: 'app-nav-menu',
   templateUrl: './nav-menu.component.html',
-  styleUrls: ['./nav-menu.component.css']
+  styleUrls: ['./nav-menu.component.scss']
 })
 export class NavMenuComponent implements OnDestroy {
   menuRoutes = menuRoutes;
@@ -91,12 +91,12 @@ export class NavMenuComponent implements OnDestroy {
 
   anyUsageAvailable(): boolean {
     return (this.supportedFeatures?.cpuUsage
-        || this.supportedFeatures?.memoryUsage
-        || this.supportedFeatures?.diskUsage
-        || this.supportedFeatures?.networkUsage
-        || this.supportedFeatures?.intelGpuUsage
-        || this.supportedFeatures?.nvidiaGpuUsage
-        || this.supportedFeatures?.amdGpuUsage) === true &&
+      || this.supportedFeatures?.memoryUsage
+      || this.supportedFeatures?.diskUsage
+      || this.supportedFeatures?.networkUsage
+      || this.supportedFeatures?.intelGpuUsage
+      || this.supportedFeatures?.nvidiaGpuUsage
+      || this.supportedFeatures?.amdGpuUsage) === true &&
       (this.allowedFeatures?.cpuUsage
         || this.allowedFeatures?.memoryUsage
         || this.allowedFeatures?.diskUsage

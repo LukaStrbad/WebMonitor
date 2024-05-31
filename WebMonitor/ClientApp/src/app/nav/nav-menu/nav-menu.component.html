@@ -1,29 +1,60 @@
 <div class="nav-container">
   @if (me) {
-  <div class="user">
-    <!-- Tabindex is used to stop the first button from being highlighted -->
-    <p class="mat-subtitle-1 fw-bold" tabindex="0">User: {{ me.displayName }}</p>
-    <p class="mat-subtitle-2">Username: {{ me.username }}</p>
-  </div>
+    <div class="user">
+      <!-- Tabindex is used to stop the first button from being highlighted -->
+      <p class="mat-subtitle-1 fw-bold" tabindex="0">User: {{ me.displayName }}</p>
+      <p class="mat-subtitle-2">Username: {{ me.username }}</p>
+    </div>
   }
 
   <mat-divider class="mt-2 mb-2"></mat-divider>
 
   @for (route of menuRoutes; track route) {
-  <button mat-flat-button [hidden]="!shouldBeVisible(route)"
-    [color]="routeWatcher.currentRoute() === route ? 'primary' : ''" [routerLink]="route.path" (click)="routeClicked()">
-    <mat-icon aria-hidden="false" [fontIcon]="route.icon ?? ''" style="vertical-align: middle"></mat-icon>
-    <span>{{ getRouteName(route) }}</span>
-  </button>
+    @if (routeWatcher.currentRoute() === route) {
+      <button
+        mat-flat-button
+        [hidden]="!shouldBeVisible(route)"
+        [disableRipple]="true"
+        [ngClass]="{'active': routeWatcher.currentRoute() === route}"
+        [routerLink]="route.path"
+        (click)="routeClicked()"
+      >
+        <mat-icon
+          aria-hidden="false"
+          [fontIcon]="route.icon ?? ''"
+          style="vertical-align: middle"
+        ></mat-icon>
+        <span>{{ getRouteName(route) }}</span>
+      </button>
+    } @else {
+      <button
+        mat-button
+        [hidden]="!shouldBeVisible(route)"
+        [disableRipple]="true"
+        [ngClass]="{'active': routeWatcher.currentRoute() === route}"
+        [routerLink]="route.path"
+        (click)="routeClicked()"
+      >
+        <mat-icon
+          aria-hidden="false"
+          [fontIcon]="route.icon ?? ''"
+          style="vertical-align: middle"
+        ></mat-icon>
+        <span>{{ getRouteName(route) }}</span>
+      </button>
+    }
   }
-
-  <button mat-button color="accent"></button>
 
   <!-- Ensures that settings and logout button are aligned to the bottom -->
   <div class="spacer"></div>
 
-  <button mat-button color="accent" routerLink="settings" (click)="routeClicked()"
-    [ngClass]="{'secondary-container settings-button-active' : routeWatcher.currentRoute().path === 'settings'}">
+  <button
+    mat-button
+    color="accent"
+    routerLink="settings"
+    (click)="routeClicked()"
+    [ngClass]="{'secondary-container settings-button-active' : routeWatcher.currentRoute().path === 'settings'}"
+  >
     <mat-icon>settings</mat-icon>Settings
   </button>
   <button mat-button color="warn" (click)="routeClicked(); userService.logout()">

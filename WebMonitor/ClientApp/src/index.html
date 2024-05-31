@@ -6,6 +6,7 @@
   <title>WebMonitor</title>
   <base href="/" />
 
+  <link id="page-theme" rel="stylesheet" type="text/css">
   <script id="theme-check">
     const appSettings = JSON.parse(localStorage.getItem("appSettings"));
     console.log(appSettings);
@@ -15,6 +16,10 @@
     const theme = appSettings?.theme === 1 ? "dark-theme" : "light-theme";
 
     document.documentElement.classList.add(theme);
+
+    // TODO: Figure out why is this necessary
+    const pageTheme = document.getElementById("page-theme");
+    pageTheme.setAttribute("href", `${theme}.css`);
   </script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
