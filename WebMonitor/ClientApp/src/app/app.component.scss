@@ -1,0 +1,25 @@
+﻿main.container {
+  padding-top: 8pt;
+}
+
+#debugWindow {
+  position: fixed;
+  /* background: rgba(200, 200, 200, 0.5); */
+  backdrop-filter: blur(32px);
+  z-index: 999;
+  right: 8px;
+  bottom: 8px;
+
+  mat-card-content {
+    padding: 8px;
+  }
+
+  p {
+    margin-bottom: 4px;
+  }
+}
+
+div.sidebar-container {
+  display: flex;
+  flex-direction: row;
+}

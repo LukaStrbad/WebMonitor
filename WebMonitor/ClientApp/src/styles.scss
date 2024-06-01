@@ -1,5 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
+@use 'sass:color';
 
 @include mat.core();
 
@@ -7,16 +8,25 @@
 // $typography-config: mat.define-typography-config();
 // @include mat.all-component-typographies($typography-config);
 
-$light-theme: mat.define-theme((color: (theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$chartreuse-palette,
-      ),
-    ));
+$light-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$chartreuse-palette,
+    ),
+  )
+);
 
-$dark-theme: mat.define-theme((color: (theme-type: dark,
-        primary: mat.$cyan-palette,
-        tertiary: mat.$blue-palette,
-      )));
+$dark-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: dark,
+      primary: mat.$cyan-palette,
+      tertiary: mat.$blue-palette,
+    ),
+  )
+);
 
 .dark-theme {
   @include mat.all-component-themes($dark-theme);
@@ -35,6 +45,14 @@ $dark-theme: mat.define-theme((color: (theme-type: dark,
 
   .secondary-container {
     background-color: mat.get-theme-color($dark-theme, secondary-container);
+  }
+
+  .surface-bg-transparent {
+    background-color: rgba(mat.get-theme-color($dark-theme, surface), 0.5);
+  }
+
+  .text-color {
+    color: mat.get-theme-color($dark-theme, on-surface);
   }
 
   mat-card {
@@ -64,6 +82,14 @@ $dark-theme: mat.define-theme((color: (theme-type: dark,
     background-color: mat.get-theme-color($light-theme, secondary-container);
   }
 
+  .surface-bg-transparent {
+    background-color: rgba(mat.get-theme-color($light-theme, surface), 0.5);
+  }
+
+  .text-color {
+    color: mat.get-theme-color($light-theme, on-surface);
+  }
+
   mat-card {
     background-color: mat.get-theme-color($light-theme, surface-container-low);
   }
@@ -82,10 +108,14 @@ body {
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 // Without this, it's impossible to scroll on <td>s with tooltips on touch devices
 .mat-tooltip-trigger {
   touch-action: auto !important;
+}
+
+mat-card-header {
+  margin-bottom: 0.5rem;
 }
