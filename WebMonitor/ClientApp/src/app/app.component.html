@@ -20,8 +20,8 @@
     </mat-sidenav-content>
   </mat-sidenav-container>
 
-  @if (showDebugWindow()) {
-    <mat-card id="debugWindow" appearance="outlined" class="surface-bg-transparent text-color">
+  @if (showInfoWindow()) {
+    <mat-card id="infoWindow" appearance="outlined" class="surface-bg-transparent text-color">
       <mat-card-content>
         <p>IP: {{ sysInfo.clientIp() }}</p>
         <p>Time since refresh: {{ sysInfo.data.refreshInfo.millisSinceLastRefresh }} ms</p>

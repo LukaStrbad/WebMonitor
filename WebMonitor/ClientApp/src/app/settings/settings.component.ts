@@ -13,7 +13,7 @@ import { AllowedFeatures } from 'src/model/allowed-features';
 })
 export class SettingsComponent {
   isDarkTheme: Signal<boolean>;
-  showDebugWindow: Signal<boolean>;
+  showInfoWindow: Signal<boolean>;
   /**
    * Rather than creating a separate component for each graph color setting, we can just create a list of them and use *ngFor.
    */
@@ -36,7 +36,7 @@ export class SettingsComponent {
       sysInfo.updateNvidiaRefreshSettings();
     });
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
-    this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
+    this.showInfoWindow = computed(() => this.appSettings.settings().showInfoWindow);
 
     sysInfo.getSupportedFeatures()
       .then(supportedFeatures => {
@@ -123,10 +123,10 @@ export class SettingsComponent {
   /**
    * Toggles the values of the showDebugWindow setting.
    */
-  toggleDebugWindow() {
+  toggleInfoWindow() {
     this.appSettings.settings.update(s => {
       let clone = Object.assign({}, s);
-      clone.showDebugWindow = !s.showDebugWindow;
+      clone.showInfoWindow = !s.showInfoWindow;
       return clone;
     });
   }

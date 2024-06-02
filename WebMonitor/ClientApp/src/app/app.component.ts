@@ -14,7 +14,7 @@ import { MediaMatcher } from '@angular/cdk/layout';
 })
 export class AppComponent {
   sidenavOpen = false;
-  showDebugWindow: Signal<boolean>;
+  showInfoWindow: Signal<boolean>;
   isDarkTheme: Signal<boolean>;
   mobileQuery: MediaQueryList;
 
@@ -41,7 +41,7 @@ export class AppComponent {
     this.mobileQuery.addEventListener('change', () => changeDetectorRef.detectChanges());
 
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
-    this.showDebugWindow = computed(() => this.appSettings.settings().showDebugWindow);
+    this.showInfoWindow = computed(() => this.appSettings.settings().showInfoWindow);
 
     // Effect that monitors isDarkTheme value and applies the appropriate theme class to the overlay container
     // Without this, dialogs will only appear in the default theme (light)

@@ -53,14 +53,14 @@ export interface GraphColors {
 
 interface AppSettings {
   theme: AppTheme;
-  showDebugWindow: boolean;
+  showInfoWindow: boolean;
   graphColors: GraphColors;
 }
 
 const DefaultAppSettings: AppSettings = {
   theme: AppTheme.Light,
   // By default, show the debug window in development mode
-  showDebugWindow: !environment.production,
+  showInfoWindow: !environment.production,
   graphColors: {
     cpu: "teal",
     memory: "purple",
