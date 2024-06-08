@@ -80,7 +80,6 @@ export class SysInfoService {
 
     this.getNvidiaRefreshSettings()
       .then(settings => {
-        console.log("NVIDIA refresh settings", settings);
         this.nvidiaRefreshSettings.set(settings);
       });
 
@@ -120,7 +119,6 @@ export class SysInfoService {
   private async refreshLoop() {
     while (true) {
       if (this.stopRefresh) {
-        console.log("Refresh stopped");
         return;
       }
 
@@ -293,9 +291,6 @@ export class SysInfoService {
     if (!this.userService.user?.allowedFeatures.nvidiaRefreshSettings) {
       return;
     }
-
-    // Print stack trace
-    console.trace();
 
     await firstValueFrom(this.http.post(this.apiUrl + "nvidiaRefreshSettings", this.nvidiaRefreshSettings()));
   }

@@ -88,8 +88,6 @@ export class UserService {
       return;
     }
 
-    console.log("User features changed");
-
     this.user = user;
     this.allowedFeaturesChanged.next(user.allowedFeatures);
   }

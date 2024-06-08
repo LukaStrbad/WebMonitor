@@ -8,10 +8,6 @@
     <link id="page-theme" rel="stylesheet" type="text/css" />
     <script id="theme-check">
       const appSettings = JSON.parse(localStorage.getItem("appSettings"));
-      console.log(appSettings);
-      for (const key in appSettings) {
-        console.log(key);
-      }
       const theme = appSettings?.theme === 1 ? "dark-theme" : "light-theme";
 
       document.documentElement.classList.add(theme);
