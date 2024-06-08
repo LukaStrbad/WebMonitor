@@ -80,6 +80,7 @@ export class SysInfoService {
 
     this.getNvidiaRefreshSettings()
       .then(settings => {
+        console.log("NVIDIA refresh settings", settings);
         this.nvidiaRefreshSettings.set(settings);
       });
 
@@ -293,7 +294,9 @@ export class SysInfoService {
       return;
     }
 
-    console.log("Updating NVIDIA refresh settings");
+    // Print stack trace
+    console.trace();
+
     await firstValueFrom(this.http.post(this.apiUrl + "nvidiaRefreshSettings", this.nvidiaRefreshSettings()));
   }
 

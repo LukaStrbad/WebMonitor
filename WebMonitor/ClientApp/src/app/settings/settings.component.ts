@@ -1,10 +1,11 @@
-import { Component, Signal, computed, effect } from '@angular/core';
+import { Component, Signal, computed, effect, signal } from '@angular/core';
 import { NvidiaRefreshSetting } from 'src/model/nvidia-refresh-setting';
 import { AppSettingsService, AppTheme } from 'src/services/app-settings.service';
 import { SysInfoService } from 'src/services/sys-info.service';
 import { SupportedFeatures } from "../../model/supported-features";
 import { UserService } from 'src/services/user.service';
 import { AllowedFeatures } from 'src/model/allowed-features';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'app-settings',
@@ -18,11 +19,10 @@ export class SettingsComponent {
    * Rather than creating a separate component for each graph color setting, we can just create a list of them and use *ngFor.
    */
   graphColorSettings: GraphColorSetting[];
-  nvidiaRefreshSettingEnum = NvidiaRefreshSetting;
-  nvidiaRefreshSettingValues = Object
+  readonly nvidiaRefreshSettingEnum = NvidiaRefreshSetting;
+  readonly nvidiaRefreshSettingValues = Object
     .values(NvidiaRefreshSetting)
     .filter(n => typeof n === "number") as NvidiaRefreshSetting[];
-  selectedNvidiaRefreshSetting = NvidiaRefreshSetting.Enabled;
   supportedFeatures?: SupportedFeatures;
   allowedFeatures?: AllowedFeatures;
 
@@ -31,10 +31,6 @@ export class SettingsComponent {
     public sysInfo: SysInfoService,
     userService: UserService
   ) {
-    effect(() => {
-      this.selectedNvidiaRefreshSetting = sysInfo.nvidiaRefreshSettings().refreshSetting;
-      sysInfo.updateNvidiaRefreshSettings();
-    });
     this.isDarkTheme = computed(() => this.appSettings.settings().theme === AppTheme.Dark);
     this.showInfoWindow = computed(() => this.appSettings.settings().showInfoWindow);
 
@@ -144,12 +140,19 @@ export class SettingsComponent {
     }
   }
 
-  onNvidiaRefreshSettingChange() {
+  onNvidiaRefreshSettingChange(event: MatSelectChange) {
+    if (!event.value) {
+      return;
+    }
+
+    const value = event.value as NvidiaRefreshSetting;
     this.sysInfo.nvidiaRefreshSettings.update(s => {
       let clone = Object.assign({}, s);
-      clone.refreshSetting = this.selectedNvidiaRefreshSetting;
+      clone.refreshSetting = value;
       return clone;
     });
+
+    this.sysInfo.updateNvidiaRefreshSettings();
   }
 
   onNvidiaRefreshIntervalChange(target: EventTarget | null) {
@@ -163,6 +166,8 @@ export class SettingsComponent {
       clone.nRefreshIntervals = value;
       return clone;
     });
+
+    this.sysInfo.updateNvidiaRefreshSettings();
   }
 
   onRefreshIntervalChange(target: EventTarget | null) {

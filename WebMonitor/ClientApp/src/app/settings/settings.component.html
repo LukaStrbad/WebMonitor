@@ -37,19 +37,8 @@
             [value]="sysInfo.data.refreshInfo.refreshInterval.toString()"
           />
         </mat-form-field>
-      }
-      @if (!allowedFeatures?.refreshIntervalChange) {
-        <p class="mat-body-1">
-          Refresh interval:
-          {{
-        sysInfo.data.refreshInfo.refreshInterval
-
-
-
-
-
-          }}ms
-        </p>
+      } @else {
+        <p class="mat-body-1">Refresh interval: {{sysInfo.data.refreshInfo.refreshInterval}}ms</p>
       }
     </div>
 
@@ -62,12 +51,13 @@
           <mat-form-field appearance="outline" class="me-4">
             <mat-label>Nvidia GPU refresh</mat-label>
             <mat-select
-              [(value)]="selectedNvidiaRefreshSetting"
-              (selectionChange)="onNvidiaRefreshSettingChange()"
+              [(value)]="sysInfo.nvidiaRefreshSettings().refreshSetting"
+              (selectionChange)="onNvidiaRefreshSettingChange($event)"
             >
               @for (setting of nvidiaRefreshSettingValues; track setting) {
-                <mat-option [value]="setting">{{
-              nvidiaRefreshSettingName(setting) }}</mat-option>
+                <mat-option [value]="setting">
+                  {{nvidiaRefreshSettingName(setting) }}
+                </mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -102,12 +92,8 @@
     ) {
       <p class="mat-body-1">
         Nvidia GPU refresh:
-        {{
-      nvidiaRefreshSettingName(sysInfo.nvidiaRefreshSettings().refreshSetting)
-
-
-
-        }}, {{ sysInfo.nvidiaRefreshSettings().nRefreshIntervals }} intervals
+        {{ nvidiaRefreshSettingName(sysInfo.nvidiaRefreshSettings().refreshSetting) }},
+        {{ sysInfo.nvidiaRefreshSettings().nRefreshIntervals }} intervals
       </p>
     }
   </mat-card-content>
