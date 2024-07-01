@@ -31,7 +31,7 @@
     "popper.js": "^1.16.0",
     "run-script-os": "^1.1.6",
     "rxjs": "^7.8.1",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "xterm": "^5.2.1",
     "xterm-addon-attach": "^0.8.0",
     "xterm-addon-fit": "^0.8.0",
