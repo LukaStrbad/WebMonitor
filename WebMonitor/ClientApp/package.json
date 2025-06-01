@@ -23,7 +23,7 @@
     "@angular/material": "^20.0.1",
     "@angular/platform-browser": "^19.2.9",
     "@angular/platform-browser-dynamic": "^20.0.0",
-    "@angular/platform-server": "^19.2.9",
+    "@angular/platform-server": "^20.0.0",
     "@angular/router": "^20.0.0",
     "bootstrap": "^5",
     "jquery": "^3",
