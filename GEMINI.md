@@ -11,7 +11,7 @@ WebMonitor is a comprehensive system monitoring solution that provides a web-bas
 
 ## Tech Stack
 
-*   **Backend:** .NET 7.0 (ASP.NET Core Web API)
+*   **Backend:** .NET 10.0 (ASP.NET Core Web API)
     *   `LibreHardwareMonitorLib` for hardware metrics.
     *   Entity Framework Core (SQLite) for data persistence (Users, Settings).
     *   `Microsoft.AspNetCore.SpaProxy` for integrated frontend development.

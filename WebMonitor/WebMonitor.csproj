@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <SpaRoot>ClientApp\</SpaRoot>
@@ -16,21 +16,21 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.3" />
+        <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.4" />
         <PackageReference Include="ManagedCuda-Nvml.NETStandard" Version="9.1.300" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.13" />
-        <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="7.0.13" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="10.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
-        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.2.188-beta">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.257">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
     </ItemGroup>
 
     <ItemGroup>
