@@ -5,6 +5,9 @@
     "ng": "ng",
     "prestart": "node aspnetcore-https",
     "start": "run-script-os",
+    "start:aspire": "node start-aspire.js",
+    "start:aspire:win32": "ng serve --port %PORT% --disable-host-check --host 0.0.0.0",
+    "start:aspire:default": "ng serve --port ${PORT} --disable-host-check --host 0.0.0.0",
     "start:windows": "ng serve --port 44427 --ssl --ssl-cert \"%APPDATA%\\ASP.NET\\https\\%npm_package_name%.pem\" --ssl-key \"%APPDATA%\\ASP.NET\\https\\%npm_package_name%.key\"",
     "start:default": "ng serve --port 44427 --ssl --ssl-cert \"$HOME/.aspnet/https/${npm_package_name}.pem\" --ssl-key \"$HOME/.aspnet/https/${npm_package_name}.key\"",
     "build": "ng build",
@@ -51,7 +54,7 @@
     "karma-coverage": "~2.2.1",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
-    "typescript": "^5.2.2"
+    "typescript": "~5.4.5"
   },
   "overrides": {
     "autoprefixer": "10.4.5"

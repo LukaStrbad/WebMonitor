@@ -1,7 +1,6 @@
 const { env } = require('process');
 
-const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
-  env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'http://localhost:53311';
+const target = process.env["services__webmonitor__http__0"] || "http://127.0.0.1:5002";
 
 const PROXY_CONFIG = [
   {

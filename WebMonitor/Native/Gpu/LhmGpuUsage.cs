@@ -1,5 +1,4 @@
 ﻿using LibreHardwareMonitor.Hardware;
-using Microsoft.OpenApi.Extensions;
 using WebMonitor.Utility;
 
 namespace WebMonitor.Native.Gpu;
@@ -37,7 +36,7 @@ public class LhmGpuUsage : IGpuUsage
             HardwareType.GpuAmd => "AMD",
             HardwareType.GpuIntel => "Intel",
             HardwareType.GpuNvidia => "NVIDIA",
-            _ => throw new NotSupportedException($"Unsupported hardware type: {gpu.HardwareType.GetDisplayName()}")
+            _ => throw new NotSupportedException($"Unsupported hardware type: {gpu.HardwareType.GetType().Name}")
         };
 
         _loadSensor = Array.Find(gpu.Sensors, s => s.SensorType is SensorType.Load);

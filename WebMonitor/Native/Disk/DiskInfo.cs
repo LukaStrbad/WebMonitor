@@ -1,11 +1,4 @@
 ﻿using System.Runtime.Versioning;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using Windows.Win32;
-using Windows.Win32.Storage.FileSystem;
-using Windows.Win32.System.Ioctl;
-using Microsoft.OpenApi.Extensions;
-using Microsoft.Win32;
 using System.Management;
 
 namespace WebMonitor.Native.Disk;

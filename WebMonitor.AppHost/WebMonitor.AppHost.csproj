@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  
+  <Sdk Name="Aspire.AppHost.Sdk" Version="13.0.1" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>ee8f4ac0-2ebe-4b5a-a4a0-11635f750115</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Dashboard.Sdk.win-x64" Version="13.0.1" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.1" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" Version="9.5.2" />
+    <PackageReference Include="Aspire.Hosting.Orchestration.win-x64" Version="13.0.1" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WebMonitor\WebMonitor.csproj" />
+  </ItemGroup>
+
+</Project>

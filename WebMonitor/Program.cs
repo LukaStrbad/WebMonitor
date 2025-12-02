@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using WebMonitor;
 using WebMonitor.Extensions;
 using WebMonitor.Middleware;
@@ -167,20 +167,20 @@ if (builder.Environment.IsDevelopment())
             BearerFormat = "JWT",
             Scheme = "Bearer"
         });
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
-        });
+        // options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        // {
+        //     {
+        //         new OpenApiSecurityScheme
+        //         {
+        //             Reference = new OpenApiReference
+        //             {
+        //                 Type = ReferenceType.SecurityScheme,
+        //                 Id = "Bearer"
+        //             }
+        //         },
+        //         Array.Empty<string>()
+        //     }
+        // });
     });
 }
 
@@ -190,6 +190,8 @@ builder.Services.Configure<FormOptions>(options =>
     options.ValueLengthLimit = int.MaxValue;
     options.MultipartBodyLengthLimit = long.MaxValue;
 });
+
+builder.AddServiceDefaults();
 
 builder.WebHost.UseKestrel(options =>
 {
@@ -218,6 +220,8 @@ builder.WebHost.UseKestrel(options =>
 
 var app = builder.Build();
 
+app.MapDefaultEndpoints();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -242,8 +246,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}"
 );
-
-app.MapFallbackToFile("index.html");
 
 app.Lifetime.ApplicationStopping.Register(() => { settings.Save(); });
 
